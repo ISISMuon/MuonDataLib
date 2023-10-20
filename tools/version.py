@@ -51,6 +51,6 @@ def update_version(file_name: str, bump: str):
 
     with open(file_name, 'w') as file:
         for txt in lines:
-            if VERSION_STR in txt:
+            if VERSION_STRING in txt:
                 txt = update_version_str(txt, bump)
             file.write(txt)
