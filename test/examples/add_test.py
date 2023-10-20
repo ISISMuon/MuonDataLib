@@ -42,10 +42,10 @@ class addTest(unittest.TestCase):
         RHS = array([5, 6, 7])
 
         result = add(LHS, RHS)
-
         self.assertEqual(result[0], 6)
         self.assertEqual(result[1], 8)
         self.assertEqual(result[2], 10)
+
 
 if __name__ == '__main__':
     unittest.main()
