@@ -23,4 +23,3 @@ jobs:
         uses: actions/setup-python@v2
       - name: check flake8
         uses: py-actions/flake8@v2
-

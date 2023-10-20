@@ -15,7 +15,7 @@ setup(
         long_description='This package provides code for reading '
                          'and analysing data from MuSR experiments. ',
         author='Anthony Lim',
-        # ext_modules=extensions,
+        #  ext_modules=extensions,
         author_email="anthony.lim@stfc.ac.uk",
         version=VERSION,
         license='BSD',
