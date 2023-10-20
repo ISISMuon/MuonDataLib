@@ -1,9 +1,13 @@
 from setuptools import find_packages, setup
+from tools.setup_helper import get_extensions
+
 
 VERSION = "0.1.0b2"
 
 PACKAGE_NAME = 'MuonDataLib'
 
+
+extensions = get_extensions(PACKAGE_NAME)
 
 setup(
         name=PACKAGE_NAME,
@@ -15,7 +19,7 @@ setup(
         long_description='This package provides code for reading '
                          'and analysing data from MuSR experiments. ',
         author='Anthony Lim',
-        #  ext_modules=extensions,
+        ext_modules=extensions,
         author_email="anthony.lim@stfc.ac.uk",
         version=VERSION,
         license='BSD',
