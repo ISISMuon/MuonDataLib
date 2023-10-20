@@ -1,0 +1,11 @@
+name: muonDataLib-dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python =3.10.*
+  - numpy
+  - pytest
+  - pip
+
