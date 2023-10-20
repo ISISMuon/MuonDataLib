@@ -26,7 +26,7 @@ If instructions for replicating the fault are contained in the linked issue then
 
 - Is the code of an acceptable quality?
 - Are the unit tests small and test the class in isolation?
-- Does the documentation build [ReadTheDocs]()?
+- Does the documentation build [ReadTheDocs](https://readthedocs.org/projects/muondatalib/builds/)?
 
 #### Functional Tests
 
