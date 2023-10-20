@@ -23,7 +23,7 @@ jobs:
 
       - name: Build wheels
         run:  |
-          python -m pip install --user --upgrade setuptools wheel pytest
+          python -m pip install --user --upgrade setuptools wheel pytest numpy
           python setup.py sdist bdist_wheel
           pytest
       - uses: actions/upload-artifact@v3
