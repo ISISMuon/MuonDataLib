@@ -28,7 +28,8 @@ jobs:
       - name: Commit changes
         uses: actions/upload-artifact@v3
         with:
-          path: *
+          name: setup
+          path: setup.py
 
 
   build_wheels:
@@ -39,8 +40,19 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
     steps:
+      - name: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
       - uses: actions/download-artifact@v3
         with:
+          name: setup
+      - name: check
+        run: |
+          echo setup.py
+          echo ""
+          echo src/__init__.py
+          echo "moo"
       - name: build wheel
         uses: pypa/cibuildwheel@v2.8.0
         env:
@@ -57,7 +69,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
-
 
   upload_pypi:
     needs: [build_wheels]
