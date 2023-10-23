@@ -1,3 +1,7 @@
+import argparse
+import sys
+
+
 VERSION_STRING = "VERSION ="
 VERSION_MARKS = '"'
 ORDER = ['major', 'minor', 'patch', 'beta']
@@ -54,3 +58,23 @@ def update_version(file_name: str, bump: str):
             if VERSION_STRING in txt:
                 txt = update_version_str(txt, bump)
             file.write(txt)
+
+
+def get_input():
+    """
+    get the bump for the version from the command line arg
+    :returns the bump for the version
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('bump',
+                        help='the bump to the setup file', type=str)
+    return args.bump
+
+
+if __name__ == "__main__":
+    try:
+        bump = get_input()
+        update_version('setup.py', bump)
+    except ValueError:
+        error = sys.exc_info()[1]
+        print(error)

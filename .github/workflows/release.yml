@@ -1,9 +1,9 @@
 name: Build and upload to PyPI
 
 on:
-  #pull_request:
-  #  branches:
-  #    - 'main'
+  pull_request:
+    branches:
+      - 'main'
   release:
     types:
         - published
@@ -20,6 +20,21 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: "0"
+
+      - name: Update version
+        - if: ${{github.event_name == 'pull_request' }}
+          run: python tools/version.py "beta"
+
+        - if: ${{github.event_name == 'release' }}
+          run: python tools/version.py "minor"
+
+        - uses: EndBug/add-and-commit@v9
+          with:
+            commiter_name: Github Actions
+            commiter_email: actions@github.com
+            message: 'update version'
+            add setup.py
+
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.8.0
