@@ -31,6 +31,7 @@ jobs:
           committer_name: Github Actions
           committer_email: actions@github.com
           message: 'update version'
+          push: true
           add: setup.py
 
 
