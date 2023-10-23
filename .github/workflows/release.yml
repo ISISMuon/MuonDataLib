@@ -31,7 +31,7 @@ jobs:
             python tools/version.py "minor"
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
-          with:
+        with:
             commiter_name: Github Actions
             commiter_email: actions@github.com
             message: 'update version'
