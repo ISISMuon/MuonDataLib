@@ -14,13 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: "0"
-      - name: setup Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.11
       - name: Update version on merge
         if: github.event_name == 'pull_request'
         run:  |
