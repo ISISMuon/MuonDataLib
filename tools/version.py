@@ -68,7 +68,8 @@ def get_input():
     parser = argparse.ArgumentParser()
     parser.add_argument('bump',
                         help='the bump to the setup file', type=str)
-    args = parser.get_args()
+    args = parser.parse_args()
+    print(args)
     return args.bump
 
 
