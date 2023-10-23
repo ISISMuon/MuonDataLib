@@ -21,11 +21,11 @@ jobs:
         with:
           fetch-depth: "0"
       - name: Update version
-        - if: ${{github.event_name == 'pull_request' }}
+        if: ${{github.event_name == 'pull_request' }}
           run: python tools/version.py "beta"
-        - if: ${{github.event_name == 'release' }}
+        if: ${{github.event_name == 'release' }}
           run: python tools/version.py "minor"
-        - uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v9
           with:
             commiter_name: Github Actions
             commiter_email: actions@github.com
