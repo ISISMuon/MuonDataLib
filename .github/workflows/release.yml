@@ -36,8 +36,6 @@ jobs:
             commiter_email: actions@github.com
             message: 'update version'
             add: setup.py
-
-
   build_wheels:
     needs: [update_version]
     name: Build wheels on ${{ matrix.os }}
@@ -61,7 +59,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
-
   upload_pypi:
     needs: [build_wheels]
     runs-on: ubuntu-latest
