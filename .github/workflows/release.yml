@@ -23,11 +23,11 @@ jobs:
           python_version: 3.11
       - name: Update version on merge
         if: github.event_name == 'pull_request'
-          run:  |
+        run:  |
             python tools/version.py "beta"
       - name: Update version on release
         if: github.event_name == 'release'
-          run: |
+        run: |
             python tools/version.py "minor"
       - name: Commit changes
         uses: EndBug/add-and-commit@v9
