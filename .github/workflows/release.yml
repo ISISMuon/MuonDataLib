@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: "0"
       - name: Update version on merge
@@ -26,13 +26,13 @@ jobs:
         run: |
             python tools/version.py "minor"
       - name: Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          committer_name: Github Actions
-          committer_email: actions@github.com
-          message: 'update version'
-          push: true
-          add: setup.py
+        uses: actions/checkout@v3
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add setup.py
+          git commit -m 'update version'
+          git push
 
 
   build_wheels:
