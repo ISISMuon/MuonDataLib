@@ -47,12 +47,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: setup
-      - name: check
-        run: |
-          echo "${GITHUB_REF_NAME}"
-          echo ""
-          echo src/__init__.py
-          echo "moo"
       - name: build wheel
         uses: pypa/cibuildwheel@v2.8.0
         env:
@@ -70,22 +64,22 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
 
-            #upload_pypi:
-            #  needs: [build_wheels]
-            #  runs-on: ubuntu-latest
-            #  permissions:
-            #    id-token: write
-            #  steps:
-            #    - name: mint API token
-            #      id: mint
-            #      uses: tschm/token-mint-action@v1.0.2
+  upload_pypi:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: mint API token
+        id: mint
+        uses: tschm/token-mint-action@v1.0.2
 
-            #    - uses: actions/download-artifact@v3
-            #      with:
-            #        name: artifact
-            #        path: dist
+      - uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
 
-            #    - name: Publish package distribution to PYPI
-            #      uses: pypa/gh-action-pypi-publish@release/v1
-            #      with:
-            #        password: ${{ steps.mint.outputs.api-token }}
+      - name: Publish package distribution to PYPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ steps.mint.outputs.api-token }}
