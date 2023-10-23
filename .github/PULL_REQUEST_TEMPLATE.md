@@ -1,3 +1,12 @@
+<!-- Please use a descriptive name for the PR.
+It will be used for the automated release notes along with the labels.
+The labels that are used are:
+ - ignore-for-release-notes
+ - Data Loader
+ - Maintenance
+ - New Feature
+-->
+
 ### Description of work
 
 #### Summary of work
