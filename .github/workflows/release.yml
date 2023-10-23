@@ -17,6 +17,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: "0"
+      - name: setup Python
+        uses: actions/setup-python@v2
+        with:
+          python_version: 3.11
       - name: Update version on merge
         if: github.event_name == 'pull_request'
           run:  |
