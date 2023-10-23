@@ -49,7 +49,7 @@ jobs:
           name: setup
       - name: check
         run: |
-          echo "${GITHUB_BASE_REF}"
+          echo "${GITHUB_REF_NAME}"
           echo ""
           echo src/__init__.py
           echo "moo"
