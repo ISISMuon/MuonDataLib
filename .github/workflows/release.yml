@@ -18,11 +18,11 @@ jobs:
         with:
           fetch-depth: "0"
       - name: Update version on merge
-        if: ${{github.event_name == 'pull_request' }}
+        if: github.event_name == 'pull_request'
           run:  |
             python tools/version.py "beta"
       - name: Update version on release
-        if: ${{github.event_name == 'release' }}
+        if: github.event_name == 'release'
           run: |
             python tools/version.py "minor"
       - name: Commit changes
