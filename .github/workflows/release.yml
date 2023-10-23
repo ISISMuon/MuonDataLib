@@ -26,7 +26,6 @@ jobs:
         run: |
             python tools/version.py "minor"
       - name: Commit changes
-        uses: actions/checkout@v3
         run: |
           git config user.name github-actions
           git config user.email actions@github.com
