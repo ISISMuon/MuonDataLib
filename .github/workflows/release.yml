@@ -31,7 +31,7 @@ jobs:
           git config user.email actions@github.com
           git add setup.py
           git commit -m 'update version'
-          git push origin/HEAD:${GITHUB_REF} HEAD:${GITHUB_REF}
+          git push origin/${GITHUB_REF} HEAD:${GITHUB_REF}
 
 
   build_wheels:
