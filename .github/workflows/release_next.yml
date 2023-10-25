@@ -1,12 +1,11 @@
-name: Build and upload to PyPI
+name: Build and upload release to PyPI
 
 on:
-  merge_group:
+  push:
     branches:
-      - 'main'
-  release:
-    types:
-        - published
+      - 'release-next'
+premissions:
+  contents: write
 
 jobs:
   update_version:
@@ -14,16 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: "0"
       - name: Update version on merge
-        if: github.event_name == 'merge_group'
         run:  |
-            python tools/version.py "beta"
-      - name: Update version on release
-        if: github.event_name == 'release'
-        run: |
             python tools/version.py "minor"
       - name: Store changes
         uses: actions/upload-artifact@v3
@@ -31,6 +25,19 @@ jobs:
           name: setup
           path: setup.py
 
+  build_sdist:
+    name: Build source distribution
+    runs-on: ubuntu-latest
+    needs: [update_version]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build sdist
+        run: |
+          pip install numpy Cython
+          python setup.py sdist
+      - uses: actions/upload-artifact@v3
+        with:
+          path: dist/*.tar.gz
 
   build_wheels:
     name: Build and test wheels on ${{ matrix.os }}
@@ -51,7 +58,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.8.0
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{8,9,10}-manylinux_x86_64 cp3{8,9,10}-win_amd64 cp3{8,9,10}-macosx_x86_64 cp38-macosx_arm64
+          CIBW_BUILD: cp3{8,9,10,11}-manylinux_x86_64 cp3{8,9,10,11}-win_amd64 cp3{8,9,10,11}-macosx_x86_64 cp38-macosx_arm64
 
           CIBW_BEFORE_BUILD: >
              pip install numpy cython==0.29.32 scipy joblib
@@ -65,7 +72,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   upload_pypi:
-    needs: [build_wheels]
+    needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -90,14 +97,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: "0"
       - uses: actions/download-artifact@v3
         with:
           name: setup
+      - name: check
+        run: |
+          cat setup.py
+          echo ${{github.event.pull_request.head.repo.full_name }}
       - name: Commit on merge
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: Update version number
-          commit_user_email: actions@github
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add setup.py
+          git commit -m "update version number"
+          git push
+      - name: create_new_branch
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git checkout --no-track -b version_bump origin/release-next
+          git push --set-upstream origin version_bump
