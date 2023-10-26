@@ -3,7 +3,7 @@ name: Build and upload to PyPI
 on:
   pull_request_review:
     types: [submitted]
-premissions:
+permissions:
   contents: write
 
 jobs:
