@@ -9,7 +9,7 @@ Once the changes have been approved they will enter the merge queue, to make sur
 
 To reduce the chances of problems Conda (alternatively you can use mamba) to manage the setup of the development environment (this is also used for the continuous integration).
 To setup the developer’s environment use the command :code:`conda env create -f MuonDataLib.yml`.
-Once it is completed you will need to use the command :code:`conda activate MuonDataLib` to get access to the environment.
+Once it is completed you will need to use the command :code:`conda activate MuonDataLib-dev` to get access to the environment.
 This guarantees that your setup is correct and it is isolated from the rest of your machine (i.e. changes here wont break any of your other software).
 To reduce wasted time this environment uses pre-commit to make sure that the code being committed meets a minimum standard (flake8).
 However, some setup is required.
