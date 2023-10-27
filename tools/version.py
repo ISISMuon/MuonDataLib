@@ -2,7 +2,7 @@ import argparse
 import sys
 
 
-VERSION_STRING = "VERSION ="
+VERSION_STRING = "VERSION = "
 VERSION_MARKS = '"'
 ORDER = ['major', 'minor', 'patch', 'beta']
 VERSION_SEP = ['.', '.', 'b', '']
@@ -15,7 +15,7 @@ def make_str(version):
     txt = VERSION_MARKS
     for j in range(len(ORDER)):
         txt += version[ORDER[j]] + VERSION_SEP[j]
-    txt += VERSION_MARKS
+    txt += VERSION_MARKS + '\n'
     return txt
 
 
