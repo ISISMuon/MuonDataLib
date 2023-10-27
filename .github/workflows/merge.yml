@@ -29,7 +29,6 @@ jobs:
     name: Build source distribution
     runs-on: ubuntu-latest
     needs: [update_version]
-    if: github.event.review.state == 'approved'
     steps:
       - uses: actions/checkout@v4
       - name: Build sdist
@@ -59,12 +58,12 @@ jobs:
         uses: pypa/cibuildwheel@v2.8.0
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{8,9,10,11}-manylinux_x86_64 cp3{8,9,10,11}-win_amd64 cp3{8,9,10,11}-macosx_x86_64 cp38-macosx_arm64
+          CIBW_BUILD: cp3{8,9,10,11}-manylinux_x86_64 cp3{8,9,10,11}-win_amd64 cp3{8,9,10,11}-macosx_x86_64 cp3{8,9,10,11}-macosx_arm64
 
           CIBW_BEFORE_BUILD: >
-             pip install numpy cython==0.29.32 scipy joblib
+             pip install numpy cython
           # Install test dependencies and run tests
-          CIBW_TEST_REQUIRES: pytest joblib
+          CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: >
             pytest {project}/test
       - name: upload wheel
