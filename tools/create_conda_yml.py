@@ -36,7 +36,7 @@ def get_info(version):
 
 
 """
-Here we list the conda recipies.
+Here we list the conda recipes.
 We start with a default.
 Can add changes for specific OS's
 """
