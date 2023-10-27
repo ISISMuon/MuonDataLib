@@ -1,5 +1,5 @@
 """
-Written a custom passer to write yml file
+Written a custom parser to write yml file
 the default did not have nice formatting
 and didn't allow for nice managment of
 dependencies
@@ -34,7 +34,7 @@ def record_channels(yml, outfile):
 
 def record_pip(pip_dict, outfile):
     """
-    Adds the packagesto be installed by pip to the file
+    Adds the packages to be installed by pip to the file
     :param pip_dict: a dict containing the packages for pip
     :param outfile: the file the data will be written to
     """
