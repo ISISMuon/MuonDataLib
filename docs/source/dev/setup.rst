@@ -20,7 +20,7 @@ Then you can reset your environment (but it keeps the bash file) with :code:`con
 Once this is complete you will be able to use pre-commit.
 
 
-To build your local version use :code:`python -m pip install -v --editable .`, the full stop is important.
+To build your local version use :code:`python -m pip install -v -e .`, the full stop is important.
 To run all of the tests locally use :code:`python -m pytest`
 
 
