@@ -5,6 +5,7 @@ The labels that are used are:
  - Data Loader
  - Maintenance
  - New Feature
+ - bug
 -->
 
 ### Description of work
