@@ -1,0 +1,3 @@
+data.store.data_template: join('data', 'store', 'data_template.py')
+data.store.sample: join('data', 'store', 'sample.py')
+data.store.source: join('data', 'store', 'source.py')
