@@ -95,11 +95,16 @@ jobs:
   update_setup:
     needs: [upload_pypi]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: "0"
+          repository: ${{github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
       - uses: actions/download-artifact@v3
         with:
           name: setup

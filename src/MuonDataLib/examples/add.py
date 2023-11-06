@@ -10,6 +10,6 @@ def add(LHS: ndarray, RHS: ndarray) -> ndarray:
     """
     if len(LHS) != len(RHS):
         raise ValueError("Both data must be same length")
-    if len(LHS) == 0:
+    elif len(LHS) == 0:
         raise ValueError("no data to add")
     return LHS + RHS

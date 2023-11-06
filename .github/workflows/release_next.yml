@@ -95,18 +95,24 @@ jobs:
   update_setup:
     needs: [upload_pypi]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - name: checkout
+      - name: checkout_release
+        if: ${{ github.event.push.head.ref }} == 'release-next'
         uses: actions/checkout@v4
         with:
           fetch-depth: "0"
+          repository: ${{github.event.push.head.repo.full_name }}
+          ref: ${{ github.event.push.head.ref }}
+
       - uses: actions/download-artifact@v3
         with:
           name: setup
       - name: check
         run: |
           cat setup.py
-          echo ${{github.event.pull_request.head.repo.full_name }}
+          echo ${{github.event.merge_group.head.repo.full_name }}
       - name: Commit on merge
         run: |
           git config user.name github-actions
