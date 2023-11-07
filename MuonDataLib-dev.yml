@@ -1,0 +1,11 @@
+name: MuonDataLib-dev
+
+channels:
+  - conda-forge
+
+dependencies:
+  - python =3.11.*
+  - numpy
+  - pytest
+  - pre-commit >=2.15
+  - Cython

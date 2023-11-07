@@ -1,0 +1,63 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+    - 'main'
+  pull_request:
+    branches:
+      - 'main'
+  release:
+
+jobs:
+  run_tests:
+    strategy:
+      matrix:
+           os: [windows-latest, ubuntu-latest, macOS-latest]
+           python_version: ['3.8', '3.9', '3.10', '3.11']
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # Needed to get tags so that git describe works during package build
+          fetch-depth: "0"
+
+      - name: Get Date
+        id: get-date
+        run: |
+          echo "::set-output name=date::$(/bin/date -u "+%Y%V")"
+        shell: bash
+
+      - name: Create yml file
+        shell: bash -l {0}
+        run: |
+          python tools/create_conda_yml.py ${{ matrix.python_version }}
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2.1.1
+        with:
+          miniforge-version: latest
+          miniforge-variant: Mambaforge
+          activate-environment: MuonDataLib-dev
+          environment-file: MuonDataLib.yml
+          auto-activate-base: false
+          use-mamba: true
+
+      - name: check install
+        shell: bash -l {0}
+        run:  |
+             mamba env list
+             python --version; conda list ; pip list
+
+      - name: compile
+        shell: bash -l {0}
+        run:  |
+            conda activate MuonDataLib-dev
+            python -m pip install .
+
+      - name: run tests
+        timeout-minutes: 10
+        shell: bash -l {0}
+        run:  |
+             python -m pytest
