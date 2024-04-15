@@ -1,21 +1,21 @@
-from utils import (INT32, FLOAT32,
-                   convert_date_for_NXS,
-                   convert_date,
-                   stype)
- 
-
-from hdf5 import HDF5
-import numpy as np
-import h5py
-
-#sample_grp_path = '/raw_data_1/sample'
-#sample_path = '/raw_data_1/sample/name'
-#temperature_path = '/raw_data_1/sample/temperature'
-#field_path = '/raw_data_1/sample/magnetic_field'
+from MuonDataLib.data.hdf5 import HDF5
 
 
 class Sample(HDF5):
+    """
+    A class for the sample information needed for a muon nexus v2 file
+    """
     def __init__(self, ID, thickness, height, width, B_field, Temp, name):
+        """
+        The sample information for a muon nexus v2 file
+        :param ID: the sample ID
+        :param thickness: the thickness of the sample
+        :param height: the height of the sample
+        :param width: the width of the sample
+        :param B_field: the magnetic field being applied to the sample
+        :param Temp: the applied temperature to the sample
+        :param name: the name of the sample
+        """
         super().__init__()
         self._dict['ID'] = ID
         self._dict['thickness'] = thickness
@@ -26,13 +26,11 @@ class Sample(HDF5):
         self._dict['name'] = name
 
     def save_nxs2(self, file):
-
-        #sample = file.create_group(sample_group_path)
-        #sample.attrs.create('NX_class', 'NXsample', dtype='S9')
-        #file.create_dataset(sample_path, (1), dtype=stype(self._name), data=self._name)
-        #file.create_dataset(temperature_path, (1), data=self._Temp)
-        #file.create_dataset(field_path, (1), data=self._B_field)
-
+        """
+        A method to write the sample information into
+        a muon nexus v2 file
+        :param file: the open file to write the data to
+        """
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('sample')
         tmp.attrs['NX_class'] = 'NXsample'
@@ -46,17 +44,18 @@ class Sample(HDF5):
         self.save_float('temperature', self._dict['Temp'], tmp)
 
 
-
-
 def read_sample_from_histogram(file):
+    """
+    A function to read the sample information from
+    a muon nexus v2 file
+    :param file: the open file to read from
+    :return: the Sample information
+    """
     tmp = file['raw_data_1']['sample']
-    return Sample(tmp['id'][0].decode(), 
+    return Sample(tmp['id'][0].decode(),
                   tmp['thickness'][0],
                   tmp['height'][0],
                   tmp['width'][0],
                   tmp['magnetic_field'][0],
                   tmp['temperature'][0],
                   tmp['name'][0].decode())
-
-
-
