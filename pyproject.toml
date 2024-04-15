@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'MuonDataLib'
-version = "0.1.0b6"
+version = "0.1.0b7"
 dependencies = ['numpy', 'h5py']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
 description = 'Reading and writing for ISIS muon experiments'
