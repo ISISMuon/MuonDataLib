@@ -38,7 +38,7 @@ jobs:
       - name: Build sdist
         run: |
           pip install numpy
-          python -m build --sdist
+          pipx run build --sdist
       - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
@@ -57,7 +57,7 @@ jobs:
           fetch-depth: "0"
       - uses: actions/download-artifact@v3
         with:
-          name: setup
+          name: pyproject
       - name: build wheel
         uses: pypa/cibuildwheel@v2.8.0
         env:
