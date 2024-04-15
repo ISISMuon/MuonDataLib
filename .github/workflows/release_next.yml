@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python_version: ['3.8', '3.9', '3.10', '3.11']
+        version: ['3.8', '3.9', '3.10', '3.11']
     steps:
       - name: checkout
         uses: actions/checkout@v3
@@ -62,9 +62,9 @@ jobs:
       - name: setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ python_version }}
+          python-version: ${{ version }}
       - name: install build
-        run: python 0m pip install build --user
+        run: python -m pip install build --user
       - name: build wheel
         run: python -m build
       - name: test wheel
