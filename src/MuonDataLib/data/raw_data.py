@@ -64,6 +64,9 @@ class RawData(HDF5):
         self.save_str('end_time', convert_date_for_NXS(self._dict['end']), tmp)
         self.save_str('experiment_identifier', self._dict['ID'], tmp)
 
+        tmp = tmp.require_group('instrument')
+        self.save_str('name', self._dict['inst'], tmp)
+
 
 def read_raw_data_from_histogram(file):
     """

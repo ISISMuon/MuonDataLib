@@ -45,7 +45,7 @@ class Periods(HDF5):
         self.save_int_array('frames_requested', self._dict['requested'], tmp)
         self.save_int_array('raw_frames', self._dict['raw'], tmp)
         self.save_int_array('output', self._dict['output'], tmp)
-        self.save_float_array('total_conts', self._dict['counts'], tmp)
+        self.save_float_array('total_counts', self._dict['counts'], tmp)
 
 
 def read_periods_from_histogram(file):

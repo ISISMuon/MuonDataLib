@@ -57,11 +57,11 @@ class Detector_1(HDF5):
         tmp.attrs['NX_class'] = 'NXdetector'
 
         resolution = self.save_int('resolution', self.resolution, tmp)
-        resolution.attrs.create('units', 'picoseconds', dtype='S11')
+        resolution.attrs.create('units', 'picoseconds'.encode(), dtype='S11')
 
         raw = self.save_float_array('raw_time', self._dict['raw_time'], tmp)
-        raw.attrs.create('units', 'microseconds', dtype='S12')
-        raw.attrs.create('long_name', 'time', dtype='S4')
+        raw.attrs.create('units', 'microseconds'.encode(), dtype='S12')
+        raw.attrs.create('long_name', 'time'.encode(), dtype='S4')
 
         self.save_int_array('spectrum_index',
                             self._dict['spectrum_index'],
@@ -71,9 +71,11 @@ class Detector_1(HDF5):
                                         self.N_hist, self.N_x,
                                         self._dict['counts'], tmp)
         counts.attrs.create('axes',
-                            '[period index, spectrum index, raw time bin]',
+                            ('[period index, '
+                             'spectrum index, '
+                             'raw time bin]').encode(),
                             dtype='S45')
-        counts.attrs.create('long_name', self._dict['inst'],
+        counts.attrs.create('long_name', self._dict['inst'].encode(),
                             dtype=stype(self._dict['inst']))
         counts.attrs.create('t0_bin', self._dict['time_zero'], dtype=INT32)
 
@@ -104,7 +106,7 @@ def read_detector1_from_histogram(file):
     spec = tmp['spectrum_index'][:]
 
     tmp = tmp['counts']
-    inst = tmp.attrs['long_name']
+    inst = tmp.attrs['long_name'].decode()
     first_good = tmp.attrs['first_good_bin'] * resolution
     last_good = tmp.attrs['last_good_bin'] * resolution
     t0 = tmp.attrs['t0_bin']

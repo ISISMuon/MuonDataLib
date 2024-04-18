@@ -27,12 +27,6 @@ class Source(HDF5):
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('instrument')
 
-        """
-        test - dont know if this is needed
-        if it is we should probably move it
-        self.save_str('name', 'HIFI', tmp)
-        """
-
         tmp = tmp.require_group('source')
         tmp.attrs['NX_class'] = 'NXsource'
         for key in self._dict.keys():
