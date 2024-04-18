@@ -4,6 +4,7 @@ from MuonDataLib.data.detector1 import (Detector_1,
 from MuonDataLib.test_helpers.nexus import NexusTestHelper
 import h5py
 import os
+import unittest
 import numpy as np
 
 

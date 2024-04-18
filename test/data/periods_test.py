@@ -3,6 +3,7 @@ from MuonDataLib.data.periods import (Periods,
 
 from MuonDataLib.test_helpers.nexus import NexusTestHelper
 import h5py
+import unittest
 import os
 
 
