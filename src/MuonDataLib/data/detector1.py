@@ -43,7 +43,7 @@ class Detector_1(HDF5):
         Get the resolution in pico seconds
         :return the resolution in pico seconds
         """
-        return self._dict['resolution']*1e6
+        return int(self._dict['resolution']*1e6)
 
     def save_nxs2(self, file):
         """

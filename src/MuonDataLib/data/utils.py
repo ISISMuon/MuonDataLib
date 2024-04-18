@@ -24,7 +24,7 @@ def convert_date(date):
     Convert the muon nexus v2 file data string into a
     date object.
     Assume in the form f'{year} {month} {day}', time
-    :param date: the date in the above format
+    :param date: the date string in the above format
     :return: the date object
     """
 

@@ -56,7 +56,7 @@ class RawData(HDF5):
         self.save_str('title', self._dict['title'], tmp)
         self.save_str('notes', self._dict['notes'], tmp)
         self.save_int('run_number', self._dict['run_number'], tmp)
-        # duration not used for Wimda
+        self.save_float('duration', self._dict['duration'], tmp)
         self.save_int('raw_frames', self._dict['raw_frames'], tmp)
         self.save_str('start_time',
                       convert_date_for_NXS(self._dict['start']),

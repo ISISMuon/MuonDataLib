@@ -55,10 +55,8 @@ class SampleTest(NexusTestHelper):
                                              'width',
                                              'magnetic_field',
                                              'temperature'])
-            self.assertEqual(group['id'][0].decode(), 'ISIS2')
-            self.assertEqual(len(group['id']), 1)
-            self.assertEqual(group['name'][0].decode(), 'Si')
-            self.assertEqual(len(group['name']), 1)
+            self.assertString(group, 'id', 'ISIS2')
+            self.assertString(group, 'name', 'Si')
             self.assertArrays(group['thickness'], [23.1])
             self.assertArrays(group['height'], [12.2])
             self.assertArrays(group['width'], [13.3])

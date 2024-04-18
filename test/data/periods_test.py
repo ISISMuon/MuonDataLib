@@ -54,7 +54,7 @@ class PeriodsTest(NexusTestHelper):
             self.assertEqual(group.attrs['NX_class'], 'NXperiod')
 
             self.assertEqual(group['number'][0], 1)
-            self.assertEqual(group['labels'][0].decode(), 'period 1')
+            self.assertString(group, 'labels', 'period 1')
             self.assertArrays(group['type'], [1])
             self.assertArrays(group['frames_requested'], [500])
             self.assertArrays(group['raw_frames'], [1000])

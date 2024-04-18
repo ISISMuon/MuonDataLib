@@ -42,8 +42,8 @@ class UserTest(NexusTestHelper):
 
             keys = self.compare_keys(group, ['name', 'affiliation'])
 
-            self.assertEqual(group['name'][0].decode(), 'Unit Test')
-            self.assertEqual(group['affiliation'][0].decode(), 'Python')
+            self.assertString(group, 'name', 'Unit Test')
+            self.assertString(group, 'affiliation', 'Python')
 
         os.remove(FILENAME)
 

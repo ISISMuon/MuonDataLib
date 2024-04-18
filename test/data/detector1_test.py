@@ -12,7 +12,7 @@ FILENAME = 'detector1_test.nxs'
 
 
 def create_single_period_data():
-    x = [1, 2, 3]
+    x = [1., 2., 3.]
     # counts: shape(periods, spec, x)
     counts = []
     for p in range(1):
@@ -25,7 +25,7 @@ def create_single_period_data():
 
 
 def create_multiperiod_data():
-    x = [1, 2, 3]
+    x = [1., 2., 3.]
     # counts: shape(periods, spec, x)
     counts = []
     for p in range(3):
@@ -158,7 +158,7 @@ class Detector1Test(NexusTestHelper):
         det = create_multiperiod_data()
 
         self.assertEqual(det._dict['resolution'], 1)
-        self.assertArrays(det._dict['raw_time'], [1, 2, 3])
+        self.assertArrays(det._dict['raw_time'], [1., 2., 3.])
         self.assertArrays(det._dict['spectrum_index'], [4, 5])
         self.assertEqual(det._dict['inst'], 'python')
         self.assertEqual(det._dict['time_zero'], 3)

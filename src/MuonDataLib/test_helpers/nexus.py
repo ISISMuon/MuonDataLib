@@ -27,6 +27,19 @@ class NexusTestHelper(unittest.TestCase):
         self.assertEqual(len(ref), 0)
         return keys
 
+    def assertString(self, group, key, expected):
+        """
+        The strings in nexus files are lists,
+        with just one element. They also need
+        decoding
+        :param group: the open nexus group
+        :param key: the key we want to check
+        :param expected: the expected string
+        """
+        string_list = group[key]
+        self.assertEqual(len(string_list), 1)
+        self.assertEqual(string_list[0].decode(), expected)
+
     def assertArrays(self, array, ref):
         for j in range(len(array)):
             len_a = len(array)

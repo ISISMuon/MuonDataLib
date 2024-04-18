@@ -4,6 +4,18 @@ from MuonDataLib.data.utils import (INT32, FLOAT32,
 import numpy as np
 
 
+def is_list(values):
+    return isinstance(values, np.ndarray) or isinstance(values, list)
+
+
+def is_int(value):
+    return isinstance(value, int) or isinstance(value, INT32)
+
+
+def is_float(value):
+    return isinstance(value, float) or isinstance(value, FLOAT32)
+
+
 class HDF5(object):
     """
     A wrapper object to make it easier to write
@@ -23,12 +35,15 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        dtype = stype(string)
-        return group.require_dataset(name=name,
-                                     shape=(1),
-                                     data=np.array([string.encode()],
-                                                   dtype=dtype),
-                                     dtype=dtype)
+        if isinstance(string, str):
+            dtype = stype(string)
+            return group.require_dataset(name=name,
+                                         shape=(1),
+                                         data=np.array([string.encode()],
+                                                       dtype=dtype),
+                                         dtype=dtype)
+        else:
+            raise ValueError(f'{string} is not a string')
 
     def save_float(self, name, value, group):
         """
@@ -38,10 +53,13 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        return group.require_dataset(name=name,
-                                     shape=(1),
-                                     data=[value],
-                                     dtype=FLOAT32)
+        if is_float(value):
+            return group.require_dataset(name=name,
+                                         shape=(1),
+                                         data=[value],
+                                         dtype=FLOAT32)
+        else:
+            raise ValueError(f'{value} is a {type(value)}, not a float')
 
     def save_int(self, name, value, group):
         """
@@ -51,10 +69,13 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        return group.require_dataset(name=name,
-                                     shape=(1),
-                                     data=[value],
-                                     dtype=INT32)
+        if is_int(value):
+            return group.require_dataset(name=name,
+                                         shape=(1),
+                                         data=[value],
+                                         dtype=INT32)
+        else:
+            raise ValueError(f'{value} is a {type(value)}, not an integer')
 
     def save_int_array(self, name, values, group):
         """
@@ -64,10 +85,14 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        return group.require_dataset(name=name,
-                                     shape=len(values),
-                                     data=values,
-                                     dtype=INT32)
+        if is_list(values) and is_int(values[0]):
+            return group.require_dataset(name=name,
+                                         shape=len(values),
+                                         data=values,
+                                         dtype=INT32)
+        else:
+            raise ValueError(f'{values} is a {type(values)}, '
+                             'not a list of ints')
 
     def save_float_array(self, name, values, group):
         """
@@ -77,15 +102,20 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        return group.require_dataset(name=name,
-                                     shape=len(values),
-                                     data=values,
-                                     dtype=FLOAT32)
+        if is_list(values) and is_float(values[0]):
+            return group.require_dataset(name=name,
+                                         shape=len(values),
+                                         data=values,
+                                         dtype=FLOAT32)
+        else:
+            raise ValueError(f'{values} is a {type(values)}, '
+                             'not a list of floats')
 
     def save_counts_array(self, name, N_periods, N_hist, N_x, values, group):
         """
         Save the counts array to the relevant part of the nexus file
         The counts are (period #, spec #, time values)
+        It is not practical to test every value, so just do the first.
         :param name: the name used to reference the value in the file
         :param N_periods: the number of periods
         :param N_hist: the number of histograms
@@ -94,5 +124,23 @@ class HDF5(object):
         :param group: the location (nexus group) to save the data to
         :return: the nexus dataset object
         """
-        return group.require_dataset(name=name, shape=(N_periods, N_hist, N_x),
-                                     data=values, dtype=INT32)
+        if len(values) != N_periods:
+            raise ValueError(f'The length of counts is {len(values)} '
+                             'and should be of length {N_periods}')
+
+        elif len(values[0]) != N_hist:
+            raise ValueError(f'The number of spectra is {len(values[0])} '
+                             'and should be {N_hist}')
+
+        elif len(values[0][0]) != N_x:
+            raise ValueError(f'The length of x data is {len(values[0][0])} '
+                             'and should be of length {N_x}')
+
+        elif is_int(values[0][0][0]):
+            return group.require_dataset(name=name,
+                                         shape=(N_periods, N_hist, N_x),
+                                         data=values,
+                                         dtype=INT32)
+        else:
+            raise ValueError('Should contain integers in count data, '
+                             f'not {type(values[0][0][0])}')
