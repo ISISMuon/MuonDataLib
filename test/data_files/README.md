@@ -8,3 +8,4 @@ These are used to test the file writers.
 It is important that when these files are updated they are tested directly
 
 HIFI42.nxs: saved single period data, only works with Wimda, no sample logs
+HIFI51.nxs: saved multiperiod data, only works with Wimda, no sample logs
