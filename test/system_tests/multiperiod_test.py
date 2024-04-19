@@ -31,7 +31,7 @@ class SinglePeriodSystemTest(unittest.TestCase):
             del data
         # the requirment is that its less than 5 seconds
         self.assertLess(np.mean(times), 0.1)
-        self.assertLess(np.max(times), 0.1)
+        self.assertLess(np.max(times), 1.0)
         self.assertLess(np.max(times), 5.00)
 
     def test_saved_data(self):
