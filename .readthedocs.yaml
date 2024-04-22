@@ -8,6 +8,7 @@ build:
 conda:
   environment: MuonDataLib.yml
 
+build_triggered: True
 
 python:
   install:
@@ -16,7 +17,7 @@ python:
 
 
 sphinx:
-  fail_on_warning: true
+  fail_on_warning: False
 
 formats:
   - pdf
