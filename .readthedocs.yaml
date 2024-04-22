@@ -5,10 +5,10 @@ build:
   tools:
     python: 'mambaforge-4.10'
 
+
 conda:
   environment: MuonDataLib.yml
 
-build_triggered: True
 
 python:
   install:
