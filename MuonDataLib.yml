@@ -9,6 +9,4 @@ dependencies:
   - pytest
   - pre-commit
   - pip
-  - pip:
-    - cython
 

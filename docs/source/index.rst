@@ -15,7 +15,7 @@ Contents
 
    Introduction <intro>
    Developer docs <dev/index>
-   usage
+   loaders
    api
 
 Indices and tables
