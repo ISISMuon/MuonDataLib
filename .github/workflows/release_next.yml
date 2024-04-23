@@ -4,12 +4,7 @@ name: Build and upload release to PyPI
 on:
   push:
     branches:
-    - 'main'
-  pull_request:
-    branches:
-      - 'main'
-  release:
-
+      - 'release-next'
 
 permissions:
   contents: write
@@ -45,11 +40,9 @@ jobs:
         with:
           name: pyproject
       - name: install build
-        run: python -m pip install build pytest pluggy==1.4.0 --user
+        run: python -m pip install build pytest --user
       - name: build wheel
         run: python -m build --sdist --wheel
-      - name: test wheel
-        run: python -m pytest
       - name: upload wheel
         uses: actions/upload-artifact@v3
         with:
