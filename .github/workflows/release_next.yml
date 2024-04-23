@@ -1,5 +1,6 @@
 name: Build and upload release to PyPI
 
+
 on:
   push:
     branches:
@@ -7,9 +8,8 @@ on:
   pull_request:
     branches:
       - 'main'
-  push:
-    branches:
-    - 'release-next'
+  release:
+
 
 permissions:
   contents: write
