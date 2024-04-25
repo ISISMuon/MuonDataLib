@@ -2,6 +2,14 @@ name: Build and upload release to PyPI
 
 
 on:
+
+on:
+  push:
+    branches:
+    - 'main'
+  pull_request:
+    branches:
+      - 'main'
   push:
     branches:
       - 'release-next'
