@@ -1,8 +1,5 @@
 name: Build and upload release to PyPI
 
-
-on:
-
 on:
   push:
     branches:
