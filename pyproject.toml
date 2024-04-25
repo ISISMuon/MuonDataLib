@@ -4,7 +4,7 @@ build-backend = 'hatchling.build'
 
 [project]
 name = 'MuonDataLib'
-version = "0.2.0b0"
+version = "0.4.0b0"
 requires-python = ">=3.7.1"
 dependencies = ['numpy', 'h5py']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
