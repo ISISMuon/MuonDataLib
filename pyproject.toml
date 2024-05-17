@@ -1,0 +1,14 @@
+[build-system]
+requires = ['hatchling']
+build-backend = 'hatchling.build'
+
+[project]
+name = 'MuonDataLib'
+version = "0.5.0b1"
+requires-python = ">=3.7.1"
+dependencies = ['numpy', 'h5py']
+authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
+description = 'Reading and writing for ISIS muon experiments'
+readme = 'README.md'
+license = {text = 'BSD'}
+

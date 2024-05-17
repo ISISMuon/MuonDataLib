@@ -59,7 +59,6 @@ def create_default(version):
                                    'numpy': '',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',
-                                   'Cython': '',
                                    'pip': pip_dict}
     return default_yml
 

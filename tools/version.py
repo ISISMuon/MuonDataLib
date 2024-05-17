@@ -2,7 +2,7 @@ import argparse
 import sys
 
 
-VERSION_STRING = "VERSION = "
+VERSION_STRING = "version = "
 VERSION_MARKS = '"'
 ORDER = ['major', 'minor', 'patch', 'beta']
 VERSION_SEP = ['.', '.', 'b', '']
@@ -76,7 +76,7 @@ def get_input():
 if __name__ == "__main__":
     try:
         bump = get_input()
-        update_version('setup.py', bump)
+        update_version('pyproject.toml', bump)
     except ValueError:
         error = sys.exc_info()[1]
         print(error)

@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to MuonDataLib's documentation!
-======================================
+========================================
 
 Contents
 --------
@@ -15,7 +15,7 @@ Contents
 
    Introduction <intro>
    Developer docs <dev/index>
-   usage
+   loaders
    api
 
 Indices and tables

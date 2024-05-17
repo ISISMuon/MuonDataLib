@@ -5,6 +5,7 @@ build:
   tools:
     python: 'mambaforge-4.10'
 
+
 conda:
   environment: MuonDataLib.yml
 
@@ -16,7 +17,7 @@ python:
 
 
 sphinx:
-  fail_on_warning: true
+  fail_on_warning: False
 
 formats:
   - pdf

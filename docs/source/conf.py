@@ -16,6 +16,7 @@ project = 'MuonDataLib'
 copyright = '2023, Anthony Lim'
 author = 'Anthony Lim'
 release = '0.0.1'
+build_triggered = True
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
