@@ -24,6 +24,9 @@ class InstrumentTest(TestHelper):
         self.assertEqual(inst._current_frame, -1)
         self.assertEqual(inst._current_index, None)
         self.assertEqual(len(inst._detectors), 2)
+        self.assertArrays(inst._bin_edges, np.arange(0, 30.5, .5))
+        self.assertArrays(inst._bounds, [0, 30])
+        self.assertEqual(inst._unit_conversion, 1e-3)
 
     def test_add_new_frame(self):
         inst = Instrument(DATE, 2)
@@ -142,7 +145,7 @@ class InstrumentTest(TestHelper):
                           0, 4.1)
 
     def test_add_3_frames(self):
-        inst = Instrument(0, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(1.2, 0, 0)
 
         inst.add_event_data([0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
@@ -182,6 +185,36 @@ class InstrumentTest(TestHelper):
                           [10],
                           [4],
                           0, 8.6)
+
+    def test_set_bins(self):
+        inst = Instrument(DATE, 2)
+        # change the bounds to make test simpiler
+        inst._bounds = [1, 4]
+        inst.set_bins(0.5)
+        self.assertArrays(inst._bin_edges,
+                          [1., 1.5, 2, 2.5, 3, 3.5, 4])
+
+    def test_get_histogram(self):
+        inst = Instrument(DATE, 2)
+        inst.add_new_frame(1.2, 0, 0)
+
+        inst.add_event_data([0, 1, 0, 1, 0, 1, 0, 1],
+                            np.asarray([1, 2, 3, 4, 5, 6, 7, 8])*1.e3,
+                            [1, 2, 1, 2, 2, 1, 2, 1],
+                            [0, 0],
+                            [1.2, 4.1],
+                            [0, 4])
+        inst._bounds = [0, 10]
+        inst.set_bins(1.)
+        # check detector 0
+        y, x = inst.get_histogram(0)
+        self.assertArrays(x, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        self.assertArrays(y, [0, 1, 0, 1, 0, 1, 0, 1, 0, 0])
+
+        # check detector 1
+        y, x = inst.get_histogram(1)
+        self.assertArrays(x, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        self.assertArrays(y, [0, 0, 1, 0, 1, 0, 1, 0, 1, 0])
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from MuonDataLib.data.events.frame import Frame
+import numpy as np
 
 
 class Detector(object):
@@ -17,3 +18,10 @@ class Detector(object):
 
     def add_events_to_frame(self, frame, times, amps):
         self._frames[frame].add_events(times, amps)
+
+    def get_histogram(self, bin_edges, unit_conversion=1):
+        events = np.asarray([])
+        for frame in self._frames.keys():
+            events = np.append(events, self._frames[frame].get_event_times)
+        return np.histogram(events * unit_conversion,
+                            bins=bin_edges)

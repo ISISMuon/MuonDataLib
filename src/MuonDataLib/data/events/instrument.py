@@ -10,11 +10,25 @@ def filter_data(data_list, condition):
 
 class Instrument(object):
     def __init__(self, start_time, N_det=64):
-        self._detectors = [Detector(j) for j in range(N_det)]
+        self.N_det = N_det
+        self._detectors = [Detector(j) for j in range(self.N_det)]
         self._start = start_time
         # need to start counting from 0 after increment
         self._current_frame = -1
         self._current_index = None
+        self._bounds = [0, 30]
+        self.set_bins(.5)
+        # ns to micro sec
+        self._unit_conversion = 1.e-3
+
+    def set_bins(self, bin_width):
+        self._bin_edges = np.arange(self._bounds[0],
+                                    self._bounds[1] + bin_width,
+                                    bin_width)
+
+    def get_histogram(self, ID):
+        return self._detectors[ID].get_histogram(self._bin_edges,
+                                                 self._unit_conversion)
 
     def add_new_frame(self, start_time, period, index):
         self._current_frame += 1

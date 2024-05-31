@@ -1,7 +1,7 @@
 from MuonDataLib.data.loader.load_event import LoadEventData
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.test_helpers.utils import extract_event_data
-
+import numpy as np
 import unittest
 import os
 
@@ -98,6 +98,19 @@ class LoadEventDataTest(TestHelper):
                                   part_frame.get_event_times)
                 self.assertArrays(full_frame.get_event_amplitudes,
                                   part_frame.get_event_amplitudes)
+
+    def test_get_histograms(self):
+        file_full = os.path.join(os.path.dirname(__file__),
+                                 '..',
+                                 '..',
+                                 'data_files',
+                                 'simple_test.nxs')
+
+        full_data = LoadEventData()
+        full_data.load_data(file_full)
+        hist, bins = full_data.get_histograms()
+        self.assertArrays(bins, np.arange(0, 30.5, .5))
+        self.assertEqual(len(hist[0]), 64)
 
 
 if __name__ == '__main__':

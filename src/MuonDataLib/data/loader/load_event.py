@@ -5,12 +5,19 @@ import numpy as np
 
 class LoadEventData(object):
     def __init__(self):
-        self._bin_width = 0.5
         self._inst = None
         self._file_name = None
 
     def set_bin_width(self, width):
-        self._bin_width = width
+        self._inst.set_bin_width(width)
+
+    def get_histograms(self):
+        # loop periods - assume 1 for now
+        histograms = []
+        for k in range(self._inst.N_det):
+            y, x = self._inst.get_histogram(k)
+            histograms.append(y)
+        return [histograms], x
 
     def reload_data(self):
         with h5py.File(self._file_name, 'r') as file:
@@ -41,10 +48,9 @@ class LoadEventData(object):
             start_times = tmp['event_time_zero'][:]
             periods = tmp['period_number'][:]
             amps = tmp['pulse_height'][:]
-            # start is attribute from event_time_zero?
             start = tmp['event_time_zero'].attrs['offset'][0]
 
-            self._inst = Instrument(start, np.max(IDs))
+            self._inst = Instrument(start, np.max(IDs) + 1)
             # add frame
             self._inst.add_new_frame(start_times[0],
                                      periods[0],
