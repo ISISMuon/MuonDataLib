@@ -34,6 +34,26 @@ class SinglePeriodEventTest(unittest.TestCase):
         self.assertLess(np.max(times), 1.0)
         self.assertLess(np.max(times), 5.00)
 
+    def test_reload_run_time(self):
+        times = []
+        full = os.path.join(DATADIR, 'complete_run.nxs')
+        part = os.path.join(DATADIR, 'partial_run.nxs')
+        for j in range(100):
+
+            data = LoadEventData()
+            data.load_data(part)
+            data._file_name = full
+            # only want to time the reload
+            start = time.time()
+            data.reload_data()
+            hist, bins = data.get_histograms()
+            times.append(time.time() - start)
+            del data
+        # the requirment is that its less than 5 seconds
+        self.assertLess(np.mean(times), 0.1)
+        self.assertLess(np.max(times), 1.0)
+        self.assertLess(np.max(times), 5.00)
+
 
 if __name__ == '__main__':
     unittest.main()
