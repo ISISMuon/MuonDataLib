@@ -1,7 +1,7 @@
 from MuonDataLib.data.raw_data import (RawData,
                                        read_raw_data_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import unittest
 import os
@@ -20,7 +20,7 @@ def create_data():
             start, end)
 
 
-class RawDataTest(NexusTestHelper):
+class RawDataTest(TestHelper):
 
     def test_raw_data_object_stores_correct_info(self):
         """

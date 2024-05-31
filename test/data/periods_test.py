@@ -1,7 +1,7 @@
 from MuonDataLib.data.periods import (Periods,
                                       read_periods_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import unittest
 import os
@@ -19,7 +19,7 @@ def create_multiperiod_data():
                    [1000, 500], [1, 0], [1.23, 4.56], [42, 42])
 
 
-class PeriodsTest(NexusTestHelper):
+class PeriodsTest(TestHelper):
 
     def test_periods_object_stores_correct_info_single_period(self):
         """

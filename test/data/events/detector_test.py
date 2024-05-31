@@ -1,9 +1,9 @@
 from MuonDataLib.data.events.detector import Detector
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
 
 
-class DetectorTest(NexusTestHelper):
+class DetectorTest(TestHelper):
 
     def test_init(self):
         det = Detector(5)

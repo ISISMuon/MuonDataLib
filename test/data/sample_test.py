@@ -1,7 +1,7 @@
 from MuonDataLib.data.sample import (Sample,
                                      read_sample_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import unittest
 import os
@@ -14,7 +14,7 @@ def create_data():
     return Sample('ISIS2', 23.1, 12.2, 13.3, 5.1, 312.6, 'Si')
 
 
-class SampleTest(NexusTestHelper):
+class SampleTest(TestHelper):
 
     def test_sample_object_stores_correct_info(self):
         """

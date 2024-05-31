@@ -22,7 +22,6 @@ class LoadEventData(object):
             start_times = tmp['event_time_zero'][:]
             periods = tmp['period_number'][:]
             amps = tmp['pulse_height'][:]
-
             # add data
             self._inst.add_event_data(IDs,
                                       times,
@@ -43,11 +42,13 @@ class LoadEventData(object):
             periods = tmp['period_number'][:]
             amps = tmp['pulse_height'][:]
             # start is attribute from event_time_zero?
-            start = 0
+            start = tmp['event_time_zero'].attrs['offset'][0]
 
-            self._inst = Instrument(0, np.max(IDs))
+            self._inst = Instrument(start, np.max(IDs))
             # add frame
-            self._inst.add_new_frame(start, periods[0], start_indicies[0])
+            self._inst.add_new_frame(start_times[0],
+                                     periods[0],
+                                     start_indicies[0])
             # add data
             self._inst.add_event_data(IDs,
                                       times,

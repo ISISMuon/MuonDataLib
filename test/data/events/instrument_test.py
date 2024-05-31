@@ -1,15 +1,14 @@
 from MuonDataLib.data.events.instrument import Instrument, filter_data
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
+from MuonDataLib.test_helpers.utils import extract_event_data
 import unittest
 import numpy as np
 
 
-def extract_event_data(inst, ID, frame):
-    det = inst._detectors[ID]
-    return det._frames[frame]
+DATE = '2024-05-23T09:03:23.85'
 
 
-class InstrumentTest(NexusTestHelper):
+class InstrumentTest(TestHelper):
 
     def test_filter_data(self):
         data_0 = np.asarray([0, 1, 2, 3, 4, 5])
@@ -20,16 +19,16 @@ class InstrumentTest(NexusTestHelper):
         self.assertArrays(filter_1, [2, 1, 0])
 
     def test_init(self):
-        inst = Instrument(0.1, 2)
-        self.assertEqual(inst._start, 0.1)
+        inst = Instrument(DATE, 2)
+        self.assertEqual(inst._start, DATE)
         self.assertEqual(inst._current_frame, -1)
         self.assertEqual(inst._current_index, None)
         self.assertEqual(len(inst._detectors), 2)
 
     def test_add_new_frame(self):
-        inst = Instrument(0.1, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(0.1, 0, 0)
-        self.assertEqual(inst._start, 0.1)
+        self.assertEqual(inst._start, DATE)
         self.assertEqual(inst._current_frame, 0)
         self.assertEqual(inst._current_index, 0)
 
@@ -41,7 +40,7 @@ class InstrumentTest(NexusTestHelper):
         self.assertEqual(frame.get_start_time, start)
 
     def test_add_data(self):
-        inst = Instrument(0.1, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(0.1, 0, 0)
         inst._add_data(0,
                        [0, 1, 0, 1],
@@ -53,7 +52,7 @@ class InstrumentTest(NexusTestHelper):
                           0, 0.1)
 
     def test_add_event_data(self):
-        inst = Instrument(0, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(1.2, 0, 0)
 
         inst.add_event_data([0, 1, 0, 1, 0, 1, 0],
@@ -73,7 +72,7 @@ class InstrumentTest(NexusTestHelper):
                           0, 1.2)
 
     def test_extend_current_frame(self):
-        inst = Instrument(0, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(1.2, 0, 0)
 
         # just provide some data
@@ -111,7 +110,7 @@ class InstrumentTest(NexusTestHelper):
                           0, 1.2)
 
     def test_add_2_frames(self):
-        inst = Instrument(0, 2)
+        inst = Instrument(DATE, 2)
         inst.add_new_frame(1.2, 0, 0)
 
         inst.add_event_data([0, 1, 0, 1, 0, 1, 0, 1],

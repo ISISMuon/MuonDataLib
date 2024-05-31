@@ -1,16 +1,12 @@
 from MuonDataLib.data.loader.load_event import LoadEventData
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
+from MuonDataLib.test_helpers.utils import extract_event_data
 
 import unittest
 import os
 
 
-def extract_event_data(inst, ID, frame):
-    det = inst._detectors[ID]
-    return det._frames[frame]
-
-
-class LoadEventDataTest(NexusTestHelper):
+class LoadEventDataTest(TestHelper):
 
     def assertEvents(self, inst, ID, frame, times, amps, period, start):
         frame = extract_event_data(inst, ID, frame)

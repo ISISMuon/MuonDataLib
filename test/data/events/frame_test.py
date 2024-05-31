@@ -1,9 +1,9 @@
 from MuonDataLib.data.events.frame import Frame
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
 
 
-class FrameTest(NexusTestHelper):
+class FrameTest(TestHelper):
 
     def test_init(self):
         frame = Frame(4.2, 1)

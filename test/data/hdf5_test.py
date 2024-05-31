@@ -1,5 +1,5 @@
 from MuonDataLib.data.hdf5 import HDF5
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 
 import h5py
 import unittest
@@ -9,7 +9,7 @@ import os
 FILENAME = 'hdf5_test.nxs'
 
 
-class HDF5Test(NexusTestHelper):
+class HDF5Test(TestHelper):
 
     def test_save_str(self):
         hdf5 = HDF5()
