@@ -1,7 +1,7 @@
 from MuonDataLib.data.source import (Source,
                                      read_source_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import unittest
 import os
@@ -14,7 +14,7 @@ def create_data():
     return Source('python', 'muon', 'pulsed')
 
 
-class SourceTest(NexusTestHelper):
+class SourceTest(TestHelper):
 
     def test_source_object_stores_correct_info(self):
         """

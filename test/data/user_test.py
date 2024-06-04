@@ -1,7 +1,7 @@
 from MuonDataLib.data.user import (User,
                                    read_user_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import unittest
 import os
@@ -10,7 +10,7 @@ import os
 FILENAME = 'user_test.nxs'
 
 
-class UserTest(NexusTestHelper):
+class UserTest(TestHelper):
 
     def test_user_object_stores_correct_info(self):
         """

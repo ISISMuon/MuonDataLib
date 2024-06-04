@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 
 
-class NexusTestHelper(unittest.TestCase):
+class TestHelper(unittest.TestCase):
     """
     A simple wrapper to make unit tests easier
     for nxs file

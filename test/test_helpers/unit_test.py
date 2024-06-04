@@ -1,8 +1,8 @@
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
 
 
-class UtilsTest(unittest.TestCase):
+class UnitTest(unittest.TestCase):
 
     def test_compare_keys(self):
         """
@@ -10,7 +10,7 @@ class UtilsTest(unittest.TestCase):
         object, we can pass just a dict
         to represent the readers results.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         data = {'sample': 1, 'source': 2, 'user': 3}
         ref = ['sample', 'source', 'user']
         # this has an assertion within it
@@ -22,7 +22,7 @@ class UtilsTest(unittest.TestCase):
         object, we can pass just a dict
         to represent the readers results.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         data = {'sample': 1, 'Source': 2, 'user': 3}
         ref = ['sample', 'source', 'user']
         with self.assertRaises(AssertionError):
@@ -34,7 +34,7 @@ class UtilsTest(unittest.TestCase):
         object, we can pass just a dict
         to represent the readers results.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         data = {'sample': 1, 'Source': 2, 'user': 3}
         ref = ['sample', 'source', 'sample']
         with self.assertRaises(AssertionError):
@@ -46,7 +46,7 @@ class UtilsTest(unittest.TestCase):
         object, we can pass just a dict
         to represent the readers results.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         data = {'sample': 1, 'Source': 2, 'user': 3}
         ref = ['sample', 'user']
         with self.assertRaises(AssertionError):
@@ -60,7 +60,7 @@ class UtilsTest(unittest.TestCase):
         The dicts have string keys and the
         values are a list of encoded strings.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         data = {'name': ['unit test'.encode()], 'version': ['1.1.2'.encode()]}
         # contains an assert
@@ -75,7 +75,7 @@ class UtilsTest(unittest.TestCase):
         The dicts have string keys and the
         values are a list of encoded strings.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         data = {'name': ['unit test'], 'version': ['1.1.2']}
 
@@ -91,7 +91,7 @@ class UtilsTest(unittest.TestCase):
         The dicts have string keys and the
         values are a list of encoded strings.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         data = {'name': ['unit test'], 'version': ['1.1.2']}
 
@@ -106,7 +106,7 @@ class UtilsTest(unittest.TestCase):
         The dicts have string keys and the
         values are a list of encoded strings.
         """
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         data = {'name': ['unit test'.encode()], 'version': ['1.1.2'.encode()]}
 
@@ -124,7 +124,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [1, 2, 3]
         ref = [1, 2, 3]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         nexus.assertArrays(array, ref)
 
@@ -138,7 +138,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [1, 2, 3, 4]
         ref = [1, 2, 3]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
@@ -152,7 +152,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [1, 2, 3.01]
         ref = [1, 2, 3]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
@@ -166,7 +166,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [[1, 2, 3], [4, 5, 6]]
         ref = [[1, 2, 3], [4, 5, 6]]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
 
         nexus.assertArrays(array, ref)
 
@@ -180,7 +180,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [[1, 2, 3, 4], [4, 5, 6]]
         ref = [[1, 2, 3], [4, 5, 6]]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
@@ -194,7 +194,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [[1, 2, 3], [4, 5, 6, 7]]
         ref = [[1, 2, 3], [4, 5, 6]]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
@@ -208,7 +208,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [[1, 2, 3.01], [4, 5, 6]]
         ref = [[1, 2, 3], [4, 5, 6]]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
@@ -222,7 +222,7 @@ class UtilsTest(unittest.TestCase):
         """
         array = [[1, 2, 3], [4, 5, 5.2]]
         ref = [[1, 2, 3], [4, 5, 6]]
-        nexus = NexusTestHelper()
+        nexus = TestHelper()
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 

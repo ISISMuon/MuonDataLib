@@ -1,7 +1,7 @@
 from MuonDataLib.data.detector1 import (Detector_1,
                                         read_detector1_from_histogram)
 
-from MuonDataLib.test_helpers.nexus import NexusTestHelper
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import h5py
 import os
 import unittest
@@ -37,7 +37,7 @@ def create_multiperiod_data():
     return Detector_1(1, x, [4, 5], counts, 'python', 3, 4, 42)
 
 
-class Detector1Test(NexusTestHelper):
+class Detector1Test(TestHelper):
 
     def test_detector1_object_stores_correct_info_single_period(self):
         """
