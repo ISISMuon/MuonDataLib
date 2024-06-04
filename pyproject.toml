@@ -8,7 +8,7 @@ version = "0.5.0b2"
 requires-python = ">=3.7.1"
 dependencies = ['numpy', 'h5py', 'plotly']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
-description = 'Reading and writing for ISIS muon experiments'
+description = 'Reading and writing for ISIS muon experiments.'
 readme = 'README.md'
 license = {text = 'BSD'}
 
