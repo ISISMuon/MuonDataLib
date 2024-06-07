@@ -112,6 +112,21 @@ class LoadEventDataTest(TestHelper):
         self.assertArrays(bins, np.arange(0, 30.5, .5))
         self.assertEqual(len(hist[0]), 64)
 
+    def test_set_bin_width(self):
+        file_full = os.path.join(os.path.dirname(__file__),
+                                 '..',
+                                 '..',
+                                 'data_files',
+                                 'simple_test.nxs')
+
+        full_data = LoadEventData()
+        full_data.load_data(file_full)
+        full_data.set_bin_width(0.1)
+
+        hist, bins = full_data.get_histograms()
+        self.assertArrays(bins, np.arange(0, 30.1, .1))
+        self.assertEqual(len(hist[0]), 64)
+
 
 if __name__ == '__main__':
     unittest.main()
