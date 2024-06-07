@@ -21,7 +21,7 @@ class Instrument(object):
     Each Instrument represents a single run.
 
     Methods:
-    - set_bins: set the bins for the histograms.
+    - set_bin_width: set the bins for the histograms.
     - get_histograms: gets the histogram values and bin edges.
     - add_new_frame: adds a new frame to all of the detectors.
     - add_event_data: sorts and adds event data to each detector.
@@ -40,11 +40,11 @@ class Instrument(object):
         self._current_frame = -1
         self._current_index = None
         self._bounds = [0, 30]
-        self.set_bins(.5)
+        self.set_bin_width(.5)
         # ns to micro sec
         self._unit_conversion = 1.e-3
 
-    def set_bins(self, bin_width):
+    def set_bin_width(self, bin_width):
         """
         Sets bin edges to a constant width from 0 to 30 micro sec.
         :param bin_width: the bin width to use when calculating the

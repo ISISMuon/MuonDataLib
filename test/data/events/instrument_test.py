@@ -190,7 +190,7 @@ class InstrumentTest(TestHelper):
         inst = Instrument(DATE, 2)
         # change the bounds to make test simpiler
         inst._bounds = [1, 4]
-        inst.set_bins(0.5)
+        inst.set_bin_width(0.5)
         self.assertArrays(inst._bin_edges,
                           [1., 1.5, 2, 2.5, 3, 3.5, 4])
 
@@ -205,7 +205,7 @@ class InstrumentTest(TestHelper):
                             [1.2, 4.1],
                             [0, 4])
         inst._bounds = [0, 10]
-        inst.set_bins(1.)
+        inst.set_bin_width(1.)
         # check detector 0
         y, x = inst.get_histogram(0)
         self.assertArrays(x, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
