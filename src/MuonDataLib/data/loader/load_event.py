@@ -1,6 +1,7 @@
 from MuonDataLib.data.events.instrument import Instrument
 import h5py
 import numpy as np
+import time
 
 
 class LoadEventData(object):
@@ -20,6 +21,14 @@ class LoadEventData(object):
     def __init__(self):
         self._inst = None
         self._file_name = None
+        self.h5py_time = 0
+        self.N_events = 0
+        self.frames = 0
+        self.total_time = 0
+
+    @property
+    def load_time(self):
+        return self.total_time - self.h5py_time
 
     def set_bin_width(self, width):
         """
@@ -71,6 +80,7 @@ class LoadEventData(object):
         :param file_name: the name of the file to load.
         """
         self._file_name = file_name
+        start_timer = time.time()
         with h5py.File(self._file_name, 'r') as file:
             tmp = file.require_group('raw_data_1')
             tmp = tmp.require_group('detector_1')
@@ -81,6 +91,8 @@ class LoadEventData(object):
             periods = tmp['period_number'][:]
             amps = tmp['pulse_height'][:]
             start = tmp['event_time_zero'].attrs['offset'][0]
+
+            self.h5py_time = time.time() - start_timer
 
             self._inst = Instrument(start, np.max(IDs) + 1)
             # add frame
@@ -94,3 +106,7 @@ class LoadEventData(object):
                                       periods,
                                       start_times,
                                       start_indicies)
+
+            self.total_time = time.time() - start_timer
+            self.N_events = len(times)
+            self.frames = len(start_indicies)
