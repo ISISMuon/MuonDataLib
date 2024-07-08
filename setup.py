@@ -8,7 +8,7 @@ PACKAGE_NAME = 'MuonDataLib'
 
 extensions = [Extension(
                 "muondatalib.cython.add",
-                sources=["src/muondatalib/cython/add.pyx"])]
+                sources=["src/MuonDataLib/cython/add.pyx"])]
 setup(
     name=PACKAGE_NAME,
     requires=['numpy', 'cython'],
