@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup, Extension
 
-VERSION = "0.5.0b4"
+version = "0.5.0b4"
 
 
 PACKAGE_NAME = 'MuonDataLib'
@@ -16,6 +16,6 @@ setup(
     install_requires=['numpy', 'cython'],
     packages=find_packages(where='src'),
     ext_modules=extensions,
-    version=VERSION,
+    version=version,
     package_dir={'': 'src'}
 )

@@ -77,6 +77,7 @@ if __name__ == "__main__":
     try:
         bump = get_input()
         update_version('pyproject.toml', bump)
+        update_version('setup.py', bump)
     except ValueError:
         error = sys.exc_info()[1]
         print(error)
