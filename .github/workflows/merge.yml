@@ -25,14 +25,13 @@ jobs:
       - name: Update version on merge
         run:  |
             python tools/version.py "beta"
-      - name: pyproject
+      - name: Store changes
         uses: actions/upload-artifact@v3
         with:
+          name: pyproject
           path: |
             ./pyproject.toml
             ./setup.py
-
-
 
   build:
     name: Build wheels on ${{ matrix.os }}
