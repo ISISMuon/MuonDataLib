@@ -1,10 +1,6 @@
 name: Build and upload release to PyPI
 
 on:
-  pull_request:
-    branches:
-      - 'main'
-
   push:
     branches:
       - 'release-next'
@@ -52,7 +48,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.8.0
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{9,10,11,12}-manylinux_x86_64 cp3{9,10,11,12}-win_amd64 cp3{9,10,11,12}-macosx_arm64
+          CIBW_BUILD: cp3{9,10,11}-manylinux_x86_64 cp3{9,10,11}-win_amd64 cp3{9,10,11}-macosx_arm64
 
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
@@ -100,7 +96,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ steps.mint.outputs.api-token }}
-
 
   update_setup:
     needs: [upload_pypi]
