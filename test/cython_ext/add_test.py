@@ -1,5 +1,5 @@
 import unittest
-from MuonDataLib.cython.add import my_add
+from MuonDataLib.cython_ext.add import my_add
 
 
 class AddTest(unittest.TestCase):
