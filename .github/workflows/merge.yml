@@ -1,13 +1,6 @@
 name: Build and upload to PyPI
 
 on:
-  push:
-    branches:
-    - 'main'
-  pull_request:
-    branches:
-      - 'main'
-
   pull_request_review:
     types: [submitted]
 permissions:
@@ -16,6 +9,7 @@ permissions:
 jobs:
   update_version:
     name: update version
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -126,6 +120,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add pyproject.toml
+          git add pyproject.toml setup.py
           git commit -m "update version number"
           git push
