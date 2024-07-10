@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup, Extension
 
-version = "0.6.0b1"
+version = "0.6.0b2"
 
 
 PACKAGE_NAME = 'MuonDataLib'
