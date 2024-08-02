@@ -8,8 +8,8 @@ from MuonDataLib.test_helpers.unit_test import TestHelper
 class EventsTest(TestHelper):
 
     def setUp(self):
-        self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype=np.uint32)
-        self._time = np.asarray([1, 2, 1, 2, 1, 2], dtype=np.double)
+        self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype=np.int32)
+        self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
         self._frame_i = np.asarray([0, 3], dtype=np.uint32)
         self._events = Events(self._IDs,
                               self._time,
