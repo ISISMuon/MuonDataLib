@@ -19,8 +19,8 @@ extensions = [
                 ),
               Extension(
                 "MuonDataLib.cython_ext.stats",
-                sources=["src/MuonDataLib/cython_ext/stats.pyx"],
-                extra_compile_args=['openmp']),
+                sources=["src/MuonDataLib/cython_ext/stats.pyx"]
+                ),
 
 
               ]
