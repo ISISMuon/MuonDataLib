@@ -1,8 +1,5 @@
 import unittest
 import numpy as np
-cimport numpy as cnp  # noqa: E999
-import cython
-cnp.import_array()
 
 from MuonDataLib.cython_ext.event_data import Events
 from MuonDataLib.test_helpers.unit_test import TestHelper
@@ -11,9 +8,9 @@ from MuonDataLib.test_helpers.unit_test import TestHelper
 class EventsTest(TestHelper):
 
     def setUp(self):
-        self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype=cnp.int32_t)
+        self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype=np.uint32)
         self._time = np.asarray([1, 2, 1, 2, 1, 2], dtype=np.double)
-        self._frame_i = np.asarray([0, 3], dtype=cnp.int32_t)
+        self._frame_i = np.asarray([0, 3], dtype=np.uint32)
         self._events = Events(self._IDs,
                               self._time,
                               self._frame_i)
