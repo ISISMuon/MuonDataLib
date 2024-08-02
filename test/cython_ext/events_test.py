@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-cimport numpy as cnp
+cimport numpy as cnp  # noqa: E999
 import cython
 cnp.import_array()
 
