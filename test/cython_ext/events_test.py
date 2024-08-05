@@ -1,18 +1,27 @@
 import unittest
 import numpy as np
+import os
 
-from MuonDataLib.cython_ext.event_data import mock_events
 from MuonDataLib.test_helpers.unit_test import TestHelper
+from MuonDataLib.cython_ext.load_events import load_data
 
 
 class EventsTest(TestHelper):
 
     def setUp(self):
-        IDs, time, frame_i, events = mock_events()
-        self._IDs = IDs
-        self._time = time
-        self._frame_i = frame_i
-        self._events = events
+        self._IDs = np.zeros(6, dtype=np.int32)
+        for k in [1, 3, 5]:
+            self._IDs[k] = 1
+        self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
+        self._frame_i = np.zeros(2, dtype=np.int32)
+        self._frame_i[1] = 3
+
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'simple_test.nxs')
+
+        _, self._events = load_data(file)
 
     def test_get_N_spec(self):
         self.assertEqual(self._events.get_N_spec, 2)
