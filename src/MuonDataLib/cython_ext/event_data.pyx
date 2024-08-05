@@ -74,7 +74,8 @@ def mock_events():
     for k in [1, 3, 5]:
         IDs[k] = 1
     time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
-    frame_i = np.asarray([0, 3], dtype=np.int32)
+    frame_i = np.zeros(2, dtype=np.int32)
+    frame_i[1] = 3
     events = Events(IDs,
                     time,
                     frame_i)
