@@ -5,6 +5,25 @@ from MuonDataLib.cython_ext.event_data import Events
 from MuonDataLib.test_helpers.unit_test import TestHelper
 
 
+class vector(object):
+    """
+    This is a simple wrapper to overwrite
+    the len method.
+    This is needed because Ubuntu returns
+    the wrong data type from pure Python
+    (long instead of int32)
+    """
+    def __init__(self, data):
+        self.data = data
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __len__(self):
+        result = np.ndarray(len(self.data), dtype='int32')
+        return result[0]
+
+
 class EventsTest(TestHelper):
 
     def setUp(self):
