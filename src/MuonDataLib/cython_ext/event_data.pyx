@@ -33,7 +33,7 @@ cdef class Events:
         self.N_spec = np.max(IDs) + 1
         self.times = times
         self.start_index_list = start_i
-        self.end_index_list = np.append(start_i[1:], len(IDs))
+        self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
         #self.frame_start_time = frame_time
 
     def histogram(self):
@@ -67,18 +67,3 @@ cdef class Events:
         :return: the IDs for the events
         """
         return self.IDs
-
-
-def mock_events():
-    IDs = np.zeros(6, dtype=np.int32)
-    for k in [1, 3, 5]:
-        IDs[k] = 1
-    time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
-    frame_i = np.zeros(2, dtype=np.int32)
-    frame_i[1] = 3
-    events = Events(IDs,
-                    time,
-                    frame_i)
-    return IDs, time, frame_i, events
-
-
