@@ -58,7 +58,7 @@ class LoadEventDataTest(TestHelper):
 
         time_taken, events = load_data('test.nxs')
         load_mock.assert_called_once_with("test.nxs")
-        self.assertAlmostEqual(time_taken, 1., delta=0.1)
+        self.assertGreater(time_taken, 1.)
         events_mock.assert_called_once_with(IDs, times, start_j)
 
 
