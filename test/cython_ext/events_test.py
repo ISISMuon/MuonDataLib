@@ -17,14 +17,14 @@ class vector(object):
         return np.asarray(data, dtype=dtype)
 
     def __len__(self):
-        result = np.ndarray(len(self.data), dtype='int32')
+        result = np.ndarray(len(self.data), dtype=np.uint32)
         return result[0]
 
 
 class EventsTest(TestHelper):
 
     def setUp(self):
-        self._IDs = vector([0, 1, 0, 1, 0, 1], dtype='int32')
+        self._IDs = vector([0, 1, 0, 1, 0, 1], dtype=np.uint32)
         self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
         self._frame_i = vector([0, 3], dtype='int32')
         self._events = Events(self._IDs,
