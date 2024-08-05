@@ -70,9 +70,11 @@ cdef class Events:
 
 
 def mock_events():
-    IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype='int32')
+    IDs = np.zeros(6, dtype=np.int32)
+    for k in [1, 3, 5]:
+        IDs[k] = 1
     time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
-    frame_i = np.asarray([0, 3], dtype='int32')
+    frame_i = np.asarray([0, 3], dtype=np.int32)
     events = Events(IDs,
                     time,
                     frame_i)
