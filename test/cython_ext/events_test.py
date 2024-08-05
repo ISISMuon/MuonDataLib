@@ -17,7 +17,7 @@ class vector(object):
         return np.asarray(data, dtype=dtype)
 
     def __len__(self):
-        return int(len(self.data))
+        return np.int32(len(self.data))
 
 
 class EventsTest(TestHelper):
