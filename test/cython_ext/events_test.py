@@ -13,11 +13,8 @@ class vector(object):
     the wrong data type from pure Python
     (long instead of int32)
     """
-    def __init__(self, data):
-        self.data = data
-
-    def __getitem__(self, index):
-        return self.data[index]
+    def __new__(self, data, dtype):
+        return np.asarray(data, dtype=dtype)
 
     def __len__(self):
         result = np.ndarray(len(self.data), dtype='int32')
@@ -27,9 +24,9 @@ class vector(object):
 class EventsTest(TestHelper):
 
     def setUp(self):
-        self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype='int32')
+        self._IDs = vector([0, 1, 0, 1, 0, 1], dtype='int32')
         self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
-        self._frame_i = np.asarray([0, 3], dtype='int32')
+        self._frame_i = vector([0, 3], dtype='int32')
         self._events = Events(self._IDs,
                               self._time,
                               self._frame_i)
