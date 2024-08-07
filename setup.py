@@ -1,14 +1,29 @@
 from setuptools import find_packages, setup, Extension
+import numpy
 
-version = "0.6.0b2"
+
+version = "0.6.0b3"
 
 
 PACKAGE_NAME = 'MuonDataLib'
 
 
-extensions = [Extension(
-                "MuonDataLib.cython_ext.add",
-                sources=["src/MuonDataLib/cython_ext/add.pyx"])]
+extensions = [
+              Extension(
+                "MuonDataLib.cython_ext.event_data",
+                sources=["src/MuonDataLib/cython_ext/event_data.pyx"],
+                ),
+              Extension(
+                "MuonDataLib.cython_ext.load_events",
+                sources=["src/MuonDataLib/cython_ext/load_events.pyx"],
+                ),
+              Extension(
+                "MuonDataLib.cython_ext.stats",
+                sources=["src/MuonDataLib/cython_ext/stats.pyx"]
+                ),
+
+
+              ]
 setup(
     name=PACKAGE_NAME,
     requires=['numpy', 'cython'],
@@ -17,5 +32,6 @@ setup(
     packages=find_packages(where='src'),
     ext_modules=extensions,
     version=version,
+    include_dirs=[numpy.get_include()],
     package_dir={'': 'src'}
 )
