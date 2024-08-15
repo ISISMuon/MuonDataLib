@@ -8,11 +8,21 @@ cnp.import_array()
 
 
 cdef vector[double] my_sort(vector[double] times):
+    """
+    A simple wrapper for a vector sort
+    :param times: the times of the data to be sorted
+    :return: a sorted list of time
+    """
     sort(times.begin(), times.end())
     return times
 
 
 cdef class FrameFilter:
+    """
+    A class for filtering out frames.
+    If any part of the frame is within the filter,
+    then it is excluded.
+    """
     cdef readonly cnp.int32_t[:] start_index_list
     cdef readonly cnp.int32_t[:] end_index_list
     cdef readonly double[:] frame_start_time
@@ -26,23 +36,36 @@ cdef class FrameFilter:
                  cnp.ndarray[double] frame_time,
                  int data_end):
         """
-
+        Create the frame filter object
+        :param start_i: the start indicies for the frames
+        :param frame_time: the time at the start of each time
+        :param data_end: the index of the end of the event data
         """
         self.start_index_list = start_i
         self.end_index_list = np.append(start_i[1:] - 1, np.int32(data_end))
         self.frame_start_time = frame_time
+        # create some empty filter info
         self.names = []
         self.filter_start_time = []
         self.filter_end_time = []
 
 
     def add_filter(self, str name, double start, double end):
+        """
+        Add a single filter to the object.
+        :param name: the name of the filter
+        :param start: the start time for the filter
+        :param end: the end time for the filter
+        """
         self.names.append(name)
         self.filter_start_time.push_back(start)
         self.filter_end_time.push_back(end)
 
     @property
     def get_filters(self):
+        """
+        :return: a dict of the filters {name: (start, end)}
+        """
         filters = {}
         for k in range(self.filter_start_time.size()):
             filters[self.names[k]] = (self.filter_start_time[k],
@@ -50,13 +73,23 @@ cdef class FrameFilter:
         return filters
 
     def apply_filter(self, data):
-        rm = self.filter_data()
+        """
+        Applys the filter to an array.
+        i.e. it removes the data in the relevant frames.
+        :param data: the input data to filter
+        :return: an array of data excluding the filtered data
+        """
+        exclude = self.filter_data()
+
         tmp = np.asarray(data)
-        for j in range(len(rm)-1, 0, -2):
-            tmp = tmp[np.r_[:rm[j-1], rm[j] + 1: len(tmp)]]
+        for j in range(len(exclude)-1, 0, -2):
+            tmp = tmp[np.r_[:exclude[j-1], exclude[j] + 1: len(tmp)]]
         return tmp
 
     def filter_data(self):
+        """
+        Filters the data
+        """
         # sanity check
         if self.filter_start_time.size() == 0:
             return

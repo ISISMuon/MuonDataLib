@@ -44,11 +44,11 @@ def load_data(file_name):
         """
         Loads the data from an event nxs file
         :param file_name: the name of the event nxs file to load
-        :return: the time to run this method, the total number of events
+        :return: the time to run this method, the events object, a filter object
         """
         start = time.time()
         IDs, frames, times, amps, frame_times = _load_data(file_name)
-        events = Events(IDs, times, frames, frame_times)
+        events = Events(IDs, times)
         frame_filter = FrameFilter(frames, frame_times, len(IDs))
         return time.time() - start, events, frame_filter
 

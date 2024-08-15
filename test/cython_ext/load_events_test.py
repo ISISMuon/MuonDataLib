@@ -33,7 +33,8 @@ class LoadEventDataTest(TestHelper):
 
     @mock.patch('MuonDataLib.cython_ext.load_events._load_data')
     @mock.patch('MuonDataLib.cython_ext.load_events.Events')
-    def test_load_data(self, events_mock, load_mock):
+    @mock.patch('MuonDataLib.cython_ext.load_events.FrameFilter')
+    def test_load_data(self, filter_mock, events_mock, load_mock):
         """
         For this we are going to mock most of the computation,
         as the individual parts are tested.
@@ -56,10 +57,11 @@ class LoadEventDataTest(TestHelper):
         events_mock.return_value = mock.Mock()
         load_mock.side_effect = fake_load
 
-        time_taken, events = load_data('test.nxs')
+        time_taken, events, _ = load_data('test.nxs')
         load_mock.assert_called_once_with("test.nxs")
         self.assertGreater(time_taken, 1.)
-        events_mock.assert_called_once_with(IDs, times, start_j)
+        events_mock.assert_called_once_with(IDs, times)
+        filter_mock.assert_called_once_with(start_j, start_t, 4)
 
 
 if __name__ == '__main__':
