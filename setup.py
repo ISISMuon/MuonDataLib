@@ -12,7 +12,11 @@ extensions = [
               Extension(
                 "MuonDataLib.cython_ext.event_data",
                 sources=["src/MuonDataLib/cython_ext/event_data.pyx"],
-                ),
+                language='c++',),
+              Extension(
+                "MuonDataLib.cython_ext.filters",
+                sources=["src/MuonDataLib/cython_ext/filters.pyx"],
+                language='c++',),
               Extension(
                 "MuonDataLib.cython_ext.load_events",
                 sources=["src/MuonDataLib/cython_ext/load_events.pyx"],

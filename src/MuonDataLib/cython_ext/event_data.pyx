@@ -6,6 +6,7 @@ import cython
 cnp.import_array()
 
 
+
 cdef class Events:
     """
     Class for storing event information
@@ -13,35 +14,48 @@ cdef class Events:
     cdef public cnp.int32_t[:] IDs
     cdef public double[:] times
     cdef readonly int N_spec
-    cdef readonly cnp.int32_t[:] start_index_list
-    cdef readonly cnp.int32_t[:] end_index_list
-    #cdef readonly cnp.ndarray[int] frame_start_time
+    #cdef readonly cnp.int32_t[:] start_index_list
+    #cdef readonly cnp.int32_t[:] end_index_list
+    #cdef readonly double [:] frame_start_time
 
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
-                 cnp.ndarray[int] start_i): #, frame_time):
+                 cnp.ndarray[int] start_i,
+                 cnp.ndarray[double] frame_time):
         """
         Creates an event object.
         This knows everything needed for the events to create a histogram.
         :param IDs: the detector ID's for the events
         :param times: the time stamps for the events, relative to the start of their frame
         :param start_i: the first event index for each frame
+        :param frame_time: the time when the frame starts
         """
         self.IDs = IDs
         # add as IDs counts from 0
         self.N_spec = np.max(IDs) + 1
         self.times = times
-        self.start_index_list = start_i
-        self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
+        #self.start_index_list = start_i
+        #self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
         #self.frame_start_time = frame_time
 
-    def histogram(self):
+    def histogram(self,
+                  min_time=0,
+                  max_time=32.768,
+                  width=0.016,
+                  frame_filter=None):
         """
         Create a matrix of histograms from the event data
         ;returns: a matrix of histograms, bin edges
         """
-        return make_histogram(self.times, self.IDs, self.N_spec)
+        if frame_filter is not None:
+            times = frame_filter.apply_filter(self.times)
+            IDs = frame_filter.apply_filter(self.IDs)
+            return make_histogram(times, IDs, self.N_spec,
+                                  min_time, max_time, width)
+
+        return make_histogram(self.times, self.IDs, self.N_spec,
+                              min_time, max_time, width)
 
     @property
     def get_N_spec(self):
