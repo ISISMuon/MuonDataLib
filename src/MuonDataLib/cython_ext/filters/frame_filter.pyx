@@ -1,10 +1,14 @@
 import numpy as np
 cimport numpy as cnp
 import cython
+#from cython.operator cimport postincrement as inc
+#from cython.operator cimport dereference
+
 from libcpp.vector cimport vector
-from libcpp.string cimport string
 from libcpp.algorithm cimport sort as sort
 cnp.import_array()
+
+from MuonDataLib.cython_ext.filters.utils import erase_from_vector
 
 
 cdef vector[double] my_sort(vector[double] times):
@@ -49,6 +53,12 @@ cdef class FrameFilter:
         self.filter_start_time = []
         self.filter_end_time = []
 
+        cdef vector[int] a = np.asarray([1,2,3,4,5])
+        #cdef vector.iterator it = a.begin()
+        #print(dereference(it))
+        #preincrement(it)
+        #print(dereference(it))
+
 
     def add_filter(self, str name, double start, double end):
         """
@@ -61,7 +71,14 @@ cdef class FrameFilter:
         self.filter_start_time.push_back(start)
         self.filter_end_time.push_back(end)
 
-    @property
+    def remove_filter(self, str name):
+        if name not in self.names:
+            raise ValueError("{name} is not a recognised frame filter")
+        cdef int index = self.names.index(name)
+        del self.names[index]
+        self.filter_start_time = erase_from_vector(self.filter_start_time, index)
+        self.filter_end_time = erase_from_vector(self.filter_end_time, index)
+
     def get_filters(self):
         """
         :return: a dict of the filters {name: (start, end)}
@@ -72,6 +89,20 @@ cdef class FrameFilter:
                                       self.filter_end_time[k])
         return filters
 
+    def get_frame_indicies(self, data):
+        """
+        Applys the filter to an array.
+        i.e. it removes the data in the relevant frames.
+        :return: an array of data excluding the filtered data
+        """
+        exclude = self.filter_data()
+
+        tmp = np.arange(len(data))
+        for j in range(len(exclude)-1, 0, -2):
+            tmp = tmp[np.r_[:exclude[j-1], exclude[j] + 1: len(tmp)]]
+        return tmp
+
+
     def apply_filter(self, data):
         """
         Applys the filter to an array.
@@ -79,12 +110,8 @@ cdef class FrameFilter:
         :param data: the input data to filter
         :return: an array of data excluding the filtered data
         """
-        exclude = self.filter_data()
-
         tmp = np.asarray(data)
-        for j in range(len(exclude)-1, 0, -2):
-            tmp = tmp[np.r_[:exclude[j-1], exclude[j] + 1: len(tmp)]]
-        return tmp
+        return tmp[self.get_frame_indicies(data)]
 
     def filter_data(self):
         """

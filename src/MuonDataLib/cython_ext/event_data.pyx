@@ -46,6 +46,7 @@ cdef class Events:
         if frame_filter is not None:
             times = frame_filter.apply_filter(self.times)
             IDs = frame_filter.apply_filter(self.IDs)
+            print(len(IDs))
             return make_histogram(times, IDs, self.N_spec,
                                   min_time, max_time, width)
 
