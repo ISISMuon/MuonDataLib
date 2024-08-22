@@ -1,5 +1,5 @@
 from MuonDataLib.cython_ext.event_data import Events
-from MuonDataLib.cython_ext.filters import FrameFilter
+from MuonDataLib.cython_ext.filters.filter_manager import FilterManager
 
 import h5py
 import numpy as np
@@ -49,7 +49,8 @@ def load_data(file_name):
         start = time.time()
         IDs, frames, times, amps, frame_times = _load_data(file_name)
         events = Events(IDs, times)
-        frame_filter = FrameFilter(frames, frame_times, len(IDs))
-        return time.time() - start, events, frame_filter
+        filters = FilterManager(frames, frame_times, len(IDs))
+        filters.create_min_filter('amplitude', amps)
+        return time.time() - start, events, filters
 
 

@@ -31,7 +31,7 @@ cdef class Events:
         self.times = times
 
     def histogram(self,
-                  frame_filter=None,
+                  filters=None,
                   min_time=0,
                   max_time=32.768,
                   width=0.016):
@@ -43,15 +43,15 @@ cdef class Events:
         :param width: the bin width
         :returns: a matrix of histograms, bin edges
         """
-        if frame_filter is not None:
-            times = frame_filter.apply_filter(self.times)
-            IDs = frame_filter.apply_filter(self.IDs)
-            print(len(IDs))
-            return make_histogram(times, IDs, self.N_spec,
-                                  min_time, max_time, width)
+        #if filters is not None:
+        #    times = frame_filter.apply_filter(self.times)
+        #    IDs = frame_filter.apply_filter(self.IDs)
+        #    print(len(IDs))
+        #    return make_histogram(times, IDs, self.N_spec,
+        #                          min_time, max_time, width)
 
         return make_histogram(self.times, self.IDs, self.N_spec,
-                              min_time, max_time, width)
+                              min_time, max_time, width, filters=filters)
 
     @property
     def get_N_spec(self):

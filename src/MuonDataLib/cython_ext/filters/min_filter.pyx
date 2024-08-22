@@ -35,6 +35,15 @@ cdef class MinFilter:
     def remove_min_filter(self):
         self.active = False
 
+    def get_stats(self):
+        return (np.min(self.data),
+                np.mean(self.data),
+                np.median(self.data),
+                np.max(self.data))
+
+    def value(self):
+        return self.min_value
+
     @property
     def is_active(self):
         return self.active

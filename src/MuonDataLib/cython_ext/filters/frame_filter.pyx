@@ -53,13 +53,6 @@ cdef class FrameFilter:
         self.filter_start_time = []
         self.filter_end_time = []
 
-        cdef vector[int] a = np.asarray([1,2,3,4,5])
-        #cdef vector.iterator it = a.begin()
-        #print(dereference(it))
-        #preincrement(it)
-        #print(dereference(it))
-
-
     def add_filter(self, str name, double start, double end):
         """
         Add a single filter to the object.
@@ -79,7 +72,7 @@ cdef class FrameFilter:
         self.filter_start_time = erase_from_vector(self.filter_start_time, index)
         self.filter_end_time = erase_from_vector(self.filter_end_time, index)
 
-    def get_filters(self):
+    def report(self):
         """
         :return: a dict of the filters {name: (start, end)}
         """

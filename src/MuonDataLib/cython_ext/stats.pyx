@@ -13,7 +13,8 @@ cpdef make_histogram(
         double min_time=0,
         double max_time=30.,
         double width=0.5,
-        double conversion=1.e-3):
+        double conversion=1.e-3,
+        filters=None):
     """
     This method creates histograms from a list of data.
     It produces a matrix of histograms for multiple spectra.
@@ -35,7 +36,8 @@ cpdef make_histogram(
     cdef cnp.ndarray[double, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.double)
     cdef double[:, :] mat = result
 
-    for k in range(len(times)):
+    #cdef cnp.ndarray[int, ndim=1] indecies = np.asarray(range(len(times)))
+    for k in filters.get_good_frames(times):
         det = spec[k]
         time = times[k] * conversion
         if time <= max_time and time >= min_time:
