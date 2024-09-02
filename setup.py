@@ -7,28 +7,35 @@ version = "0.6.0b3"
 
 PACKAGE_NAME = 'MuonDataLib'
 
+"""
+
+
+              Extension(
+                "MuonDataLib.cython_ext.filters.min_filter",
+                sources=["src/MuonDataLib/cython_ext/filters/min_filter.pyx"],
+               language='c++',),
+
+               Extension(
+                "MuonDataLib.cython_ext.filters.filter_manager",
+                sources=["src/MuonDataLib/cython_ext/filters/filter_manager.pyx"],
+                language='c++',),
+"""
 
 extensions = [
-              Extension(
-                "MuonDataLib.cython_ext.event_data",
-                sources=["src/MuonDataLib/cython_ext/event_data.pyx"],
-                language='c++',),
+
               Extension(
                 "MuonDataLib.cython_ext.load_events",
                 sources=["src/MuonDataLib/cython_ext/load_events.pyx"],
                 ),
               Extension(
+                "MuonDataLib.cython_ext.event_data",
+                sources=["src/MuonDataLib/cython_ext/event_data.pyx"],
+                language='c++',),
+
+              Extension(
                 "MuonDataLib.cython_ext.stats",
                 sources=["src/MuonDataLib/cython_ext/stats.pyx"]
                 ),
-              Extension(
-                "MuonDataLib.cython_ext.filters.frame_filter",
-                ["src/MuonDataLib/cython_ext/filters/frame_filter.pyx"],
-                language='c++',),
-              Extension(
-                "MuonDataLib.cython_ext.filters.min_filter",
-                sources=["src/MuonDataLib/cython_ext/filters/min_filter.pyx"],
-                language='c++',),
 
               Extension(
                 'MuonDataLib.cython_ext.filters.utils',
@@ -36,6 +43,12 @@ extensions = [
                          "src/MuonDataLib/cython_ext/filters/_utils.cpp"],
                 language="c++",
                 extra_link_args=["-lz"]),
+
+              Extension(
+                "MuonDataLib.cython_ext.filters.frame_filter",
+                ["src/MuonDataLib/cython_ext/filters/frame_filter.pyx"],
+                language='c++',),
+
 
               ]
 setup(

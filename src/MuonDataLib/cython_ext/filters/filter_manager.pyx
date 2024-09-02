@@ -1,5 +1,6 @@
 from MuonDataLib.cython_ext.filters.frame_filter import FrameFilter
 from MuonDataLib.cython_ext.filters.min_filter import MinFilter
+import numpy as np
 import json
 
 class FilterManager(object):
@@ -13,13 +14,31 @@ class FilterManager(object):
                                         N)
         self.min_filters = {}
 
-    def __call__(self, k):
+    def call(self, int k):
         # need to filter frames first
         for key in self.min_filters.keys():
+            tmp = self.min_filters[key]
             # no need to carry on if any return false
-            if self.min_filters[key].is_active and self.min_filters[key](k):
-                return False
-        return True
+            if tmp.is_active:
+                return tmp.call(k)
+        return 1
+
+    def get_data(self, data):
+        result = self.frame_filter.filter_data()
+        inc = np.ones(len(data), dtype=int)
+        if result == []:
+            return inc
+
+        for k in range(len(result) //2):
+            # the plus 1 should be in the frame code...
+            inc[result[2*k]:result[2*k+1]+1] = 0
+
+        for key in self.min_filters.keys():
+            inc = inc * self.min_filters[key].do()
+
+        return inc
+
+
 
     def report(self):
         filters = {'frame filters': self.frame_filter.report()}
@@ -82,16 +101,35 @@ class FilterManager(object):
     """
     frame filter methods
     """
+    def frame_info(self):
+        return self.frame_filter.frame_info()
+
     def add_frame_filter(self, str name, double start, double end):
         self.frame_filter.add_filter(name, start, end)
 
     def remove_frame_filter(self, str name):
         self.frame_filter.remove(name)
 
-    def get_good_frames(self, data):
-        import time
-        start = time.time()
-        result = self.frame_filter.get_frame_indicies(data)
-        print('get', time.time() - start)
-        return result
+    def apply(self, data):
+        return self.frame_filter.apply_filter(data)
+
+    def get_good_frame_data(self, data):
+        result = self.frame_filter.filter_data()
+        inc = np.ones(len(data), dtype=int)
+        if result == []:
+            return inc
+        for k in range(len(result) //2):
+            # the plus 1 should be in the frame code...
+            inc[result[2*k]:result[2*k+1]+1] = 0
+        return inc
+
+    def offset(self, data):
+        result = self.frame_filter.filter_data()
+        inc = np.zeros(len(data), dtype=np.double)
+        if result == []:
+            return inc
+        for k in range(len(result) //2):
+            # the plus 1 should be in the frame code...
+            inc[result[2*k]:result[2*k+1]+1] = 10000.0
+        return inc
 

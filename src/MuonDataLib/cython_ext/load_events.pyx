@@ -48,7 +48,7 @@ def load_data(file_name):
         """
         start = time.time()
         IDs, frames, times, amps, frame_times = _load_data(file_name)
-        events = Events(IDs, times)
+        events = Events(IDs, times, amps)
         filters = FilterManager(frames, frame_times, len(IDs))
         filters.create_min_filter('amplitude', amps)
         return time.time() - start, events, filters

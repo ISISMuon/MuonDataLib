@@ -7,8 +7,98 @@ import cython
 from libcpp.vector cimport vector
 from libcpp.algorithm cimport sort as sort
 cnp.import_array()
-
+from copy import deepcopy
 from MuonDataLib.cython_ext.filters.utils import erase_from_vector
+
+
+
+cpdef double[:] sorter(double[:] times):
+    result = deepcopy(times)
+    return result.sort()
+
+
+cdef class FF:
+    """
+    A class for filtering out frames.
+    If any part of the frame is within the filter,
+    then it is excluded.
+    """
+    cdef readonly cnp.int32_t[:] start_index_list
+    cdef readonly cnp.int32_t[:] end_index_list
+    cdef readonly double[:] frame_start_time
+    #cdef readonly double[:] filter_start_time
+    #cdef readonly double[:] filter_end_time
+    #cdef readonly list names
+    cdef dict[str, (double, double)] filters
+    cdef int[:] active
+
+    def __init__(self,
+                 cnp.ndarray[int] start_i,
+                 cnp.ndarray[double] frame_time,
+                 int data_end):
+        """
+        Create the frame filter object
+        :param start_i: the start indicies for the frames
+        :param frame_time: the time at the start of each time
+        :param data_end: the index of the end of the event data
+        """
+        self.start_index_list = start_i
+        self.end_index_list = np.append(start_i[1:] - 1, np.int32(data_end))
+        self.frame_start_time = frame_time
+        # create some empty filter info
+        self.filters = {}
+        self.active = np.zeros(len(start_i)-1, dtype=int)
+        #self.names = []
+        #self.filter_start_time = np.asarray([], dtype=np.double)
+        #self.filter_end_time = np.asarray([], dtype=np.double)
+
+
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
+    def add_filter(self, str name, double start, double end):
+        """
+        Add a single filter to the object.
+        :param name: the name of the filter
+        :param start: the start time for the filter
+        :param end: the end time for the filter
+        """
+        cdef Py_ssize_t k
+        cdef double time
+        self.filters[name] = (start, end)
+        for k, time in enumerate(self.frame_start_time):
+            if start < time:
+                self.active[k-1] += 1
+            if end < time:
+                return
+
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
+    @cython.initializedcheck(False)   # Deactivate negative indexing.
+    def apply_filter(self, double[:] data):
+        # maybe we make a copy np.ones*data
+        # then shift data to remove the stuff we dont want
+        # return a trimmed array
+        result = np.zeros(len(data), dtype=np.double)
+        cdef double[:] _result = result
+        cdef Py_ssize_t k, tmp, end, start
+        tmp = 0
+        for k in range(len(self.active)):
+            if self.active[k] == 0:
+                start = self.start_index_list[k]
+                end = self.end_index_list[k]
+                _result[tmp:tmp+end-start] = data[start:end]
+                tmp += end-start
+        return result[:tmp]
+
+    def check(self):
+        return self.active, self.filters
+
+
+
+
+
+
+
 
 
 cdef vector[double] my_sort(vector[double] times):
@@ -53,6 +143,11 @@ cdef class FrameFilter:
         self.filter_start_time = []
         self.filter_end_time = []
 
+    def frame_info(self):
+        return (self.frame_start_time[0],
+                self.frame_start_time[1] - self.frame_start_time[0],
+                self.frame_start_time[-1])
+
     def add_filter(self, str name, double start, double end):
         """
         Add a single filter to the object.
@@ -64,7 +159,7 @@ cdef class FrameFilter:
         self.filter_start_time.push_back(start)
         self.filter_end_time.push_back(end)
 
-    def remove_filter(self, str name):
+    def remove(self, str name):
         if name not in self.names:
             raise ValueError("{name} is not a recognised frame filter")
         cdef int index = self.names.index(name)
@@ -112,7 +207,7 @@ cdef class FrameFilter:
         """
         # sanity check
         if self.filter_start_time.size() == 0:
-            return
+            return []
 
         # get ordered filter times
         filter_start_time = my_sort(self.filter_start_time)

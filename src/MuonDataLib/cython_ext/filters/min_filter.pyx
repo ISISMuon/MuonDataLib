@@ -48,6 +48,15 @@ cdef class MinFilter:
     def is_active(self):
         return self.active
 
-    def __call__(self, int k):
-        return self.data[k] < self.min_value
+    cpdef do(self):
+        cdef int[:] inc = np.ones(len(self.data))
+        if self.active:
+            tmp = np.where(np.asarray(self.data) < self.min_value)
+            inc[tmp] = 0
+        return inc
+
+    cpdef call(self, int k):
+        if self.data[k] < self.min_value:
+            return 0
+        return 1
 
