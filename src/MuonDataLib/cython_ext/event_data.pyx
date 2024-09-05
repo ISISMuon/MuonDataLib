@@ -20,7 +20,8 @@ cdef class Events:
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
-                 cnp.ndarray[int] start_i): #, frame_time):
+                 cnp.ndarray[int] start_i,
+                 int N_det): #, frame_time):
         """
         Creates an event object.
         This knows everything needed for the events to create a histogram.
@@ -29,19 +30,26 @@ cdef class Events:
         :param start_i: the first event index for each frame
         """
         self.IDs = IDs
-        # add as IDs counts from 0
-        self.N_spec = np.max(IDs) + 1
+        self.N_spec = N_det
         self.times = times
         self.start_index_list = start_i
         self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
         #self.frame_start_time = frame_time
 
-    def histogram(self):
+    @property
+    def get_total_frames(self):
+        return len(self.start_index_list)
+
+    def histogram(self,
+                  min_time=0.,
+                  max_time=32.768,
+                  width=0.016):
         """
         Create a matrix of histograms from the event data
         ;returns: a matrix of histograms, bin edges
         """
-        return make_histogram(self.times, self.IDs, self.N_spec)
+        return make_histogram(self.times, self.IDs, self.N_spec,
+                              min_time, max_time, width)
 
     @property
     def get_N_spec(self):
