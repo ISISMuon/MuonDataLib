@@ -41,15 +41,23 @@ cdef class Events:
         return len(self.start_index_list)
 
     def histogram(self,
-                  min_time=0.,
-                  max_time=32.768,
-                  width=0.016):
+                  double min_time=0.,
+                  double max_time=32.768,
+                  double width=0.016,
+                  cache=None):
         """
         Create a matrix of histograms from the event data
         ;returns: a matrix of histograms, bin edges
         """
-        return make_histogram(self.times, self.IDs, self.N_spec,
-                              min_time, max_time, width)
+        hist, bins = make_histogram(self.times,
+                                    self.IDs,
+                                    self.N_spec,
+                                    min_time,
+                                    max_time,
+                                    width)
+        if cache is not None:
+            cache.save(np.asarray([hist]), bins, len(self.start_index_list))
+        return hist, bins
 
     @property
     def get_N_spec(self):
@@ -65,13 +73,3 @@ cdef class Events:
         """
         return len(self.IDs)
 
-    @property
-    def get_filtered_events(self):
-        """
-        Later this will apply filters.
-        Either by adding subsets of the events, so to exclude the
-        filteref out frames.
-        Or by adding an offset to unwanted events (e.g. bad amplitudes)
-        :return: the IDs for the events
-        """
-        return self.IDs

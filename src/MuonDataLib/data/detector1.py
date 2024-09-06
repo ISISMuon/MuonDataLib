@@ -3,39 +3,29 @@ from MuonDataLib.data.utils import (INT32,
 from MuonDataLib.data.hdf5 import HDF5
 
 
-class Detector_1(HDF5):
+class _Detector_1(HDF5):
     """
-    A class for storing the data associated with the detector 1 group
+    A base class for storing the data associated with the detector 1 group
     in a muon NXS v2 file.
     """
-    def __init__(self, resolution, raw_time, spec_i,
-                 counts, inst, t0, first, last):
-        super().__init__()
+    def __init__(self, resolution, spec_i,
+                 inst, t0, first, last):
         """
         Stores the data for the detector 1 group
         :param resolution: the time resolution (micro s)
-        :param raw_time: the uncorrected time
         :param spec_i: the spectrum indices
-        :param counts: the counts for the data (period, spec, time)
         :param inst: the instrument name
         :param t0: the time zero value
         :param first: the first good bin
         :param last: the last good bin
         """
+        super().__init__()
         self._dict['resolution'] = resolution
-        self._dict['raw_time'] = raw_time
         self._dict['spectrum_index'] = spec_i
         self._dict['inst'] = inst
         self._dict['time_zero'] = t0
         self._dict['first_good'] = first
         self._dict['last_good'] = last
-
-        # this will need to change for events ...
-        self._dict['counts'] = counts
-
-        self.N_x = len(counts[0][0])
-        self.N_hist = len(counts[0])
-        self.N_periods = len(counts)
 
     @property
     def resolution(self):
@@ -45,10 +35,17 @@ class Detector_1(HDF5):
         """
         return int(self._dict['resolution']*1e6)
 
-    def save_nxs2(self, file):
+    def save_nxs2(self, file,
+                  raw_time,
+                  counts,
+                  N_x,
+                  N_hist,
+                  N_periods):
         """
         Save the detector 1 values for a muon NXS v2 file
         :param file: the open file to write the data to
+        :param raw_time: the uncorrected time
+        :param counts: the counts for the data (period, spec, time)
         """
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('instrument')
@@ -59,7 +56,7 @@ class Detector_1(HDF5):
         resolution = self.save_int('resolution', self.resolution, tmp)
         resolution.attrs.create('units', 'picoseconds'.encode(), dtype='S11')
 
-        raw = self.save_float_array('raw_time', self._dict['raw_time'], tmp)
+        raw = self.save_float_array('raw_time', raw_time, tmp)
         raw.attrs.create('units', 'microseconds'.encode(), dtype='S12')
         raw.attrs.create('long_name', 'time'.encode(), dtype='S4')
 
@@ -67,9 +64,9 @@ class Detector_1(HDF5):
                             self._dict['spectrum_index'],
                             tmp)
 
-        counts = self.save_counts_array('counts', self.N_periods,
-                                        self.N_hist, self.N_x,
-                                        self._dict['counts'], tmp)
+        counts = self.save_counts_array('counts', N_periods,
+                                        N_hist, N_x,
+                                        counts, tmp)
         counts.attrs.create('axes',
                             ('[period index, '
                              'spectrum index, '
@@ -88,6 +85,81 @@ class Detector_1(HDF5):
         counts.attrs.create('last_good_bin',
                             last_bin,
                             dtype=INT32)
+
+
+class Detector_1(_Detector_1):
+    """
+    A class for storing the data associated with the detector 1 group
+    in a muon NXS v2 file.
+    """
+    def __init__(self, resolution, raw_time, spec_i,
+                 counts, inst, t0, first, last):
+        """
+        Stores the data for the detector 1 group
+        :param resolution: the time resolution (micro s)
+        :param raw_time: the uncorrected time
+        :param spec_i: the spectrum indices
+        :param counts: the counts for the data (period, spec, time)
+        :param inst: the instrument name
+        :param t0: the time zero value
+        :param first: the first good bin
+        :param last: the last good bin
+        """
+        super().__init__(resolution, spec_i,
+                         inst, t0, first, last)
+        self._dict['raw_time'] = raw_time
+        self._dict['counts'] = counts
+        self.N_x = len(counts[0][0])
+        self.N_hist = len(counts[0])
+        self.N_periods = len(counts)
+
+    def save_nxs2(self, file):
+        """
+        Save the detector 1 values for a muon NXS v2 file
+        :param file: the open file to write the data to
+        """
+        super().save_nxs2(file,
+                          self._dict['raw_time'],
+                          self._dict['counts'],
+                          self.N_x,
+                          self.N_hist,
+                          self.N_periods)
+
+
+class EventsDetector_1(_Detector_1):
+    """
+    A class for storing the data associated with the detector 1 group
+    in a muon NXS v2 file.
+    """
+    def __init__(self, events_cache, resolution, spec_i,
+                 inst, t0, first, last):
+        """
+        Stores the data for the detector 1 group
+        :param resolution: the time resolution (micro s)
+        :param raw_time: the uncorrected time
+        :param spec_i: the spectrum indices
+        :param counts: the counts for the data (period, spec, time)
+        :param inst: the instrument name
+        :param t0: the time zero value
+        :param first: the first good bin
+        :param last: the last good bin
+        """
+        super().__init__(resolution, spec_i,
+                         inst, t0, first, last)
+        self._cache = events_cache
+
+    def save_nxs2(self, file):
+        """
+        Save the detector 1 values for a muon NXS v2 file
+        :param file: the open file to write the data to
+        """
+        counts, bins = self._cache.get_histograms()
+        super().save_nxs2(file,
+                          bins,
+                          counts,
+                          len(counts[0][0]),
+                          len(counts[0]),
+                          len(counts))
 
 
 def read_detector1_from_histogram(file):

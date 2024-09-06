@@ -1,7 +1,52 @@
 from MuonDataLib.data.hdf5 import HDF5
+import numpy as np
 
 
-class Periods(HDF5):
+class _Periods(HDF5):
+    """
+    A base class to store the period informtaion for muon data
+    """
+    def __init__(self, number, labels, p_type,
+                 output, sequences):
+        """
+        A class to store the period data needed for a muon nexus v2 file
+        :param number: the number of periods
+        :param labels: a string of the period labels
+        :param p_type: an int array representing the type of period
+        :param output: an int array of the outputs
+        :param sequences: an int array of the sequences
+        """
+        super().__init__()
+        self._dict['number'] = number
+        self._dict['labels'] = labels
+        self._dict['type'] = p_type
+        self._dict['output'] = output
+        self._dict['sequences'] = sequences
+
+    def save_nxs2(self, file, requested, raw, counts):
+        """
+        A method to save the periods information as a muon
+        nexus v2 file
+        :param file: the open file to write to
+        :param requested: the number of requested frames
+        :param raw: the number of raw frames
+        :param counts: a float array of the total counts
+        """
+        tmp = file.require_group('raw_data_1')
+        tmp = tmp.require_group('periods')
+
+        tmp.attrs['NX_class'] = 'NXperiod'
+        self.save_int('number', self._dict['number'], tmp)
+        self.save_int_array('sequences', self._dict['sequences'], tmp)
+        self.save_str('labels', self._dict['labels'], tmp)
+        self.save_int_array('type', self._dict['type'], tmp)
+        self.save_int_array('frames_requested', requested, tmp)
+        self.save_int_array('raw_frames', raw, tmp)
+        self.save_int_array('output', self._dict['output'], tmp)
+        self.save_float_array('total_counts', counts, tmp)
+
+
+class Periods(_Periods):
     """
     A class to store the period informtaion for muon data
     """
@@ -18,15 +63,10 @@ class Periods(HDF5):
         :param counts: a float array of the total counts
         :param sequences: an int array of the sequences
         """
-        super().__init__()
-        self._dict['number'] = number
-        self._dict['labels'] = labels
-        self._dict['type'] = p_type
+        super().__init__(number, labels, p_type, output, sequences)
         self._dict['requested'] = requested
         self._dict['raw'] = raw
-        self._dict['output'] = output
         self._dict['counts'] = counts
-        self._dict['sequences'] = sequences
 
     def save_nxs2(self, file):
         """
@@ -34,18 +74,42 @@ class Periods(HDF5):
         nexus v2 file
         :param file: the open file to write to
         """
-        tmp = file.require_group('raw_data_1')
-        tmp = tmp.require_group('periods')
+        super().save_nxs2(file,
+                          self._dict['requested'],
+                          self._dict['raw'],
+                          self._dict['counts'])
 
-        tmp.attrs['NX_class'] = 'NXperiod'
-        self.save_int('number', self._dict['number'], tmp)
-        self.save_int_array('sequences', self._dict['sequences'], tmp)
-        self.save_str('labels', self._dict['labels'], tmp)
-        self.save_int_array('type', self._dict['type'], tmp)
-        self.save_int_array('frames_requested', self._dict['requested'], tmp)
-        self.save_int_array('raw_frames', self._dict['raw'], tmp)
-        self.save_int_array('output', self._dict['output'], tmp)
-        self.save_float_array('total_counts', self._dict['counts'], tmp)
+
+class EventsPeriods(_Periods):
+    """
+    A class to store the period informtaion for muon data
+    """
+    def __init__(self, cache, number, labels, p_type,
+                 output, sequences):
+        """
+        A class to store the period data needed for a muon nexus v2 file
+        :param cache: the events cache
+        :param number: the number of periods
+        :param labels: a string of the period labels
+        :param p_type: an int array representing the type of period
+        :param output: an int array of the outputs
+        :param sequences: an int array of the sequences
+        """
+        super().__init__(number, labels, p_type, output, sequences)
+        self._cache = cache
+
+    def save_nxs2(self, file):
+        """
+        A method to save the periods information as a muon
+        nexus v2 file
+        :param file: the open file to write to
+        """
+        N = np.asarray([self._cache.get_total_frames()], dtype=int)
+        # in the examples the counts always seems to be zero
+        super().save_nxs2(file,
+                          N,
+                          N,
+                          np.asarray([0], dtype=np.double))
 
 
 def read_periods_from_histogram(file):

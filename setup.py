@@ -14,6 +14,10 @@ extensions = [
                 sources=["src/MuonDataLib/cython_ext/event_data.pyx"],
                 ),
               Extension(
+                "MuonDataLib.cython_ext.events_cache",
+                sources=["src/MuonDataLib/cython_ext/events_cache.pyx"],
+                ),
+              Extension(
                 "MuonDataLib.cython_ext.load_events",
                 sources=["src/MuonDataLib/cython_ext/load_events.pyx"],
                 ),

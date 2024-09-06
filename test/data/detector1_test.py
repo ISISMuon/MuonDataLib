@@ -164,7 +164,6 @@ class Detector1Test(TestHelper):
         self.assertEqual(det._dict['time_zero'], 3)
         self.assertEqual(det._dict['first_good'], 4)
         self.assertEqual(det._dict['last_good'], 42)
-        print(det._dict['counts'])
         self.assertArrays(det._dict['counts'], [
                                                 [[1, 1, 1], [1, 1, 1]],
                                                 [[2, 2, 2], [2, 2, 2]],
@@ -213,7 +212,6 @@ class Detector1Test(TestHelper):
 
             # check attributes
             tmp = group['resolution']
-            print(tmp.attrs['units'])
             self.assertEqual(tmp.attrs['units'].decode(), "picoseconds")
 
             tmp = group['raw_time']
