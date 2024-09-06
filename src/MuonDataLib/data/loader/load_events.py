@@ -14,6 +14,12 @@ import numpy as np
 
 
 def load_events(file_name, N):
+    """
+    Load muon event nxs file (ISIS)
+    :param file_name: the name of the file to load
+    :param N: the number of detectors
+    :return: a MuonEventData object
+    """
     with h5py.File(file_name, 'r') as file:
         tmp = file.require_group('raw_data_1')
         run_number = int(tmp['run_number'][()])

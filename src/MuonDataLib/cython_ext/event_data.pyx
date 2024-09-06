@@ -15,19 +15,19 @@ cdef class Events:
     cdef readonly int N_spec
     cdef readonly cnp.int32_t[:] start_index_list
     cdef readonly cnp.int32_t[:] end_index_list
-    #cdef readonly cnp.ndarray[int] frame_start_time
 
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
                  cnp.ndarray[int] start_i,
-                 int N_det): #, frame_time):
+                 int N_det):
         """
         Creates an event object.
         This knows everything needed for the events to create a histogram.
         :param IDs: the detector ID's for the events
         :param times: the time stamps for the events, relative to the start of their frame
         :param start_i: the first event index for each frame
+        :param N_det: the number of detectors
         """
         self.IDs = IDs
         self.N_spec = N_det
@@ -47,7 +47,11 @@ cdef class Events:
                   cache=None):
         """
         Create a matrix of histograms from the event data
-        ;returns: a matrix of histograms, bin edges
+        :param min_time: the start time for the histogram
+        :param max_time: the end time for the histogram
+        :param width: the bin width for the histogram
+        :param cache: the cache of event data histograms
+        :returns: a matrix of histograms, bin edges
         """
         hist, bins = make_histogram(self.times,
                                     self.IDs,
