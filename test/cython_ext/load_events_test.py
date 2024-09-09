@@ -3,6 +3,7 @@ from unittest import mock
 import os
 import time
 from MuonDataLib.cython_ext.load_events import load_data, _load_data
+from MuonDataLib.cython_ext.events_cache import EventsCache
 from MuonDataLib.test_helpers.unit_test import TestHelper
 
 
@@ -55,8 +56,8 @@ class LoadEventDataTest(TestHelper):
 
         events_mock.return_value = mock.Mock()
         load_mock.side_effect = fake_load
-
-        time_taken, events = load_data('test.nxs')
+        cache = EventsCache()
+        time_taken, events = load_data('test.nxs', cache)
         load_mock.assert_called_once_with("test.nxs")
         self.assertGreater(time_taken, 1.)
         events_mock.assert_called_once_with(IDs, times, start_j)

@@ -14,7 +14,8 @@ class EventsTest(TestHelper):
         self._frame_i = np.asarray([0, 3], dtype='int32')
         self._events = Events(self._IDs,
                               self._time,
-                              self._frame_i)
+                              self._frame_i,
+                              2)
 
     def test_get_N_spec(self):
         self.assertEqual(self._events.get_N_spec, 2)

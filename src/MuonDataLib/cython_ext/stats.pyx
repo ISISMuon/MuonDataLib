@@ -36,7 +36,7 @@ cpdef make_histogram(
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
 
-    cdef cnp.ndarray[int, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=int)
+    cdef cnp.ndarray[int, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.int32)
     cdef int[:, :] mat = result
 
     for k in range(len(times)):
