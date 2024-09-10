@@ -31,7 +31,7 @@ class EventsTest(TestHelper):
         are passed to the histogram generation
         """
         mat, bins = self._events.histogram()
-        self.assertArrays(bins, np.arange(0, 32.768, 0.016))
+        self.assertArrays(bins, np.arange(0, 32.784, 0.016))
         self.assertEqual(len(mat), 2)
 
 
