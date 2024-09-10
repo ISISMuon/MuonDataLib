@@ -20,7 +20,7 @@ class EventsCacheTest(TestHelper):
         self.assertTrue(cache.empty())
 
         cache.save(np.asarray([[[1, 2, 3],
-                                [4, 5, 6]]]),
+                                [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
                    1)
 
@@ -36,7 +36,7 @@ class EventsCacheTest(TestHelper):
         self.assertTrue(cache.empty())
 
         cache.save(np.asarray([[[1, 2, 3],
-                                [4, 5, 6]]]),
+                                [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
                    1)
 
