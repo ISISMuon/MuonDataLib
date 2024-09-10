@@ -90,7 +90,7 @@ class RawData(_RawData):
         :param ID: a string identifier for the experiment
         """
         super().__init__(IDF, definition, inst, title, notes,
-                         run_number, duration, raw_frames,
+                         run_number, duration,
                          start_time, end_time, ID)
 
         self._dict['good_frames'] = good_frames

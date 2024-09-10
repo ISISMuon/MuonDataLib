@@ -23,10 +23,6 @@ class EventsTest(TestHelper):
     def test_get_N_events(self):
         self.assertEqual(self._events.get_N_events, 6)
 
-    def test_get_filtered_events(self):
-        self.assertArrays(self._events.get_filtered_events,
-                          self._IDs)
-
     def test_histogram(self):
         """
         We dont check the histograms themselves
@@ -35,7 +31,7 @@ class EventsTest(TestHelper):
         are passed to the histogram generation
         """
         mat, bins = self._events.histogram()
-        self.assertArrays(bins, np.arange(0, 30.5, 0.5))
+        self.assertArrays(bins, np.arange(0, 32.768, 0.016))
         self.assertEqual(len(mat), 2)
 
 
