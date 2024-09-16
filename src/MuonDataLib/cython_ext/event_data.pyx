@@ -60,7 +60,8 @@ cdef class Events:
                                     max_time,
                                     width)
         if cache is not None:
-            cache.save(np.asarray([hist]), bins, len(self.start_index_list))
+            cache.save(np.asarray([hist]), bins,
+                       np.asarray([len(self.start_index_list)], dtype=np.int32))
         return hist, bins
 
     @property

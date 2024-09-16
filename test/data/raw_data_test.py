@@ -66,8 +66,8 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
                             args[10], args[11])
         counts = np.asarray([[[1]]], dtype=np.int32)
         bins = np.asarray([1, 2], dtype=np.double)
-        cache.save(counts, bins, np.asarray([args[8]]))
-        cache.set_good_frames(np.asarray([args[0]]))
+        cache.save(counts, bins, np.asarray([args[8]], dtype=np.int32))
+        cache.set_good_frames(np.asarray([args[0]], dtype=np.int32))
         return raw, args[9], args[10]
 
     def save(self, raw, file):

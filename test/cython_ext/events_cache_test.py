@@ -22,11 +22,11 @@ class EventsCacheTest(TestHelper):
         cache.save(np.asarray([[[1, 2, 3],
                                 [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
-                   1)
+                   np.asarray([1], dtype=np.int32))
 
         self.assertFalse(cache.empty())
-        self.assertEqual(cache.get_total_frames(), 1)
-        self.assertEqual(cache.get_good_frames(), 1)
+        self.assertEqual(np.asarray(cache.get_total_frames()), [1])
+        self.assertEqual(np.asarray(cache.get_good_frames()), [1])
         hist, bins = cache.get_histograms()
         self.assertArrays(hist, [[[1, 2, 3],
                                   [4, 5, 6]]])
@@ -39,7 +39,7 @@ class EventsCacheTest(TestHelper):
         cache.save(np.asarray([[[1, 2, 3],
                                 [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
-                   1)
+                   np.asarray([1], dtype=np.int32))
 
         self.assertFalse(cache.empty())
 
@@ -56,13 +56,13 @@ class EventsCacheTest(TestHelper):
         cache.save(np.asarray([[[1, 2, 3],
                                 [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
-                   10)
-        self.assertEqual(cache.get_good_frames(), 10)
+                   np.asarray([10], dtype=np.int32))
+        self.assertEqual(np.asarray(cache.get_good_frames()), [10])
 
-        cache.set_good_frames(5)
+        cache.set_good_frames(np.asarray([5], dtype=np.int32))
 
-        self.assertEqual(cache.get_good_frames(), 5)
-        self.assertEqual(cache.get_total_frames(), 10)
+        self.assertEqual(np.asarray(cache.get_good_frames()), [5])
+        self.assertEqual(np.asarray(cache.get_total_frames()), [10])
 
     def test_set_too_many_good_frames(self):
         cache = EventsCache()
@@ -71,10 +71,10 @@ class EventsCacheTest(TestHelper):
         cache.save(np.asarray([[[1, 2, 3],
                                 [4, 5, 6]]], dtype=np.int32),
                    np.asarray([7, 8, 9], dtype=np.double),
-                   1)
+                   np.asarray([1], dtype=np.int32))
 
         with self.assertRaises(RuntimeError):
-            cache.set_good_frames(6)
+            cache.set_good_frames(np.asarray([1, 2], dtype=np.int32))
 
 
 if __name__ == '__main__':

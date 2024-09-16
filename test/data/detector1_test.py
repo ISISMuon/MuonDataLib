@@ -79,7 +79,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
                                   args[2], args[4],
                                   args[5], args[6],
                                   args[7])
-        cache.save(counts, bins, 1)
+        cache.save(counts, bins, np.asarray([1], dtype=np.int32))
         return events
 
     def create_multiperiod_data(self):
@@ -91,7 +91,8 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
                                   args[2], args[4],
                                   args[5], args[6],
                                   args[7])
-        cache.save(counts, bins, 1)
+        cache.save(counts, bins,
+                   np.asarray([1], dtype=np.int32))
         return events
 
     def setUp(self):
