@@ -1,122 +1,89 @@
-from MuonDataLib.data.raw_data import (RawData,
-                                       read_raw_data_from_histogram)
+from MuonDataLib.data.raw_data import (_RawData,
+                                       RawData,
+                                       EventsRawData)
 
 from MuonDataLib.test_helpers.unit_test import TestHelper
-import h5py
+from MuonDataLib.test_helpers.raw_data import RawDataTestTemplate
+from MuonDataLib.cython_ext.events_cache import EventsCache
 import unittest
-import os
-import datetime
+import numpy as np
 
 
-FILENAME = 'raw_data_test.nxs'
+class _RawDataTest(RawDataTestTemplate, TestHelper):
+
+    def create_data(self):
+        args = super().create_data()
+        self.good_frames = args[0]
+        self.raw_frames = args[8]
+
+        return (_RawData(args[1], args[2],
+                         args[3], args[4],
+                         args[5], args[6],
+                         args[7], args[9],
+                         args[10], args[11]),
+                args[9], args[10])
+
+    def save(self, raw, file):
+        raw.save_nxs2(file, self.good_frames,
+                      self.raw_frames)
+
+    def setUp(self):
+        self.filename = '_raw_data.nxs'
 
 
-def create_data():
-    start = datetime.datetime(2018, 12, 24, 13, 32, 1)
-    end = datetime.datetime(2018, 12, 24, 18, 11, 52)
+class RawDataTest(RawDataTestTemplate, TestHelper):
 
-    return (RawData(10, 1, 'pulsed', 'python', 'raw data test',
-                    'testing', 42, 1024.0, 51, start, end, '19'),
-            start, end)
+    def create_data(self):
+        args = super().create_data()
+        return RawData(*args), args[9], args[10]
 
+    def save(self, raw, file):
+        raw.save_nxs2(file)
 
-class RawDataTest(TestHelper):
+    def setUp(self):
+        self.filename = '_raw_data.nxs'
 
     def test_raw_data_object_stores_correct_info(self):
         """
         Check the class stores data correctly
         """
-        raw, start, end = create_data()
+        super().test_raw_data_object_stores_correct_info()
 
-        self.assertEqual(raw._dict['good_frames'], 10)
-        self.assertEqual(raw._dict['IDF'], 1)
-        self.assertEqual(raw._dict['def'], 'pulsed')
-        self.assertEqual(raw._dict['inst'], 'python')
-        self.assertEqual(raw._dict['title'], 'raw data test')
-        self.assertEqual(raw._dict['notes'], 'testing')
-        self.assertEqual(raw._dict['run_number'], 42)
-        self.assertAlmostEqual(raw._dict['duration'], 1024.0, 3)
-        self.assertEqual(raw._dict['raw_frames'], 51)
-        self.assertEqual(raw._dict['start'], start)
-        self.assertEqual(raw._dict['end'], end)
+        self.assertEqual(self.raw._dict['good_frames'], 10)
+        self.assertEqual(self.raw._dict['raw_frames'], 51)
 
-    def test_raw_data_object_saves_correct_info(self):
+
+class EventsRawDataTest(RawDataTestTemplate, TestHelper):
+
+    def create_data(self):
+        args = super().create_data()
+        cache = EventsCache()
+        raw = EventsRawData(cache,
+                            args[1], args[2],
+                            args[3], args[4],
+                            args[5], args[6],
+                            args[7], args[9],
+                            args[10], args[11])
+        counts = np.asarray([[[1]]], dtype=np.int32)
+        bins = np.asarray([1, 2], dtype=np.double)
+        cache.save(counts, bins, args[8])
+        cache.set_good_frames(args[0])
+        return raw, args[9], args[10]
+
+    def save(self, raw, file):
+        raw.save_nxs2(file)
+
+    def setUp(self):
+        self.filename = 'events_raw_data.nxs'
+
+    def test_raw_data_object_stores_correct_info(self):
         """
-        Test that the class can save to a nexus file
-        correctly
+        Check the class stores data correctly
         """
-        raw, _, _ = create_data()
+        super().test_raw_data_object_stores_correct_info()
 
-        with h5py.File(FILENAME, 'w') as file:
-            raw.save_nxs2(file)
-
-        with h5py.File(FILENAME, 'r') as file:
-            keys = self.compare_keys(file, ['raw_data_1'])
-            group = file[keys[0]]
-            self.assertEqual(group.attrs['NX_class'], 'NXentry')
-
-            keys = self.compare_keys(group, ['good_frames',
-                                             'IDF_version',
-                                             'definition',
-                                             'name',
-                                             'title',
-                                             'notes',
-                                             'run_number',
-                                             'duration',
-                                             'raw_frames',
-                                             'start_time',
-                                             'end_time',
-                                             'experiment_identifier',
-                                             'instrument'])
-
-            self.assertArrays(group['good_frames'], [10])
-            self.assertArrays(group['IDF_version'], [1])
-            self.assertString(group, 'definition', 'pulsed')
-            self.assertString(group, 'name', 'python')
-            self.assertString(group, 'title', 'raw data test')
-            self.assertString(group, 'notes', 'testing')
-            self.assertArrays(group['run_number'], [42])
-            self.assertArrays(group['duration'], [1024.0])
-            self.assertArrays(group['raw_frames'], [51])
-            self.assertString(group, 'start_time', '2018-12-24T13:32:01')
-            self.assertString(group, 'end_time', '2018-12-24T18:11:52')
-
-            group = group['instrument']
-            self.compare_keys(group, ['name'])
-            self.assertString(group, 'name', 'python')
-
-        os.remove(FILENAME)
-
-    def test_load_raw_data_gets_correct_info(self):
-        """
-        Check load method gets the correct information.
-        The above tests prove that the information
-        stored is correct and that it is correctly
-        written to file.
-        """
-        raw, start, end = create_data()
-
-        with h5py.File(FILENAME, 'w') as file:
-            raw.save_nxs2(file)
-
-        del raw
-
-        with h5py.File(FILENAME, 'r') as file:
-            load_raw = read_raw_data_from_histogram(file)
-
-        self.assertEqual(load_raw._dict['good_frames'], 10)
-        self.assertEqual(load_raw._dict['IDF'], 1)
-        self.assertEqual(load_raw._dict['def'], 'pulsed')
-        self.assertEqual(load_raw._dict['inst'], 'python')
-        self.assertEqual(load_raw._dict['title'], 'raw data test')
-        self.assertEqual(load_raw._dict['notes'], 'testing')
-        self.assertEqual(load_raw._dict['run_number'], 42)
-        self.assertAlmostEqual(load_raw._dict['duration'], 1024.0, 3)
-        self.assertEqual(load_raw._dict['raw_frames'], 51)
-        self.assertEqual(load_raw._dict['start'], start)
-        self.assertEqual(load_raw._dict['end'], end)
-
-        os.remove(FILENAME)
+        self.assertEqual(self.raw._cache.get_good_frames(), 10)
+        self.assertEqual(self.raw._cache.get_total_frames(), 51)
 
 
 if __name__ == '__main__':

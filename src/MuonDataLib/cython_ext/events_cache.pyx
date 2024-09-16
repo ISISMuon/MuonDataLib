@@ -11,6 +11,7 @@ cdef class EventsCache:
     cdef readonly int[:, :, :] histograms
     cdef readonly double[:] bins
     cdef readonly int N_frames
+    cdef readonly int N_good_frames
 
     def __init__(self):
         """
@@ -25,6 +26,7 @@ cdef class EventsCache:
         self.histograms = None
         self.bins = None
         self.N_frames = 0
+        self.N_good_frames = 0
 
     def save(self,
             int[:, :, :] histograms,
@@ -39,6 +41,7 @@ cdef class EventsCache:
         self.histograms = histograms
         self.bins = bins
         self.N_frames = N_frames
+        self.N_good_frames = N_frames
 
     def get_histograms(self):
         """
@@ -55,6 +58,24 @@ cdef class EventsCache:
         if self.empty():
             raise RuntimeError("The cache is empty, cannot get frames")
         return self.N_frames
+
+    def set_good_frames(self, N):
+        """
+        :param N: the number of good frames
+        """
+        if N > self.N_good_frames:
+            raise RuntimeError(f"The number of good frames {N} "
+                               "cannot be larger than the number "
+                               "of frames {self.N_frames}")
+        self.N_good_frames = N
+
+    def get_good_frames(self):
+        """
+        :return: the number of good frames
+        """
+        if self.empty():
+            raise RuntimeError("The cache is empty, cannot get frames")
+        return self.N_good_frames
 
     def empty(self):
         """

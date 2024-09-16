@@ -26,6 +26,7 @@ class EventsCacheTest(TestHelper):
 
         self.assertFalse(cache.empty())
         self.assertEqual(cache.get_total_frames(), 1)
+        self.assertEqual(cache.get_good_frames(), 1)
         hist, bins = cache.get_histograms()
         self.assertArrays(hist, [[[1, 2, 3],
                                   [4, 5, 6]]])
@@ -48,6 +49,32 @@ class EventsCacheTest(TestHelper):
             cache.get_histograms()
         with self.assertRaises(RuntimeError):
             cache.get_total_frames()
+
+    def test_set_good_frames(self):
+        cache = EventsCache()
+        self.assertTrue(cache.empty())
+        cache.save(np.asarray([[[1, 2, 3],
+                                [4, 5, 6]]], dtype=np.int32),
+                   np.asarray([7, 8, 9], dtype=np.double),
+                   10)
+        self.assertEqual(cache.get_good_frames(), 10)
+
+        cache.set_good_frames(5)
+
+        self.assertEqual(cache.get_good_frames(), 5)
+        self.assertEqual(cache.get_total_frames(), 10)
+
+    def test_set_too_many_good_frames(self):
+        cache = EventsCache()
+        self.assertTrue(cache.empty())
+
+        cache.save(np.asarray([[[1, 2, 3],
+                                [4, 5, 6]]], dtype=np.int32),
+                   np.asarray([7, 8, 9], dtype=np.double),
+                   1)
+
+        with self.assertRaises(RuntimeError):
+            cache.set_good_frames(6)
 
 
 if __name__ == '__main__':
