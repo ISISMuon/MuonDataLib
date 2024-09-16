@@ -66,8 +66,8 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
                             args[10], args[11])
         counts = np.asarray([[[1]]], dtype=np.int32)
         bins = np.asarray([1, 2], dtype=np.double)
-        cache.save(counts, bins, args[8])
-        cache.set_good_frames(args[0])
+        cache.save(counts, bins, np.asarray([args[8]]))
+        cache.set_good_frames(np.asarray([args[0]]))
         return raw, args[9], args[10]
 
     def save(self, raw, file):
@@ -82,8 +82,10 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
         """
         super().test_raw_data_object_stores_correct_info()
 
-        self.assertEqual(self.raw._cache.get_good_frames(), 10)
-        self.assertEqual(self.raw._cache.get_total_frames(), 51)
+        good = np.asarray(self.raw._cache.get_good_frames())
+        self.assertEqual(good, 10)
+        total = np.asarray(self.raw._cache.get_total_frames())
+        self.assertEqual(total, 51)
 
 
 if __name__ == '__main__':

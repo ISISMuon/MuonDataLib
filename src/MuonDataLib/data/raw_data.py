@@ -140,8 +140,8 @@ class EventsRawData(_RawData):
         :param file: the open file to write to.
         """
         super().save_nxs2(file,
-                          self._cache.get_good_frames(),
-                          self._cache.get_total_frames())
+                          self._cache.get_good_frames()[0],
+                          self._cache.get_total_frames()[0])
 
 
 def read_raw_data_from_histogram(file):

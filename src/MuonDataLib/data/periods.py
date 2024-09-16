@@ -43,7 +43,7 @@ class _Periods(HDF5):
         self.save_int_array('frames_requested', requested, tmp)
         self.save_int_array('raw_frames', raw, tmp)
         self.save_int_array('output', self._dict['output'], tmp)
-        self.save_float_array('total_counts', counts, tmp)
+        self.save_int_array('total_counts', counts, tmp)
 
 
 class Periods(_Periods):
@@ -104,12 +104,18 @@ class EventsPeriods(_Periods):
         nexus v2 file
         :param file: the open file to write to
         """
-        N = np.asarray([self._cache.get_total_frames()], dtype=int)
         # in the examples the counts always seems to be zero
+        # but will set it to be the sum for the period
+        counts = []
+        hist, _ = self._cache.get_histograms()
+        for k in range(self._dict['number']):
+            counts.append(np.sum(hist[k]))
+        counts = np.asarray(counts, dtype=np.int32)
+
         super().save_nxs2(file,
-                          N,
-                          N,
-                          np.asarray([0], dtype=np.double))
+                          np.asarray(self._cache.get_requested_frames()),
+                          np.asarray(self._cache.get_total_frames()),
+                          counts)
 
 
 def read_periods_from_histogram(file):

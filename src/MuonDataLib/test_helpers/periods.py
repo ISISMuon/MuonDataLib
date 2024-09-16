@@ -16,11 +16,11 @@ class PeriodsTestTemplate(object):
     -------------------------------------------------
     """
     def create_single_period_data(self):
-        return 1, 'period 1', [1], [500], [1000], [1], [1.23], [2]
+        return 1, 'period 1', [1], [500], [1000], [1], [12], [2]
 
     def create_multiperiod_data(self):
         return (2, 'period 1; period 2', [1, 2], [500, 400],
-                [1000, 500], [1, 0], [1.23, 4.56], [42, 42])
+                [1000, 500], [1, 0], [12, 45], [42, 42])
 
     def save(self, periods, file):
         raise NotImplementedError()
@@ -66,7 +66,7 @@ class PeriodsTestTemplate(object):
             self.assertArrays(group['raw_frames'], [1000])
             self.assertArrays(group['output'], [1])
             self.assertArrays(group['sequences'], [2])
-            self.assertArrays(group['total_counts'], [1.23])
+            self.assertArrays(group['total_counts'], [12])
 
         os.remove(self.filename)
 
@@ -93,7 +93,7 @@ class PeriodsTestTemplate(object):
         self.assertArrays(load_period._dict['raw'], [1000])
         self.assertArrays(load_period._dict['output'], [1])
         self.assertArrays(load_period._dict['sequences'], [2])
-        self.assertArrays(load_period._dict['counts'], [1.23])
+        self.assertArrays(load_period._dict['counts'], [12])
 
         os.remove(self.filename)
 
@@ -135,11 +135,11 @@ class PeriodsTestTemplate(object):
             self.assertArrays(group['raw_frames'], [1000, 500])
             self.assertArrays(group['output'], [1, 0])
             self.assertArrays(group['sequences'], [42, 42])
-            self.assertArrays(group['total_counts'], [1.23, 4.56])
+            self.assertArrays(group['total_counts'], [12, 45])
 
         os.remove(self.filename)
 
-    def test_load_detector1_gets_correct_info_multiperiod(self):
+    def test_load_period_gets_correct_info_multiperiod(self):
         """
         Check load method gets the correct information.
         The above tests prove that the information
@@ -162,6 +162,6 @@ class PeriodsTestTemplate(object):
         self.assertArrays(load_period._dict['raw'], [1000, 500])
         self.assertArrays(load_period._dict['output'], [1, 0])
         self.assertArrays(load_period._dict['sequences'], [42, 42])
-        self.assertArrays(load_period._dict['counts'], [1.23, 4.56])
+        self.assertArrays(load_period._dict['counts'], [12, 45])
 
         os.remove(self.filename)

@@ -23,7 +23,7 @@ class _PeriodsTest(PeriodsTestTemplate, TestHelper):
     def create_multiperiod_data(self):
         args = super().create_multiperiod_data()
         self.requested = args[3]
-        self.raw = np.asarray(args[4], dtype=np.double)
+        self.raw = args[4]
         self.counts = np.asarray(args[6], dtype=np.int32)
         return _Periods(args[0], args[1], args[2],
                         args[5], args[7])
@@ -33,7 +33,7 @@ class _PeriodsTest(PeriodsTestTemplate, TestHelper):
                          self.raw, self.counts)
 
     def setUp(self):
-        self.filename = '_periods.nxs'
+        self.filename = '_test_periods.nxs'
 
 
 class PeriodsTest(PeriodsTestTemplate, TestHelper):
@@ -47,7 +47,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
         return Periods(*args)
 
     def setUp(self):
-        self.filename = 'periods.nxs'
+        self.filename = 'test_periods.nxs'
 
     def save(self, period, file):
         period.save_nxs2(file)
@@ -60,7 +60,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
 
         self.assertArrays(self.period._dict['requested'], [500])
         self.assertArrays(self.period._dict['raw'], [1000])
-        self.assertArrays(self.period._dict['counts'], [1.23])
+        self.assertArrays(self.period._dict['counts'], [12])
 
     def test_periods_object_stores_correct_info_multiperiod(self):
         """
@@ -70,7 +70,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
 
         self.assertArrays(self.period._dict['requested'], [500, 400])
         self.assertArrays(self.period._dict['raw'], [1000, 500])
-        self.assertArrays(self.period._dict['counts'], [1.23, 4.56])
+        self.assertArrays(self.period._dict['counts'], [12, 45])
 
 
 class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
@@ -82,7 +82,11 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
                                args[0], args[1],
                                args[2], args[5],
                                args[7])
-        cache.save(args[6], args[4], args[3])
+        cache.save(np.asarray([[[2, 3], [5, 2]]], dtype=np.int32),
+                   np.asarray([3.2, 5.6], dtype=np.double),
+                   np.asarray(args[4], dtype=np.int32))
+
+        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
         return events
 
     def create_multiperiod_data(self):
@@ -92,40 +96,18 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
                                args[0], args[1],
                                args[2], args[5],
                                args[7])
-        cache.save(args[6], args[4], args[3])
+        cache.save(np.asarray([[[2, 3], [5, 2]],
+                               [[20, 21], [1, 3]]], dtype=np.int32),
+                   np.asarray([3.2, 5.6], dtype=np.double),
+                   np.asarray(args[4], dtype=np.int32))
+        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
         return events
 
     def save(self, period, file):
         period.save_nxs2(file)
 
     def setUp(self):
-        self.filename = 'events_periods.nxs'
-
-    def test_periods_object_stores_correct_info_single_period(self):
-        """
-        Check the class stores data correctly
-        """
-        super().test_periods_object_stores_correct_info_single_period()
-
-        counts, bins = self.period._cache.get_histograms()
-        requested = self.period._cache.get_total_frames()
-
-        self.assertArrays(requested, [500])
-        self.assertArrays(bins, [1000])
-        self.assertArrays(counts, [1.23])
-
-    def test_periods_object_stores_correct_info_multiperiod(self):
-        """
-        Check the class stores data correctly
-        """
-        super().test_periods_object_stores_correct_info_multiperiod()
-
-        counts, bins = self.period._cache.get_histograms()
-        requested = self.period._cache.get_total_frames()
-
-        self.assertArrays(requested, [500, 400])
-        self.assertArrays(bins, [1000, 500])
-        self.assertArrays(counts, [1.23, 4.56])
+        self.filename = 'test_events_periods.nxs'
 
 
 if __name__ == '__main__':
