@@ -21,7 +21,7 @@ class RawDataTestTemplate(object):
         end = datetime.datetime(2018, 12, 24, 18, 11, 52)
 
         return (10, 1, 'pulsed', 'python', 'raw data test',
-                    'testing', 42, 1024.0, 51, start, end, '19')
+                'testing', 42, 1024.0, 51, start, end, '19')
 
     def save(self, raw, file):
         raise NotImplementedError()
@@ -124,7 +124,3 @@ class RawDataTestTemplate(object):
         self.assertEqual(load_raw._dict['end'], end)
 
         os.remove(self.filename)
-
-
-if __name__ == '__main__':
-    unittest.main()
