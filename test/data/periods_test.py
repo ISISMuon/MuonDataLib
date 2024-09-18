@@ -24,7 +24,7 @@ class _PeriodsTest(PeriodsTestTemplate, TestHelper):
         args = super().create_multiperiod_data()
         self.requested = args[3]
         self.raw = args[4]
-        self.counts = np.asarray(args[6], dtype=np.int32)
+        self.counts = np.asarray(args[6], dtype=np.double)
         return _Periods(args[0], args[1], args[2],
                         args[5], args[7])
 
@@ -60,7 +60,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
 
         self.assertArrays(self.period._dict['requested'], [500])
         self.assertArrays(self.period._dict['raw'], [1000])
-        self.assertArrays(self.period._dict['counts'], [12])
+        self.assertArrays(self.period._dict['total_counts'], [1.2e-5])
 
     def test_periods_object_stores_correct_info_multiperiod(self):
         """
@@ -70,7 +70,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
 
         self.assertArrays(self.period._dict['requested'], [500, 400])
         self.assertArrays(self.period._dict['raw'], [1000, 500])
-        self.assertArrays(self.period._dict['counts'], [12, 45])
+        self.assertArrays(self.period._dict['total_counts'], [1.2e-5, 4.5e-5])
 
 
 class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):

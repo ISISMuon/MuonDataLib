@@ -43,7 +43,7 @@ class _Periods(HDF5):
         self.save_int_array('frames_requested', requested, tmp)
         self.save_int_array('raw_frames', raw, tmp)
         self.save_int_array('output', self._dict['output'], tmp)
-        self.save_int_array('total_counts', counts, tmp)
+        self.save_float_array('total_counts', counts, tmp)
 
 
 class Periods(_Periods):
@@ -66,7 +66,7 @@ class Periods(_Periods):
         super().__init__(number, labels, p_type, output, sequences)
         self._dict['requested'] = requested
         self._dict['raw'] = raw
-        self._dict['counts'] = counts
+        self._dict['total_counts'] = counts
 
     def save_nxs2(self, file):
         """
@@ -77,7 +77,7 @@ class Periods(_Periods):
         super().save_nxs2(file,
                           self._dict['requested'],
                           self._dict['raw'],
-                          self._dict['counts'])
+                          self._dict['total_counts'])
 
 
 class EventsPeriods(_Periods):
@@ -106,11 +106,12 @@ class EventsPeriods(_Periods):
         """
         # in the examples the counts always seems to be zero
         # but will set it to be the sum for the period
-        counts = []
+
         hist, _ = self._cache.get_histograms()
+        counts = np.zeros(self._dict['number'], dtype=np.double)
         for k in range(self._dict['number']):
-            counts.append(np.sum(hist[k]))
-        counts = np.asarray(counts, dtype=np.int32)
+            # store MeV
+            counts[k] = float(np.sum(hist[k]))/1.e6
 
         super().save_nxs2(file,
                           np.asarray(self._cache.get_requested_frames()),
