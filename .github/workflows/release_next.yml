@@ -22,8 +22,9 @@ jobs:
           fetch-depth: "0"
       - name: Update version on merge
         run:  |
-            python tools/version.py "minor"
+            ls
             pipx run cibuildwheel --platform linux --print-build-identifiers statsmodels/
+            python tools/version.py "minor"
       - name: Store changes
         uses: actions/upload-artifact@v3
         with:
