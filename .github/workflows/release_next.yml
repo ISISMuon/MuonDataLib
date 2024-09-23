@@ -109,7 +109,7 @@ jobs:
         if: ${{ github.event.push.head.ref }} == 'release-next'
         uses: actions/checkout@v4
         with:
-          fetch-depth: "0"
+          fetch-depth: "1"
           repository: ${{github.event.push.head.repo.full_name }}
           ref: ${{ github.event.push.head.ref }}
 
