@@ -19,7 +19,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: "0"
+          fetch-depth: "1"
       - name: Update version on merge
         run:  |
             python tools/version.py "minor"
@@ -51,7 +51,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.21.1
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{11}-manylinux_x86_64 cp3{11}-win_amd64 cp3{11}-macosx_arm64
+          CIBW_BUILD: cp3{12}-manylinux_x86_64 cp3{12}-win_amd64 cp3{12}-macosx_arm64
 
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
