@@ -22,8 +22,6 @@ jobs:
           fetch-depth: "0"
       - name: Update version on merge
         run:  |
-            ls
-            pipx run cibuildwheel --platform linux --print-build-identifiers statsmodels/
             python tools/version.py "minor"
       - name: Store changes
         uses: actions/upload-artifact@v3
@@ -50,7 +48,7 @@ jobs:
           name: pyproject
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.8.0
+        uses: pypa/cibuildwheel@v2.21.1
         env:
           # List of platforms to build on (incl. Python version)
           CIBW_BUILD: cp3{11}-manylinux_x86_64 cp3{11}-win_amd64 cp3{11}-macosx_arm64
