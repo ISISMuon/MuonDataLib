@@ -3,7 +3,10 @@ name: Build and upload release to PyPI
 on:
   push:
     branches:
-      - 'release-next'
+    - 'main'
+  pull_request:
+    branches:
+      - 'main'
 
 permissions:
   contents: write
