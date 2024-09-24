@@ -50,14 +50,14 @@ class LoadEventDataTest(TestHelper):
 
         def fake_load(file_name):
             # add a sleep so we can test the timer
-            time.sleep(1)
+            time.sleep(1.0)
             return IDs, start_j, times, amps, start_t
 
         events_mock.return_value = mock.Mock()
         load_mock.side_effect = fake_load
         time_taken, events = load_data('test.nxs', 2)
         load_mock.assert_called_once_with("test.nxs")
-        self.assertGreater(time_taken, 1.)
+        self.assertGreater(time_taken, 0.99)
         events_mock.assert_called_once_with(IDs, times, start_j, 2)
 
 

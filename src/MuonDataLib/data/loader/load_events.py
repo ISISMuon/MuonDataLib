@@ -26,6 +26,7 @@ def load_events(file_name, N):
         start_time = convert_date(tmp['start_time'][()].decode().split('+')[0])
         end_time = convert_date(tmp['end_time'][()].decode().split('+')[0])
 
+    print(start_time, end_time, run_number)
     cache = EventsCache()
     _, events = load_data(file_name, N)
 
@@ -67,7 +68,7 @@ def load_events(file_name, N):
 
     detector1 = Det1(cache,
                      0.016,
-                     np.arange(1, N + 1),
+                     np.arange(1, N + 1, dtype=np.int32),
                      'HIFI test',
                      3,
                      9*0.016,
