@@ -39,15 +39,16 @@ def _load_data(file_name):
 
         return IDs, start_j, times, amps, start_t
 
-def load_data(file_name):
+def load_data(file_name, N_det):
         """
         Loads the data from an event nxs file
         :param file_name: the name of the event nxs file to load
+        :param N_det: the number of detectors
         :return: the time to run this method, the total number of events
         """
         start = time.time()
         IDs, frames, times, amps, frame_times = _load_data(file_name)
-        events = Events(IDs, times, frames)
+        events = Events(IDs, times, frames, N_det)
         return time.time() - start, events
 
 

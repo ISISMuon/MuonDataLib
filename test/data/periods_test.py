@@ -1,165 +1,113 @@
-from MuonDataLib.data.periods import (Periods,
-                                      read_periods_from_histogram)
+from MuonDataLib.data.periods import (_Periods,
+                                      Periods,
+                                      EventsPeriods)
 
 from MuonDataLib.test_helpers.unit_test import TestHelper
-import h5py
+from MuonDataLib.test_helpers.periods import PeriodsTestTemplate
+from MuonDataLib.cython_ext.events_cache import EventsCache
+
 import unittest
-import os
+import numpy as np
 
 
-FILENAME = 'periods_test.nxs'
+class _PeriodsTest(PeriodsTestTemplate, TestHelper):
+
+    def create_single_period_data(self):
+        args = super().create_single_period_data()
+        self.requested = args[3]
+        self.raw = args[4]
+        self.counts = args[6]
+        return _Periods(args[0], args[1], args[2],
+                        args[5], args[7])
+
+    def create_multiperiod_data(self):
+        args = super().create_multiperiod_data()
+        self.requested = args[3]
+        self.raw = args[4]
+        self.counts = np.asarray(args[6], dtype=np.double)
+        return _Periods(args[0], args[1], args[2],
+                        args[5], args[7])
+
+    def save(self, period, file):
+        period.save_nxs2(file, self.requested,
+                         self.raw, self.counts)
+
+    def setUp(self):
+        self.filename = '_test_periods.nxs'
 
 
-def create_single_period_data():
-    return Periods(1, 'period 1', [1], [500], [1000], [1], [1.23], [2])
+class PeriodsTest(PeriodsTestTemplate, TestHelper):
 
+    def create_single_period_data(self):
+        args = super().create_single_period_data()
+        return Periods(*args)
 
-def create_multiperiod_data():
-    return Periods(2, 'period 1; period 2', [1, 2], [500, 400],
-                   [1000, 500], [1, 0], [1.23, 4.56], [42, 42])
+    def create_multiperiod_data(self):
+        args = super().create_multiperiod_data()
+        return Periods(*args)
 
+    def setUp(self):
+        self.filename = 'test_periods.nxs'
 
-class PeriodsTest(TestHelper):
+    def save(self, period, file):
+        period.save_nxs2(file)
 
     def test_periods_object_stores_correct_info_single_period(self):
         """
         Check the class stores data correctly
         """
-        period = create_single_period_data()
+        super().test_periods_object_stores_correct_info_single_period()
 
-        self.assertEqual(period._dict['number'], 1)
-        self.assertEqual(period._dict['labels'], 'period 1')
-        self.assertArrays(period._dict['type'], [1])
-        self.assertArrays(period._dict['requested'], [500])
-        self.assertArrays(period._dict['raw'], [1000])
-        self.assertArrays(period._dict['output'], [1])
-        self.assertArrays(period._dict['sequences'], [2])
-        self.assertArrays(period._dict['counts'], [1.23])
-
-    def test_periods_object_saves_correct_info_single_period(self):
-        """
-        Test that the class can save to a nexus file
-        correctly
-        """
-        periods = create_single_period_data()
-
-        with h5py.File(FILENAME, 'w') as file:
-            periods.save_nxs2(file)
-
-        with h5py.File(FILENAME, 'r') as file:
-            keys = self.compare_keys(file, ['raw_data_1'])
-            group = file[keys[0]]
-            keys = self.compare_keys(group, ['periods'])
-            group = group[keys[0]]
-            self.assertEqual(group.attrs['NX_class'], 'NXperiod')
-
-            self.assertEqual(group['number'][0], 1)
-            self.assertString(group, 'labels', 'period 1')
-            self.assertArrays(group['type'], [1])
-            self.assertArrays(group['frames_requested'], [500])
-            self.assertArrays(group['raw_frames'], [1000])
-            self.assertArrays(group['output'], [1])
-            self.assertArrays(group['sequences'], [2])
-            self.assertArrays(group['total_counts'], [1.23])
-
-        os.remove(FILENAME)
-
-    def test_load_periods_gets_correct_info_single_period(self):
-        """
-        Check load method gets the correct information.
-        The above tests prove that the information
-        stored is correct and that it is correctly
-        written to file.
-        """
-        period = create_single_period_data()
-
-        with h5py.File(FILENAME, 'w') as file:
-            period.save_nxs2(file)
-        del period
-
-        with h5py.File(FILENAME, 'r') as file:
-            load_period = read_periods_from_histogram(file)
-
-        self.assertEqual(load_period._dict['number'], 1)
-        self.assertEqual(load_period._dict['labels'], 'period 1')
-        self.assertArrays(load_period._dict['type'], [1])
-        self.assertArrays(load_period._dict['requested'], [500])
-        self.assertArrays(load_period._dict['raw'], [1000])
-        self.assertArrays(load_period._dict['output'], [1])
-        self.assertArrays(load_period._dict['sequences'], [2])
-        self.assertArrays(load_period._dict['counts'], [1.23])
-
-        os.remove(FILENAME)
+        self.assertArrays(self.period._dict['requested'], [500])
+        self.assertArrays(self.period._dict['raw'], [1000])
+        self.assertArrays(self.period._dict['total_counts'], [1.2e-5])
 
     def test_periods_object_stores_correct_info_multiperiod(self):
         """
         Check the class stores data correctly
         """
-        period = create_multiperiod_data()
+        super().test_periods_object_stores_correct_info_multiperiod()
 
-        self.assertEqual(period._dict['number'], 2)
-        self.assertEqual(period._dict['labels'], 'period 1; period 2')
-        self.assertArrays(period._dict['type'], [1, 2])
-        self.assertArrays(period._dict['requested'], [500, 400])
-        self.assertArrays(period._dict['raw'], [1000, 500])
-        self.assertArrays(period._dict['output'], [1, 0])
-        self.assertArrays(period._dict['sequences'], [42, 42])
-        self.assertArrays(period._dict['counts'], [1.23, 4.56])
+        self.assertArrays(self.period._dict['requested'], [500, 400])
+        self.assertArrays(self.period._dict['raw'], [1000, 500])
+        self.assertArrays(self.period._dict['total_counts'], [1.2e-5, 4.5e-5])
 
-    def test_periods_object_saves_correct_info_multiperiod(self):
-        """
-        Test that the class can save to a nexus file
-        correctly
-        """
-        period = create_multiperiod_data()
 
-        with h5py.File(FILENAME, 'w') as file:
-            period.save_nxs2(file)
+class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
 
-        with h5py.File(FILENAME, 'r') as file:
-            keys = self.compare_keys(file, ['raw_data_1'])
-            group = file[keys[0]]
-            keys = self.compare_keys(group, ['periods'])
-            group = group[keys[0]]
-            self.assertEqual(group.attrs['NX_class'], 'NXperiod')
+    def create_single_period_data(self):
+        args = super().create_single_period_data()
+        cache = EventsCache()
+        events = EventsPeriods(cache,
+                               args[0], args[1],
+                               args[2], args[5],
+                               args[7])
+        cache.save(np.asarray([[[2, 3], [5, 2]]], dtype=np.int32),
+                   np.asarray([3.2, 5.6], dtype=np.double),
+                   np.asarray(args[4], dtype=np.int32))
 
-            self.assertEqual(group['number'][0], 2)
-            self.assertEqual(group['labels'][0].decode(), 'period 1; period 2')
-            self.assertArrays(group['type'], [1, 2])
-            self.assertArrays(group['frames_requested'], [500, 400])
-            self.assertArrays(group['raw_frames'], [1000, 500])
-            self.assertArrays(group['output'], [1, 0])
-            self.assertArrays(group['sequences'], [42, 42])
-            self.assertArrays(group['total_counts'], [1.23, 4.56])
+        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
+        return events
 
-        os.remove(FILENAME)
+    def create_multiperiod_data(self):
+        args = super().create_multiperiod_data()
+        cache = EventsCache()
+        events = EventsPeriods(cache,
+                               args[0], args[1],
+                               args[2], args[5],
+                               args[7])
+        cache.save(np.asarray([[[2, 3], [5, 2]],
+                               [[20, 21], [1, 3]]], dtype=np.int32),
+                   np.asarray([3.2, 5.6], dtype=np.double),
+                   np.asarray(args[4], dtype=np.int32))
+        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
+        return events
 
-    def test_load_detector1_gets_correct_info_multiperiod(self):
-        """
-        Check load method gets the correct information.
-        The above tests prove that the information
-        stored is correct and that it is correctly
-        written to file.
-        """
-        period = create_multiperiod_data()
+    def save(self, period, file):
+        period.save_nxs2(file)
 
-        with h5py.File(FILENAME, 'w') as file:
-            period.save_nxs2(file)
-        del period
-
-        with h5py.File(FILENAME, 'r') as file:
-            load_period = read_periods_from_histogram(file)
-
-        self.assertEqual(load_period._dict['number'], 2)
-        self.assertEqual(load_period._dict['labels'], 'period 1; period 2')
-        self.assertArrays(load_period._dict['type'], [1, 2])
-        self.assertArrays(load_period._dict['requested'], [500, 400])
-        self.assertArrays(load_period._dict['raw'], [1000, 500])
-        self.assertArrays(load_period._dict['output'], [1, 0])
-        self.assertArrays(load_period._dict['sequences'], [42, 42])
-        self.assertArrays(load_period._dict['counts'], [1.23, 4.56])
-
-        os.remove(FILENAME)
+    def setUp(self):
+        self.filename = 'test_events_periods.nxs'
 
 
 if __name__ == '__main__':

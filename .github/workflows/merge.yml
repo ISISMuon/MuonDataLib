@@ -15,7 +15,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: "0"
+          fetch-depth: "1"
       - name: Update version on merge
         run:  |
             python tools/version.py "beta"
@@ -38,17 +38,16 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
         with:
-          fetch-depth: "0"
+          fetch-depth: "1"
       - uses: actions/download-artifact@v3
         with:
           name: pyproject
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.8.0
+        uses: pypa/cibuildwheel@v2.16.5
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{9,10,11}-manylinux_x86_64 cp3{9,10,11}-win_amd64 cp3{9,10,11}-macosx_arm64
-
+          CIBW_BUILD: cp3{8,9,10,11,12}-manylinux_x86_64 cp3{8,9,10,11,12}-macosx_x86_64 cp3{8,9,10,11,12}-macosx_arm64 cp3{8,9,10,11,12}-win_amd64
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
           # Install test dependencies and run tests
@@ -62,6 +61,7 @@ jobs:
   build_sdist:
     name: Build source distribution
     runs-on: ubuntu-latest
+    needs: [update_version]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -105,7 +105,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: "0"
+          fetch-depth: "1"
           repository: ${{github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 

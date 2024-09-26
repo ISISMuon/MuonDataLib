@@ -70,7 +70,8 @@ class StatsTest(TestHelper):
                                       conversion=1.)
         self.assertArrays(bins, [0, .1, .2, .3, .4])
         self.assertEqual(len(result), 1)
-        self.assertArrays(result[0], [0, 30, 20, 10])
+        # technically not histograms as the normalisation is done in analysis
+        self.assertArrays(result[0], [0, 3, 2, 1])
 
     def test_make_histogram_conversion(self):
         times = np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)
@@ -80,7 +81,8 @@ class StatsTest(TestHelper):
                                       1, 0, 0.5, .1, conversion=0.1)
         self.assertArrays(bins, [0, .1, .2, .3, .4, .5])
         self.assertEqual(len(result), 1)
-        self.assertArrays(result[0], [0, 30, 30, 20, 10])
+        # technically not histograms as the normalisation is done in analysis
+        self.assertArrays(result[0], [0, 3, 3, 2, 1])
 
     def test_make_histogram_multi_spec(self):
         times = np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)

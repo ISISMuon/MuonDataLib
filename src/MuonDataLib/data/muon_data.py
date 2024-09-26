@@ -34,3 +34,32 @@ class MuonData(object):
             self._dict[key].save_nxs2(file)
         file.close()
         return
+
+
+class MuonEventData(MuonData):
+    def __init__(self, events, cache, sample, raw_data, source, user,
+                 periods, detector1):
+        """
+        Creates a store for relevant muon data (defined by nxs v2)
+        :param events: the event data
+        :param cache: the cache for the event data
+        :param sample: the Sample data needed for nexus v2 file
+        :param raw_data: the RawData data needed for nexus v2 file
+        :param source: the Source data needed for nexus v2 file
+        :param user: the User data needed for nexus v2 file
+        :param periods: the Periods data needed for nexus v2 file
+        :param detector1: the Detector1 data needed for nexus v2 file
+        """
+        self._events = events
+        self._cache = cache
+        super().__init__(sample, raw_data, source, user, periods, detector1)
+
+    def save_histograms(self, file_name):
+        """
+        Method for saving the object to a muon
+        nexus v2 histogram file
+        :param file_name: the name of the file to save to
+        """
+        if self._cache.empty():
+            self._events.histogram(cache=self._cache)
+        super().save_histograms(file_name)

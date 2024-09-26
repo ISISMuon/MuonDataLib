@@ -17,6 +17,10 @@ cpdef make_histogram(
     """
     This method creates histograms from a list of data.
     It produces a matrix of histograms for multiple spectra.
+    Strictly speaking these are not histograms as they
+    are not normalised to bin width.
+    This is the language used by the users and the
+    analysis code applys the normalisation.
     :param times: the times for the data
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
@@ -32,14 +36,14 @@ cpdef make_histogram(
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
 
-    cdef cnp.ndarray[double, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.double)
-    cdef double[:, :] mat = result
+    cdef cnp.ndarray[int, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.int32)
+    cdef int[:, :] mat = result
 
     for k in range(len(times)):
         det = spec[k]
         time = times[k] * conversion
         if time <= max_time and time >= min_time:
             j_bin = int((time - min_time) // width)
-            mat[det, j_bin] += 1. / width
+            mat[det, j_bin] += 1
     return result, bins
 
