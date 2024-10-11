@@ -21,6 +21,7 @@ cdef class Events:
     cdef readonly double[:] frame_start_time
     cdef readonly double mean
 
+    
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
@@ -93,14 +94,13 @@ cdef class Events:
                   cache=None):
         """
         Create a matrix of histograms from the event data
-        and apply any filters that might be present.:wq
+        and apply any filters that might be present.
         :param min_time: the start time for the histogram
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-
         # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
         cdef double[:] times, f_start, f_end
@@ -129,6 +129,7 @@ cdef class Events:
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([len(self.start_index_list)], dtype=np.int32))
+
         return hist, bins, len(times)
 
     @property
