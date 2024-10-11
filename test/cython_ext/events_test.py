@@ -13,9 +13,12 @@ class EventsTest(TestHelper):
         self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype='int32')
         self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
         self._frame_i = np.asarray([0, 3], dtype='int32')
+        self._frame_time = np.asarray([0., 5.], dtype=np.double)
+        
         self._events = Events(self._IDs,
                               self._time,
                               self._frame_i,
+                              self._frame_time,
                               2)
 
     def test_get_N_spec(self):

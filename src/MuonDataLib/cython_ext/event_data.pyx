@@ -1,4 +1,5 @@
 from MuonDataLib.cython_ext.stats import make_histogram
+from MuonDataLib.cython_ext.filter import *
 import numpy as np
 import time
 cimport numpy as cnp
@@ -10,16 +11,21 @@ cdef class Events:
     """
     Class for storing event information
     """
-    cdef public cnp.int32_t[:] IDs
+    cdef public int [:] IDs
     cdef public double[:] times
     cdef readonly int N_spec
-    cdef readonly cnp.int32_t[:] start_index_list
-    cdef readonly cnp.int32_t[:] end_index_list
+    cdef readonly int[:] start_index_list
+    cdef readonly int[:] end_index_list
+    cdef readonly dict[str, double] filter_start
+    cdef readonly dict[str, double] filter_end
+    cdef readonly double[:] frame_start_time
+    cdef readonly double mean
 
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
                  cnp.ndarray[int] start_i,
+                 cnp.ndarray[double] frame_start,
                  int N_det):
         """
         Creates an event object.
@@ -34,7 +40,47 @@ cdef class Events:
         self.times = times
         self.start_index_list = start_i
         self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
-        #self.frame_start_time = frame_time
+        self.frame_start_time = frame_start
+        self.mean = np.mean(frame_start[1:] - frame_start[:-1], dtype=np.double)
+        self.filter_start = {}
+        self.filter_end = {}
+
+    def get_start_times(self):
+        """
+        Get the frame start times
+        :returns: the frame start times
+        """
+        return self.frame_start_time
+    
+    def add_filter(self, str name, double start, double end):
+        """
+        Adds a time filter to the events
+        The times are in the same units as the stored events
+        :param name: the name of the filter
+        :param start: the start time for the filter
+        :param end: the end time for the filter
+        """
+        if name in self.filter_start.keys():
+            raise RuntimeError(f'The filter {name} already exists')
+        self.filter_start[name] = start
+        self.filter_end[name] = end
+
+    def remove_filter(self, str name):
+        """
+        Remove a time filter from the events
+        :param name: the name of the filter to remove
+        """
+        if name in self.filter_start.keys():
+            raise RuntimeError(f'The filter {name} does not exist')
+        del self.filter_start[name]
+        del self.filter_end[name]
+
+    def clear_filters(self):
+        """
+        A method to clear all of the time filters
+        """
+        self.filter_start.clear()
+        self.filter_end.clear()
 
     @property
     def get_total_frames(self):
@@ -47,14 +93,35 @@ cdef class Events:
                   cache=None):
         """
         Create a matrix of histograms from the event data
+        and apply any filters that might be present.:wq
         :param min_time: the start time for the histogram
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-        hist, bins = make_histogram(self.times,
-                                    self.IDs,
+
+        # can add check for filter
+        cdef int[:] IDs, f_i_start, f_i_end
+        cdef double[:] times, f_start, f_end
+
+        if len(self.filter_start.keys())>0:
+            f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
+            f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
+          
+            f_i_start, f_i_end = get_indicies(f_start, f_end, self.mean)
+            
+            f_i_start, f_i_end = rm_overlaps(f_i_start, f_i_end)
+            
+            IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
+            times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+        else:
+            IDs = self.IDs
+            times = self.times
+
+
+        hist, bins = make_histogram(times,
+                                    IDs,
                                     self.N_spec,
                                     min_time,
                                     max_time,
@@ -62,7 +129,7 @@ cdef class Events:
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([len(self.start_index_list)], dtype=np.int32))
-        return hist, bins
+        return hist, bins, len(times)
 
     @property
     def get_N_spec(self):
