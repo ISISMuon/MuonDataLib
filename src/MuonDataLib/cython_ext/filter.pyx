@@ -1,13 +1,25 @@
 import numpy as np
 cimport numpy as cnp
 import cython
-import json
 cnp.import_array()
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef get_indicies(double[:] f_start, double[:] f_end, double dt):
+cpdef get_indices(double[:] f_start, double[:] f_end, double dt):
+    """
+    Method for calculating which frames filters belong to.
+    This assumes that the frame duration is a gaussian
+    distribution around some mean value, dt. This
+    assumption is needed to prevent the accumalation of
+    rounding and propegation
+    errors causing the wrong frame to be identified.
+
+    :param f_start: a list of frame start times
+    :param f_end: a list of frame end times
+    :param dt: the average duration of a frame
+    :result: the list of start and end frame indices for the filters
+    """
     cdef int N = len(f_start)
     cdef cnp.ndarray[int, ndim=1] _j_start = np.zeros(N, dtype=np.int32)
     cdef cnp.ndarray[int, ndim=1] _j_end = np.zeros(N, dtype=np.int32)
@@ -26,7 +38,42 @@ cpdef get_indicies(double[:] f_start, double[:] f_end, double dt):
 cpdef rm_overlaps(int[:] j_start, int[:] j_end):
     """
     Assume that the start and end frame values are in order.
+    They can overlap, this code will remove the overlaps.
+
+    Let o be filter 1, x be filter 2, | is a frame boundary
+
+    The original unfiltered data:
+
+    |    |    |    |    |    |    |    |    |    |
+
+    with filter one
+
+    |o o |    |    |    |   o|    |  o |    |    |
+
+    with filter two
+
+    |o o | x  | x  |    |   o| x  |  o | x  |    |
+
+    Then this code will return filters for (added
+    frame numbers to make it easier)
+
+    1    2    3    4    5    6    7    8    9    10
+    |o o | x  | x  |    |   o| x  |  o | x  |    |
+
+    frame 1 to 1
+    frame 2 to 3
+    frame 5 to 8
+
+    Notice that this includes an overlap between the two filters,
+    but the inner bounds have been removed.
+
+    :param j_start: the start indices for the filtered frames
+    :param j_end: the end indices for the filtered frames
+    :return: the list of start and end indices for the filtered
+    frames (excluding internal overlaps between filters) and the
+    number of removed frames.
     """
+    # there will be at most the same number of filters
     cdef int N = len(j_start)
     cdef cnp.ndarray[int, ndim=1] _final_start = np.zeros(N, dtype=np.int32)
     cdef cnp.ndarray[int, ndim=1] _final_end = np.zeros(N, dtype=np.int32)
@@ -38,12 +85,13 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end):
     cdef int end = j_end[0]
     cdef int k, next_start, next_end
 
+    # due to overlaps the number of filters might be smaller
     N = 0
     for k in range(1, len(j_start)):
         next_start = j_start[k]
         next_end = j_end[k]
 
-        # no overlap
+        # no overlap in filters
         if end < next_start:
             final_start[N] = start
             final_end[N] = end
@@ -51,22 +99,38 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end):
             start = next_start
             end = next_end
 
-        # overlap
+        # overlap in filters
         elif next_end > end:
             end = next_end
 
+    # get the last set of filters
     final_start[N] = start
     final_end[N] = end
     N = N+1
+    """
+    The plus one in the sum of removed frames to account for both the start and end being
+    included. Consider the case of a frame starting and ending within the same index (i.e.
+    1 to 1), then 1 frame should be removed but 1 - 1 = 0. Hence, the number of removed
+    frames would be inaccurate.
+    """
     return _final_start[:N], _final_end[:N], np.sum(one + _final_end[:N] - _final_start[:N])
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] IDs):
+cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] int_array):
+    """
+    This removes the values from the array corresponding to the filtered frames.
+    :param f_start: the start indices for the filters (no overlaps)
+    :param f_end: the end indices for the filters (no overlaps)
+    :param start_index: a list that gives the first index in int_array for that frame
+    :param int_array: the array to remove data from
+    :return: the int_array with the data in the filtered frames removed
+    """
+
     cdef Py_ssize_t start = 0
-    cdef cnp.ndarray[int] _good_IDs = np.zeros(len(IDs), dtype=np.int32)
-    cdef int[:] good_IDs = _good_IDs
+    cdef cnp.ndarray[int] _good_ints = np.zeros(len(int_array), dtype=np.int32)
+    cdef int[:] good_ints = _good_ints
     cdef Py_ssize_t k, last
     cdef Py_ssize_t v, N
     cdef Py_ssize_t M = len(f_start)
@@ -75,25 +139,25 @@ cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] 
     for k in range(M):
         last = start_index[f_start[k]]
         for v in range(start, last):
-            good_IDs[N] = IDs[v]
+            good_ints[N] = int_array[v]
             N += 1
         start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame
     if f_end[M-1] + 1 >= len(start_index):
-        return _good_IDs[:N]
-    last = len(IDs)
+        return _good_ints[:N]
+    last = len(int_array)
     for v in range(start, last):
-        good_IDs[N] = IDs[v]
+        good_ints[N] = int_array[v]
         N += 1
-    return _good_IDs[:N]
+    return _good_ints[:N]
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, double[:] IDs):
+cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, double[:] double_array):
     cdef Py_ssize_t start = 0
-    cdef cnp.ndarray[double] _good_IDs = np.zeros(len(IDs), dtype=np.double)
-    cdef double[:] good_IDs = _good_IDs
+    cdef cnp.ndarray[double] _good_doubles = np.zeros(len(double_array), dtype=np.double)
+    cdef double[:] good_doubles = _good_doubles
     cdef Py_ssize_t k, last
     cdef Py_ssize_t v, N
     cdef Py_ssize_t M = len(f_start)
@@ -102,25 +166,15 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
     for k in range(M):
         last = start_index[f_start[k]]
         for v in range(start, last):
-            good_IDs[N] = IDs[v]
+            good_doubles[N] = double_array[v]
             N += 1
         start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame
     if f_end[M-1] + 1 >= len(start_index):
-        return _good_IDs[:N]
-    last = len(IDs)
+        return _good_doubles[:N]
+    last = len(double_array)
     for v in range(start, last):
-        good_IDs[N] = IDs[v]
+        good_doubles[N] = double_array[v]
         N += 1
-    return _good_IDs[:N]
-
-def save_filters(file, start_times, end_times):
-    data = {}
-    for key in start_times.keys():
-        data[key] = (start_times[key], end_times[key])
-    json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=4)
-
-def read_filters(file):
-    data = json.load(file)
-    return data
+    return _good_doubles[:N]

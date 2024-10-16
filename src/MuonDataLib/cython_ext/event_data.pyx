@@ -1,6 +1,7 @@
 from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import *
 import numpy as np
+import json
 import time
 cimport numpy as cnp
 import cython
@@ -98,7 +99,8 @@ cdef class Events:
         :param file_name: the name of the json file
         """
         with open(file_name, 'r') as file:
-            data = read_filters(file)
+            data = json.load(file)
+
         for key in data.keys():
             self.add_filter(key, *data[key])
 
@@ -107,10 +109,11 @@ cdef class Events:
         A method to save the current filters to a file.
         :param file_name: the name of the json file to save to.
         """
+        data = {}
         with open(file_name, 'w') as file:
-            save_filters(file,
-                         self.filter_start,
-                         self.filter_end)
+            for key in self.filter_start.keys():
+                data[key] = (self.filter_start[key], self.filter_end[key])
+            json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=4)
 
     @property
     def get_total_frames(self):
@@ -141,7 +144,7 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indicies(f_start, f_end, self.mean)
+            f_i_start, f_i_end = get_indices(f_start, f_end, self.mean)
             f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
 
             # update the number of frames for the histogram
