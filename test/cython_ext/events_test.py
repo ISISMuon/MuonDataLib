@@ -13,9 +13,9 @@ class EventsTest(TestHelper):
     def setUp(self):
 
         self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype='int32')
-        self._time = np.asarray([1., 2., 1., 2., 1., 2.], dtype=np.double)
-        self._frame_i = np.asarray([0, 3], dtype='int32')
-        self._frame_time = np.asarray([0., 5.], dtype=np.double)
+        self._time = 1.e3*np.asarray([1., 2., 3., 4., 5., 6.], dtype=np.double)
+        self._frame_i = np.asarray([0, 2, 4], dtype='int32')
+        self._frame_time = np.asarray([0., 2., 4.], dtype=np.double)
 
         self._events = Events(self._IDs,
                               self._time,
@@ -30,7 +30,7 @@ class EventsTest(TestHelper):
         self.assertEqual(self._events.get_N_events, 6)
 
     def test_get_total_frames(self):
-        self.assertEqual(self._events.get_total_frames, 2)
+        self.assertEqual(self._events.get_total_frames, 3)
 
     def test_histogram(self):
         """
@@ -50,9 +50,11 @@ class EventsTest(TestHelper):
         Here we are checking that the correct values
         are passed to the histogram generation
         """
-        mat, bins = self._events.histogram(1.2, 4.2, .2)
-        self.assertArrays(bins, np.arange(1.2, 4.4, 0.2))
+        mat, bins = self._events.histogram(0., 7., 1.)
+        self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 2)
+        self.assertArrays(mat[0], [0, 1, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[1], [0, 0, 1, 0, 1, 0, 1])
 
     def test_cache_histogram(self):
         cache = EventsCache()
@@ -67,7 +69,7 @@ class EventsTest(TestHelper):
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
-                          [0., 5.])
+                          [0., 2., 4.])
 
     def test_add_filter(self):
         f_start, f_end = self._events._get_filters()
@@ -171,6 +173,15 @@ class EventsTest(TestHelper):
         self.assertEqual(f_start['unit'], 3.1)
         self.assertEqual(f_end['test'], 8.2)
         self.assertEqual(f_end['unit'], 6.6)
+
+    def test_filter_histogram(self):
+        self._events.add_filter('test', 1.2*1e-3, 2.3*1e-3)
+        mat, bins = self._events.histogram(0., 7., 1.)
+        self.assertArrays(bins, np.arange(0., 8., 1.))
+        print(mat)
+        self.assertEqual(len(mat), 2)
+        self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
 
 
 if __name__ == '__main__':
