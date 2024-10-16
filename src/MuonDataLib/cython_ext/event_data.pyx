@@ -34,6 +34,7 @@ cdef class Events:
         :param IDs: the detector ID's for the events
         :param times: the time stamps for the events, relative to the start of their frame
         :param start_i: the first event index for each frame
+        :param frame_start: the start time for the frames
         :param N_det: the number of detectors
         """
         self.IDs = IDs
@@ -53,6 +54,13 @@ cdef class Events:
         """
         return self.frame_start_time
 
+    def _get_filters(self):
+        """
+        A method to get the filters for testing
+        :returns: the filter dicts
+        """
+        return self.filter_start, self.filter_end
+
     def add_filter(self, str name, double start, double end):
         """
         Adds a time filter to the events
@@ -71,7 +79,7 @@ cdef class Events:
         Remove a time filter from the events
         :param name: the name of the filter to remove
         """
-        if name in self.filter_start.keys():
+        if name not in self.filter_start.keys():
             raise RuntimeError(f'The filter {name} does not exist')
         del self.filter_start[name]
         del self.filter_end[name]
@@ -83,13 +91,22 @@ cdef class Events:
         self.filter_start.clear()
         self.filter_end.clear()
 
-    def read_filters(self, str file_name):
+    def load_filters(self, str file_name):
+        """
+        A method to filters from a json file.
+        This will apply all of the filters from the file.
+        :param file_name: the name of the json file
+        """
         with open(file_name, 'r') as file:
             data = read_filters(file)
         for key in data.keys():
             self.add_filter(key, *data[key])
 
     def save_filters(self, str file_name):
+        """
+        A method to save the current filters to a file.
+        :param file_name: the name of the json file to save to.
+        """
         with open(file_name, 'w') as file:
             save_filters(file,
                          self.filter_start,
@@ -119,14 +136,17 @@ cdef class Events:
         cdef double[:] times, f_start, f_end
 
         if len(self.filter_start.keys())>0:
+            # sort the filter data
             f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
+            # calculate the frames that are excluded by the filter
             f_i_start, f_i_end = get_indicies(f_start, f_end, self.mean)
-
             f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
 
+            # update the number of frames for the histogram
             frames -= frames
+            # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
         else:

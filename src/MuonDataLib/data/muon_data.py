@@ -87,7 +87,7 @@ class MuonEventData(MuonData):
         :param end: the end time for the filter
         """
         self._cache.clear()
-        self._events.add_filter(name, start/s_to_ns, end/s_to_ns)
+        self._events.add_filter(name, start/ns_to_s, end/ns_to_s)
 
     def remove_time_filter(self, name):
         """
