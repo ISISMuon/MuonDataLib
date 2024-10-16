@@ -36,6 +36,9 @@ class MuonData(object):
         return
 
 
+ns_to_s = 1.e-9
+
+
 class MuonEventData(MuonData):
     def __init__(self, events, cache, sample, raw_data, source, user,
                  periods, detector1):
@@ -69,7 +72,7 @@ class MuonEventData(MuonData):
         A method to get the frame start times
         :returns: the frame start times
         """
-        return self._events.get_start_times()
+        return self._events.get_start_times()*ns_to_s
 
     def add_time_filter(self, name, start, end):
         """
@@ -83,17 +86,20 @@ class MuonEventData(MuonData):
         :param start: the start time for the filter
         :param end: the end time for the filter
         """
-        self._events.add_filter(name, start*1.e-9, end*1.e-9)
+        self._cache.clear()
+        self._events.add_filter(name, start/s_to_ns, end/s_to_ns)
 
     def remove_time_filter(self, name):
         """
         A method to remove a specific time filter.
         :param name: the name of the filter to remove
         """
+        self._cache.clear()
         self._events.remove_filter(name)
 
     def clear_time_filters(self):
         """
         A method to clear all of the time filters
         """
+        self._cache.clear()
         self._events.clear_filters()

@@ -21,7 +21,7 @@ cdef class Events:
     cdef readonly double[:] frame_start_time
     cdef readonly double mean
 
-    
+
     def __init__(self,
                  cnp.ndarray[int] IDs,
                  cnp.ndarray[double] times,
@@ -52,7 +52,7 @@ cdef class Events:
         :returns: the frame start times
         """
         return self.frame_start_time
-    
+
     def add_filter(self, str name, double start, double end):
         """
         Adds a time filter to the events
@@ -83,6 +83,18 @@ cdef class Events:
         self.filter_start.clear()
         self.filter_end.clear()
 
+    def read_filters(self, str file_name):
+        with open(file_name, 'r') as file:
+            data = read_filters(file)
+        for key in data.keys():
+            self.add_filter(key, *data[key])
+
+    def save_filters(self, str file_name):
+        with open(file_name, 'w') as file:
+            save_filters(file,
+                         self.filter_start,
+                         self.filter_end)
+
     @property
     def get_total_frames(self):
         return len(self.start_index_list)
@@ -103,16 +115,18 @@ cdef class Events:
         """
         # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
+        cdef int frames = len(self.start_index_list)
         cdef double[:] times, f_start, f_end
 
         if len(self.filter_start.keys())>0:
             f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
-          
+
             f_i_start, f_i_end = get_indicies(f_start, f_end, self.mean)
-            
-            f_i_start, f_i_end = rm_overlaps(f_i_start, f_i_end)
-            
+
+            f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
+
+            frames -= frames
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
         else:
@@ -128,9 +142,9 @@ cdef class Events:
                                     width)
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
-                       np.asarray([len(self.start_index_list)], dtype=np.int32))
+                       np.asarray([frames], dtype=np.int32))
 
-        return hist, bins, len(times)
+        return hist, bins
 
     @property
     def get_N_spec(self):
