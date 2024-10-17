@@ -244,6 +244,30 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(len(f_start), 0)
         self.assertEqual(len(f_start), len(f_end))
 
+    def test_report_filters(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+
+        data.add_time_filter('one', 0.03, 0.05)
+        data.add_time_filter('two', 0.01, 0.04)
+
+        result = data.report_filters()
+
+        keys = list(result.keys())
+        self.assertEqual(len(keys), 2)
+        self.assertArrays(result['one'], [0.03, 0.05])
+        self.assertArrays(result['two'], [0.01, 0.04])
+
     def test_save_filters(self):
         """
         Test this with some "real" data.

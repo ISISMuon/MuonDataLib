@@ -92,6 +92,17 @@ cdef class Events:
         self.filter_start.clear()
         self.filter_end.clear()
 
+    def report_filters(self):
+        """
+        A simple method to create a more readable form for the
+        user to inspect.
+        :return: a dict of the filters, with start and end values.
+        """
+        data = {}
+        for key in self.filter_start.keys():
+            data[key] = (self.filter_start[key], self.filter_end[key])
+        return data
+
     def load_filters(self, str file_name):
         """
         A method to filters from a json file.
@@ -109,10 +120,8 @@ cdef class Events:
         A method to save the current filters to a file.
         :param file_name: the name of the json file to save to.
         """
-        data = {}
+        data = self.report_filters()
         with open(file_name, 'w') as file:
-            for key in self.filter_start.keys():
-                data[key] = (self.filter_start[key], self.filter_end[key])
             json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=4)
 
     @property

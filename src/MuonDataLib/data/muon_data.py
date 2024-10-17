@@ -113,6 +113,12 @@ class MuonEventData(MuonData):
         """
         return self._events._get_filters()
 
+    def report_filters(self):
+        data = self._events.report_filters()
+        for key in data.keys():
+            data[key] = [x*ns_to_s for x in data[key]]
+        return data
+
     def load_filters(self, file_name):
         """
         A method to filters from a json file.

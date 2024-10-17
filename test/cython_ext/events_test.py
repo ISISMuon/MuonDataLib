@@ -174,6 +174,17 @@ class EventsTest(TestHelper):
         self.assertEqual(f_end['test'], 8.2)
         self.assertEqual(f_end['unit'], 6.6)
 
+    def test_report_filters(self):
+        self._events.add_filter('test', 1.2, 5.2)
+        self._events.add_filter('unit', 2.1, 2.6)
+
+        data = self._events.report_filters()
+
+        keys = list(data.keys())
+        self.assertEqual(len(keys), 2)
+        self.assertArrays(data['test'], [1.2, 5.2])
+        self.assertArrays(data['unit'], [2.1, 2.6])
+
     def test_filter_histogram(self):
         self._events.add_filter('test', 1.2*1e-3, 2.3*1e-3)
         mat, bins = self._events.histogram(0., 7., 1.)
