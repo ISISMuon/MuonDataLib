@@ -1,6 +1,9 @@
 from MuonDataLib.data.muon_data import MuonData, MuonEventData
+from MuonDataLib.data.loader.load_events import load_events
+from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
 import os
+import json
 from unittest import mock
 
 
@@ -64,7 +67,7 @@ class MuonDataTest(unittest.TestCase):
         os.remove('tmp.nxs')
 
 
-class MuonEventDataTest(unittest.TestCase):
+class MuonEventDataTest(TestHelper, unittest.TestCase):
 
     def test_MuonEventData_init(self):
         '''
@@ -169,6 +172,135 @@ class MuonEventDataTest(unittest.TestCase):
         detector_1.assert_called_once()
 
         os.remove('tmp.nxs')
+
+    def test_get_frame_start_times(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        start_time = data.get_frame_start_times()
+
+        self.assertArrays(start_time, [0.0,
+                                       0.02012,
+                                       0.04023,
+                                       0.06035,
+                                       0.08046,
+                                       0.1006,
+                                       0.1207,
+                                       0.1408,
+                                       0.1609])
+
+    def test_add_time_filter(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+
+        data.add_time_filter('one', 0.03, 0.05)
+
+        f_start, f_end = data._get_filters()
+        self.assertEqual(len(f_start), 1)
+        self.assertEqual(len(f_start), len(f_end))
+        self.assertAlmostEqual(f_start['one'], 3e7)
+        self.assertAlmostEqual(f_end['one'], 5e7)
+
+    def test_remove_time_filter(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+
+        data.add_time_filter('one', 0.03, 0.05)
+
+        f_start, f_end = data._get_filters()
+        self.assertEqual(len(f_start), 1)
+
+        data.remove_time_filter('one')
+        f_start, f_end = data._get_filters()
+        self.assertEqual(len(f_start), 0)
+        self.assertEqual(len(f_start), len(f_end))
+
+    def test_save_filters(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+
+        data.add_time_filter('one', 0.03, 0.05)
+        data.add_time_filter('two', 0.01, 0.04)
+
+        data.save_filters('event_save.json')
+
+        with open('event_save.json') as file:
+            result = json.load(file)
+        keys = list(result.keys())
+        self.assertEqual(len(keys), 2)
+        self.assertArrays(result['one'], [3e7, 5e7])
+        self.assertArrays(result['two'], [1e7, 4e7])
+
+    def test_load_filters(self):
+        """
+        Test this with some "real" data.
+        I could mock the data, but if I transition
+        to C++ later with a Python interface then
+        the object might be constructed in the C++.
+        So we will not be able to mock it.
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'load_filter.json')
+
+        data.load_filters(file)
+
+        f_start, f_end = data._events._get_filters()
+        keys = list(f_start.keys())
+        self.assertEqual(keys[0], 'test')
+        self.assertEqual(keys[1], 'unit')
+        self.assertEqual(len(keys), 2)
+
+        self.assertEqual(f_start['test'], 1.1)
+        self.assertEqual(f_start['unit'], 3.1)
+        self.assertEqual(f_end['test'], 8.2)
+        self.assertEqual(f_end['unit'], 6.6)
 
 
 if __name__ == '__main__':

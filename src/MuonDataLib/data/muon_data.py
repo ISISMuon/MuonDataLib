@@ -103,3 +103,27 @@ class MuonEventData(MuonData):
         """
         self._cache.clear()
         self._events.clear_filters()
+
+    def _get_filters(self):
+        """
+        A method to get the filters for testing
+        This will return the values in ns and not s.
+        i.e. the native units for the event object
+        :return the filter dicts
+        """
+        return self._events._get_filters()
+
+    def load_filters(self, file_name):
+        """
+        A method to filters from a json file.
+        This will apply all of the filters from the file.
+        :param file_name: the name of the json file
+        """
+        self._events.load_filters(file_name)
+
+    def save_filters(self, file_name):
+        """
+        A method to save the current filters to a file.
+        :param file_name: the name of the json file to save to.
+        """
+        self._events.save_filters(file_name)

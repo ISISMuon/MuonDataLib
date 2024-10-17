@@ -53,7 +53,7 @@ cdef class Events:
         Get the frame start times
         :returns: the frame start times
         """
-        return self.frame_start_time
+        return np.asarray(self.frame_start_time)
 
     def _get_filters(self):
         """
