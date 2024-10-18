@@ -191,7 +191,6 @@ class EventsTest(TestHelper):
         self._events.add_filter('test', 1.2*1e-3, 2.3*1e-3)
         mat, bins = self._events.histogram(0., 7., 1.)
         self.assertArrays(bins, np.arange(0., 8., 1.))
-        print(mat)
         self.assertEqual(len(mat), 2)
         self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
         self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])

@@ -84,7 +84,6 @@ class FilterTest(TestHelper):
         f_end = np.asarray([1, 4], dtype=np.int32)
         start_index = np.asarray([0, 10, 20, 30, 40], dtype=np.int32)
         double_array = np.arange(0, 0.45, step=0.01, dtype=np.double)
-        print(len(double_array))
         result = good_values_double(f_start,
                                     f_end,
                                     start_index,
