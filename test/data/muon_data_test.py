@@ -294,6 +294,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertArrays(result['one'], [3e7, 5e7])
         self.assertArrays(result['two'], [1e7, 4e7])
 
+        os.remove('event_save.json')
+
     def test_load_filters(self):
         """
         Test this with some "real" data.

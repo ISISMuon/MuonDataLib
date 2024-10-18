@@ -151,6 +151,8 @@ class EventsTest(TestHelper):
         self.assertArrays(data['test'], [1.2, 5.2])
         self.assertArrays(data['unit'], [2.1, 2.6])
 
+        os.remove('filter_data.json')
+
     def test_read_filter(self):
         f_start, f_end = self._events._get_filters()
         keys = list(f_start.keys())
