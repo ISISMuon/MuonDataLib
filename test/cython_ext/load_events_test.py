@@ -58,7 +58,7 @@ class LoadEventDataTest(TestHelper):
         time_taken, events = load_data('test.nxs', 2)
         load_mock.assert_called_once_with("test.nxs")
         self.assertGreater(time_taken, 0.99)
-        events_mock.assert_called_once_with(IDs, times, start_j, 2)
+        events_mock.assert_called_once_with(IDs, times, start_j, start_t, 2)
 
 
 if __name__ == '__main__':
