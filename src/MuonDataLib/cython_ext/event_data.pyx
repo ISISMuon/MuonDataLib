@@ -1,5 +1,8 @@
 from MuonDataLib.cython_ext.stats import make_histogram
-from MuonDataLib.cython_ext.filter import *
+from MuonDataLib.cython_ext.filter import (get_indices,
+                                           rm_overlaps,
+                                           good_values_ints,
+                                           good_values_double)
 import numpy as np
 import json
 import time
