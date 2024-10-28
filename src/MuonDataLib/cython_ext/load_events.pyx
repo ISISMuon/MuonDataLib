@@ -48,7 +48,7 @@ def load_data(file_name, N_det):
         """
         start = time.time()
         IDs, frames, times, amps, frame_times = _load_data(file_name)
-        events = Events(IDs, times, frames, N_det)
+        events = Events(IDs, times, frames, frame_times, N_det)
         return time.time() - start, events
 
 
