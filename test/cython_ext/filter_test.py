@@ -56,13 +56,14 @@ class FilterTest(TestHelper):
         self.assertEqual(N, 7)
 
     def test_get_indices(self):
-        dt = 0.1
+        times = np.asarray([0, .1, .2, .3, .4, .5, .6, .7], dtype=np.double)
         f_start = np.asarray([0.14, 0.51], dtype=np.double)
         f_end = np.asarray([0.2, 0.59], dtype=np.double)
 
-        j_start, j_end = get_indices(f_start,
-                                     f_end,
-                                     dt)
+        j_start, j_end = get_indices(times,
+                                     f_start,
+                                     f_end)
+
         self.assertArrays(j_start, [1, 5])
         self.assertArrays(j_end, [2, 5])
 

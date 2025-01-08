@@ -1,3 +1,5 @@
+from MuonDataLib.cython_ext.utils import binary_search
+
 import numpy as np
 cimport numpy as cnp
 import cython
@@ -6,30 +8,40 @@ cnp.import_array()
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef get_indices(double[:] f_start, double[:] f_end, double dt):
+cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end):
     """
     Method for calculating which frames filters belong to.
-    This assumes that the frame duration is a gaussian
-    distribution around some mean value, dt. This
-    assumption is needed to prevent the accumalation of
-    rounding and propegation
-    errors causing the wrong frame to be identified.
+    This assumes that all data is in order.
+    It uses a binary search to find the index of the left bound of the bin
+    containing the desired value. Since the filter times are in order
+    the next search can have a start value of equal to the index found for
+    the previous filter. Similarly the first end filter must be after the
+    start for the first filter.
 
-    :param f_start: a list of frame start times
-    :param f_end: a list of frame end times
-    :param dt: the average duration of a frame
+
+    :param times: the list of frame start times
+    :param f_start: a list of filter start times
+    :param f_end: a list of filter end times
     :result: the list of start and end frame indices for the filters
     """
     cdef int N = len(f_start)
+    cdef int M = len(times)
     cdef cnp.ndarray[int, ndim=1] _j_start = np.zeros(N, dtype=np.int32)
     cdef cnp.ndarray[int, ndim=1] _j_end = np.zeros(N, dtype=np.int32)
     cdef int j
     cdef int[:] j_start = _j_start
     cdef int[:] j_end = _j_end
 
+    cdef int start = 0
+
     for j in range(N):
-        j_start[j] = int(f_start[j]/dt)
-        j_end[j] = int(f_end[j]/dt)
+        j_start[j] = binary_search(times, start, M, f_start[j])
+        start = j_start[j]
+
+    # the first end filter must be after the first start filter
+    start = j_start[0]
+    for j in range(N):
+        j_end[j] = binary_search(times, start, M, f_end[j])
 
     return _j_start, _j_end
 
@@ -141,7 +153,8 @@ cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] 
         for v in range(start, last):
             good_ints[N] = int_array[v]
             N += 1
-        start = start_index[f_end[k] + 1]
+        if k < M - 1:
+            start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame
     if f_end[M-1] + 1 >= len(start_index):
@@ -168,7 +181,8 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
         for v in range(start, last):
             good_doubles[N] = double_array[v]
             N += 1
-        start = start_index[f_end[k] + 1]
+        if k < M - 1:
+            start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame
     if f_end[M-1] + 1 >= len(start_index):

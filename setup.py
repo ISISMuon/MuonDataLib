@@ -29,6 +29,10 @@ extensions = [
                 "MuonDataLib.cython_ext.filter",
                 sources=["src/MuonDataLib/cython_ext/filter.pyx"]
                 ),
+              Extension(
+                "MuonDataLib.cython_ext.utils",
+                sources=["src/MuonDataLib/cython_ext/utils.pyx"]
+                ),
               ]
 setup(
     name=PACKAGE_NAME,

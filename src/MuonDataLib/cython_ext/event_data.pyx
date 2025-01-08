@@ -156,7 +156,7 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(f_start, f_end, self.mean)
+            f_i_start, f_i_end = get_indices(self.times, f_start, f_end)
             f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
 
             # update the number of frames for the histogram
