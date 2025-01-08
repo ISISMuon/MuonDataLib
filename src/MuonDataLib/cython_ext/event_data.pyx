@@ -157,7 +157,7 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(np.asarray(self.frame_start_time)*conversion, f_start, f_end)
+            f_i_start, f_i_end = get_indices(np.asarray(self.frame_start_time), f_start, f_end)
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # update the number of frames for the histogram
             frames -= rm_frames
@@ -180,7 +180,7 @@ cdef class Events:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([frames], dtype=np.int32))
 
-        return hist, bins
+        return hist, bins#, len(times)
 
     @property
     def get_N_spec(self):
