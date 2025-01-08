@@ -144,7 +144,7 @@ cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] 
     cdef cnp.ndarray[int] _good_ints = np.zeros(len(int_array), dtype=np.int32)
     cdef int[:] good_ints = _good_ints
     cdef Py_ssize_t k, last
-    cdef Py_ssize_t v, N
+    cdef Py_ssize_t v, N, i
     cdef Py_ssize_t M = len(f_start)
     N = 0
 
@@ -153,7 +153,8 @@ cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] 
         for v in range(start, last):
             good_ints[N] = int_array[v]
             N += 1
-        if k < M - 1:
+        i = f_end[k] + 1
+        if i < len(start_index):
             start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame
@@ -172,7 +173,7 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
     cdef cnp.ndarray[double] _good_doubles = np.zeros(len(double_array), dtype=np.double)
     cdef double[:] good_doubles = _good_doubles
     cdef Py_ssize_t k, last
-    cdef Py_ssize_t v, N
+    cdef Py_ssize_t v, N, i
     cdef Py_ssize_t M = len(f_start)
     N = 0
 
@@ -181,7 +182,8 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
         for v in range(start, last):
             good_doubles[N] = double_array[v]
             N += 1
-        if k < M - 1:
+        i = f_end[k] +1
+        if i < len(start_index):
             start = start_index[f_end[k] + 1]
 
     # check if filter covers last frame

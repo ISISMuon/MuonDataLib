@@ -149,6 +149,7 @@ cdef class Events:
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int frames = len(self.start_index_list)
         cdef double[:] times, f_start, f_end
+        cdef double conversion = 1.e-3
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -156,11 +157,10 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(self.times, f_start, f_end)
-            f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
-
+            f_i_start, f_i_end = get_indices(np.asarray(self.frame_start_time)*conversion, f_start, f_end)
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # update the number of frames for the histogram
-            frames -= frames
+            frames -= rm_frames
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -174,7 +174,8 @@ cdef class Events:
                                     self.N_spec,
                                     min_time,
                                     max_time,
-                                    width)
+                                    width,
+                                    conversion)
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([frames], dtype=np.int32))

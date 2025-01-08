@@ -188,7 +188,7 @@ class EventsTest(TestHelper):
         self.assertArrays(data['unit'], [2.1, 2.6])
 
     def test_filter_histogram(self):
-        self._events.add_filter('test', 1.2*1e-3, 2.3*1e-3)
+        self._events.add_filter('test', 1.2*1e-3, 1.7*1e-3)
         mat, bins = self._events.histogram(0., 7., 1.)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 2)
