@@ -189,7 +189,19 @@ class EventsTest(TestHelper):
         self.assertArrays(data['unit'], [2.1, 2.6])
 
     def test_filter_histogram(self):
-        self._events.add_filter('test', 1.2*1e-3, 1.7*1e-3)
+        self._events.add_filter('test', 1.2e-3, 1.7e-3)
+        cache = EventsCache()
+        mat, bins = self._events.histogram(0., 7., 1., cache)
+        self.assertArrays(bins, np.arange(0., 8., 1.))
+        self.assertEqual(len(mat), 2)
+        self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
+        # check filter updates number of frames correctly
+        self.assertEqual(cache.get_total_frames()[0], 2)
+
+    def test_filters_overlap_works(self):
+        self._events.add_filter('test', 1.2e-3, 1.7e-3)
+        self._events.add_filter('unit', 1.6e-3, 1.9e-3)
         cache = EventsCache()
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))

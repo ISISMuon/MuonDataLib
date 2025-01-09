@@ -176,7 +176,7 @@ cdef class Events:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([frames], dtype=np.int32))
 
-        return hist, bins#, len(times)
+        return hist, bins
 
     @property
     def get_N_spec(self):
