@@ -23,7 +23,6 @@ cdef class Events:
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
-    cdef readonly double mean
 
 
     def __init__(self,
@@ -47,16 +46,15 @@ cdef class Events:
         self.start_index_list = start_i
         self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
         self.frame_start_time = frame_start
-        self.mean = np.mean(frame_start[1:] - frame_start[:-1], dtype=np.double)
         self.filter_start = {}
         self.filter_end = {}
 
     def get_start_times(self):
         """
-        Get the frame start times
-        :returns: the frame start times
+        Get the frame start times (stored in ns)
+        :returns: the frame start times in seconds
         """
-        return np.asarray(self.frame_start_time)
+        return np.asarray(self.frame_start_time)*1e-9
 
     def _get_filters(self):
         """
@@ -149,7 +147,6 @@ cdef class Events:
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int frames = len(self.start_index_list)
         cdef double[:] times, f_start, f_end
-        cdef double conversion = 1.e-3
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -157,7 +154,7 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(np.asarray(self.frame_start_time), f_start, f_end)
+            f_i_start, f_i_end = get_indices(self.get_start_times(), f_start, f_end)
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # update the number of frames for the histogram
             frames -= rm_frames
@@ -174,8 +171,7 @@ cdef class Events:
                                     self.N_spec,
                                     min_time,
                                     max_time,
-                                    width,
-                                    conversion)
+                                    width)
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
                        np.asarray([frames], dtype=np.int32))

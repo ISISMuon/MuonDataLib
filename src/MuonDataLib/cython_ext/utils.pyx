@@ -26,7 +26,7 @@ cpdef binary_search(
 
 
     elif values[len(values)-1] < target:
-        raise RuntimeError(f'The target {target} is after the first value {values[-1]}')
+        raise RuntimeError(f'The target {target} is after the last value {values[-1]}')
 
 
     return _binary_search(values, start, stop, target)
