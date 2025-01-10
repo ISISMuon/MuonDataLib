@@ -61,7 +61,7 @@ jobs:
             pytest {project}/test
       - uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${ { matrix.os }}
+          name: cibw-wheels-${{ matrix.os }}
           path: ./wheelhouse/*.whl
 
   build_sdist:
