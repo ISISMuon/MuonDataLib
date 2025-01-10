@@ -97,6 +97,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
           user: __token__
+          password: ${{ secrets.secrets }}
 
   update_setup:
     needs: [upload_pypi]
