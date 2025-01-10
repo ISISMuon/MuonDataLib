@@ -7,7 +7,6 @@ on:
   pull_request:
     branches:
       - 'main'
-
   pull_request_review:
     types: [submitted]
 permissions:
@@ -16,7 +15,6 @@ permissions:
 jobs:
   update_version:
     name: update version
-    : # if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
