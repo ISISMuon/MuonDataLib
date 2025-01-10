@@ -100,7 +100,7 @@ jobs:
       - name: Publish package distribution to PYPI
         env:
           TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.pypi-password }}
+          TWINE_PASSWORD: ${{ secrets.secrets }}
         run : |
           twine upload dist/*
 
