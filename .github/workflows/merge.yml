@@ -101,6 +101,7 @@ jobs:
       - name: Publish package distribution to PYPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
+          verbose: true
           password: ${{ steps.mint.outputs.api-token }}
 
   update_setup:
