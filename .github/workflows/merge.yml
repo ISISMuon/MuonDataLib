@@ -96,6 +96,7 @@ jobs:
       - name: Publish package distribution to PYPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
+          verbose: true
           user: __token__
           password: ${{ secrets.secrets }}
 
