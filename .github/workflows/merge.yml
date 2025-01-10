@@ -95,6 +95,7 @@ jobs:
           merge-multiple: true
       - name: Publish package distribution to PYPI
         uses: pypa/gh-action-pypi-publish@v1.5.0
+        user: __token__
 
   update_setup:
     needs: [upload_pypi]
