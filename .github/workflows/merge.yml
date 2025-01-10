@@ -88,10 +88,6 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - name: mint API token
-        id: mint
-        uses: tschm/token-mint-action@v1.0.2
-
       - uses: actions/download-artifact@v4
         with:
           pattern: cibw-*
@@ -99,9 +95,10 @@ jobs:
           merge-multiple: true
 
       - name: Publish package distribution to PYPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.5.0
         with:
-          password: ${{ steps.mint.outputs.api-token }}
+          user: __token__
+          password: ${{ secrets.pypi_password }}
 
   update_setup:
     needs: [upload_pypi]
