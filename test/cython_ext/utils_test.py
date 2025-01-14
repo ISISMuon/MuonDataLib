@@ -49,8 +49,8 @@ class UtilsTest(TestHelper):
         result = binary_search(times, 0, len(times), -12)
         self.assertEqual(result, 0)
         self.assertEqual(warning_mock.call_count, 1)
-        msg = "The target -12.0 is before the first frame 0.0. "
-              "Difference is 12.0"
+        msg = ("The target -12.0 is before the first frame 0.0. "
+               "Difference is 12.0")
         warning_mock.assert_called_with(msg)
 
     @mock.patch('MuonDataLib.cython_ext.utils.warning')
@@ -59,8 +59,8 @@ class UtilsTest(TestHelper):
         result = binary_search(times, 0, len(times), 250)
         self.assertEqual(result, 6)
         self.assertEqual(warning_mock.call_count, 1)
-        msg = "The target 250.0 is after the last frame start time 14.0. "
-              "Difference is 236.0"
+        msg = ("The target 250.0 is after the last frame start time 14.0. "
+               "Difference is 236.0")
         warning_mock.assert_called_with(msg)
 
 
