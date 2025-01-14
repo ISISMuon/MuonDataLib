@@ -1,7 +1,5 @@
 [build-system]
-Requires-Dist: cython
-Requires-Dist: numpy
-Requires-Dist: setuptools
+requires = ['cython', 'numpy', 'setuptools<=75.7.0']
 build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
