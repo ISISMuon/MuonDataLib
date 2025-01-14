@@ -197,7 +197,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                                                   0.1006,
                                                   0.1207,
                                                   0.1408,
-                                                  0.1609])*1.e-9)
+                                                  0.1609]))
 
     def test_add_time_filter(self):
         """
