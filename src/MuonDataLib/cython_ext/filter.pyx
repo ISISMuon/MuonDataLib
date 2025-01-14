@@ -8,7 +8,8 @@ cnp.import_array()
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end):
+cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end,
+                  str name='value', str unit=''):
     """
     Method for calculating which frames filters belong to.
     This assumes that all data is in order.
@@ -22,6 +23,8 @@ cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end):
     :param times: the list of frame start times
     :param f_start: a list of filter start times
     :param f_end: a list of filter end times
+    :param name: the name of the thing we are filtering on
+    :param unit: the unit of the thing being filtered
     :result: the list of start and end frame indices for the filters
     """
     cdef int N = len(f_start)
