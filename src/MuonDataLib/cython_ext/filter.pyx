@@ -38,13 +38,13 @@ cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end,
     cdef int start = 0
 
     for j in range(N):
-        j_start[j] = binary_search(times, start, M, f_start[j])
+        j_start[j] = binary_search(times, start, M, f_start[j], name, unit)
         start = j_start[j]
 
     # the first end filter must be after the first start filter
     start = j_start[0]
     for j in range(N):
-        j_end[j] = binary_search(times, start, M, f_end[j])
+        j_end[j] = binary_search(times, start, M, f_end[j], name, unit)
 
     return _j_start, _j_end
 
