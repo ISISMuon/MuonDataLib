@@ -59,7 +59,9 @@ class UtilsTest(TestHelper):
         result = binary_search(times, 0, len(times), 250)
         self.assertEqual(result, 6)
         self.assertEqual(warning_mock.call_count, 1)
-        warning_mock.assert_called_with('The target 250.0 is after the last frame start time 14.0. Difference is 236.0')
+        msg = "The target 250.0 is after the last frame start time 14.0. "
+              "Difference is 236.0"
+        warning_mock.assert_called_with(msg)
 
 
 if __name__ == '__main__':
