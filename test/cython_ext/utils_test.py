@@ -1,4 +1,5 @@
 import unittest
+from unittest import mock
 import numpy as np
 from MuonDataLib.cython_ext.utils import binary_search
 from MuonDataLib.test_helpers.unit_test import TestHelper
@@ -42,15 +43,23 @@ class UtilsTest(TestHelper):
         result = binary_search(times, 0, len(times), 12)
         self.assertEqual(result, 5)
 
-    def test_target_is_too_small(self):
+    @mock.patch('MuonDataLib.cython_ext.utils.warning')
+    def test_target_is_too_small(self, warning_mock):
         times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
-        with self.assertRaises(RuntimeError):
-            _ = binary_search(times, 0, len(times), -12)
+        result = binary_search(times, 0, len(times), -12)
+        self.assertEqual(result, 0)
+        self.assertEqual(warning_mock.call_count, 1)
+        msg = "The target -12.0 is before the first frame 0.0. "
+              "Difference is 12.0"
+        warning_mock.assert_called_with(msg)
 
-    def test_target_is_too_large(self):
+    @mock.patch('MuonDataLib.cython_ext.utils.warning')
+    def test_target_is_too_large(self, warning_mock):
         times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
-        with self.assertRaises(RuntimeError):
-            _ = binary_search(times, 0, len(times), 250)
+        result = binary_search(times, 0, len(times), 250)
+        self.assertEqual(result, 6)
+        self.assertEqual(warning_mock.call_count, 1)
+        warning_mock.assert_called_with('The target 250.0 is after the last frame start time 14.0. Difference is 236.0')
 
 
 if __name__ == '__main__':

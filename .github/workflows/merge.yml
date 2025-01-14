@@ -1,12 +1,6 @@
 name: Build and upload to PyPI
 
 on:
-  push:
-    branches:
-    - 'main'
-  pull_request:
-    branches:
-      - 'main'
   pull_request_review:
     types: [submitted]
 permissions:
@@ -15,6 +9,7 @@ permissions:
 jobs:
   update_version:
     name: update version
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -117,7 +112,7 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: pyproject
       - name: check
