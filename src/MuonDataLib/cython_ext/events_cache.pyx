@@ -1,6 +1,7 @@
 import numpy as np
 cimport numpy as cnp
 import cython
+cimport cpython.datetime as dt
 cnp.import_array()
 
 
@@ -21,6 +22,9 @@ cdef class EventsCache:
     cdef readonly int[:] N_frames
     cdef readonly int[:] N_good_frames
     cdef readonly int[:] N_requested_frames
+    cdef readonly int[:] rm_frames
+    cdef readonly dt.datetime start_time
+    cdef readonly dt.datetime end_time
 
     def __init__(self):
         """
@@ -37,22 +41,41 @@ cdef class EventsCache:
         self.N_frames = np.asarray([], dtype=np.int32)
         self.N_good_frames = np.asarray([], dtype=np.int32)
         self.N_requested_frames = np.asarray([], dtype=np.int32)
+        self.rm_frames = np.asarray([], dtype=np.int32)
+        self.start_time = dt.datetime(2018, 12, 24, 13, 32, 1)
+        self.end_time = dt.datetime(2018, 12, 25, 14, 42, 10)
+
+    def test(self, seconds):
+        t = dt.timedelta(seconds=seconds)
+        print(self.start_time, t)
+        return self.start_time + t
 
     def save(self,
             int[:, :, :] histograms,
             double[:] bins,
-             int[:] N_frames):
+            int[:] N_frames):#,
+            #int[:] rm_frames,
+            #double start_time,
+            #double end_frame_time):
         """
         Store data in the cache
         :param histograms: the histogram data (periods, N_det, bin)
         :param bins: the histogram bins
         :param N_frames: the number of frames used (can be an int of list)
+        :param rm_frames: the number of frames removed
+        (at present doesnt account for multiperiod data)
+        :param start_time: the start time
+        :param end_frame_time: the last frame start time
         """
         self.histograms = histograms
         self.bins = bins
         self.N_frames = N_frames
         self.N_good_frames = N_frames
         self.N_requested_frames = N_frames
+        #self.rm_frames = rm_frames
+        #self.start_time = start_time
+        # add 32 micro sec to the end of the last frame (ns)
+        #self.end_time = end_frame_time + 32.0e3
 
     def get_histograms(self):
         """

@@ -156,6 +156,7 @@ cdef class Events:
             # calculate the frames that are excluded by the filter
             f_i_start, f_i_end = get_indices(self.get_start_times(), f_start, f_end)
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+            print("remove ", rm_frames)
             # update the number of frames for the histogram
             frames -= rm_frames
             # remove the filtered data from the event lists

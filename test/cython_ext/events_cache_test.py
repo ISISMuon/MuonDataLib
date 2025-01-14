@@ -76,6 +76,11 @@ class EventsCacheTest(TestHelper):
         with self.assertRaises(RuntimeError):
             cache.set_good_frames(np.asarray([1, 2], dtype=np.int32))
 
+    def test_date(self):
+        cache = EventsCache()
+        print(cache.test(100))
+        self.assertEqual(1, 2)
+
 
 if __name__ == '__main__':
     unittest.main()
