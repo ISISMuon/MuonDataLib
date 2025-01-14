@@ -15,7 +15,7 @@ class EventsTest(TestHelper):
         self._IDs = np.asarray([0, 1, 0, 1, 0, 1], dtype='int32')
         self._time = 1.e3*np.asarray([1., 2., 3., 4., 5., 6.], dtype=np.double)
         self._frame_i = np.asarray([0, 2, 4], dtype='int32')
-        self._frame_time = np.asarray([0., 2., 4.], dtype=np.double)*1.e9
+        self._frame_time = np.asarray([0.0, 2.0, 4.0], dtype=np.double)
 
         self._events = Events(self._IDs,
                               self._time,
@@ -70,7 +70,7 @@ class EventsTest(TestHelper):
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
-                          [0., 2., 4.])
+                          [0.0, 2.0, 4.0])
 
     def test_add_filter(self):
         f_start, f_end = self._events._get_filters()
@@ -189,7 +189,7 @@ class EventsTest(TestHelper):
         self.assertArrays(data['unit'], [2.1, 2.6])
 
     def test_filter_histogram(self):
-        self._events.add_filter('test', 1.2e-3, 1.7e-3)
+        self._events.add_filter('test', 1.2, 1.7)
         cache = EventsCache()
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
@@ -200,8 +200,8 @@ class EventsTest(TestHelper):
         self.assertEqual(cache.get_total_frames()[0], 2)
 
     def test_filters_overlap_works(self):
-        self._events.add_filter('test', 1.2e-3, 1.7e-3)
-        self._events.add_filter('unit', 1.6e-3, 1.9e-3)
+        self._events.add_filter('test', 1.2, 1.7)
+        self._events.add_filter('unit', 1.6, 1.9)
         cache = EventsCache()
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))

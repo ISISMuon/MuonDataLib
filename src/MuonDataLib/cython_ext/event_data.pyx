@@ -54,7 +54,7 @@ cdef class Events:
         Get the frame start times (stored in ns)
         :returns: the frame start times in seconds
         """
-        return np.asarray(self.frame_start_time)*1e-9
+        return np.asarray(self.frame_start_time)
 
     def _get_filters(self):
         """
