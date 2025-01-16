@@ -145,7 +145,7 @@ cdef class Events:
         """
         # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
-        cdef int frames = len(self.start_index_list)
+        cdef int rm_frames = 0
         cdef double[:] times, f_start, f_end
 
         if len(self.filter_start.keys())>0:
@@ -156,9 +156,7 @@ cdef class Events:
             # calculate the frames that are excluded by the filter
             f_i_start, f_i_end = get_indices(self.get_start_times(), f_start, f_end)
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
-            print("remove ", rm_frames)
             # update the number of frames for the histogram
-            frames -= rm_frames
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -175,7 +173,8 @@ cdef class Events:
                                     width)
         if cache is not None:
             cache.save(np.asarray([hist]), bins,
-                       np.asarray([frames], dtype=np.int32))
+                       np.asarray([rm_frames], dtype=np.int32),
+                       veto_frames=np.zeros(1, dtype=np.int32))
 
         return hist, bins
 

@@ -19,17 +19,17 @@ cdef class EventsCache:
     """
     cdef readonly int[:, :, :] histograms
     cdef readonly double[:] bins
-    cdef readonly int[:] N_frames
-    cdef readonly int[:] N_good_frames
-    cdef readonly int[:] N_requested_frames
-    cdef readonly int[:] rm_frames
+    cdef readonly int[:] N_event_frames
+    cdef readonly int[:] N_filter_frames
+    cdef readonly int[:] N_veto_frames
     cdef readonly dt.datetime start_time
-    cdef readonly dt.datetime end_time
 
-    def __init__(self):
+    def __init__(self, dt.datetime start_time, int[:] event_frames):
         """
         Create an empty cache
         """
+        self.N_event_frames = event_frames
+        self.start_time = start_time
         self.clear()
 
     def clear(self):
@@ -38,12 +38,8 @@ cdef class EventsCache:
         """
         self.histograms = None
         self.bins = None
-        self.N_frames = np.asarray([], dtype=np.int32)
-        self.N_good_frames = np.asarray([], dtype=np.int32)
-        self.N_requested_frames = np.asarray([], dtype=np.int32)
-        self.rm_frames = np.asarray([], dtype=np.int32)
-        self.start_time = dt.datetime(2024, 12, 18, 13, 43, 03)
-        self.end_time = dt.datetime(2024, 12, 18, 14, 43, 30)
+        self.N_filter_frames = np.asarray([], dtype=np.int32)
+        self.N_veto_frames = np.asarray([], dtype=np.int32)
 
     def test(self, seconds):
         t = dt.timedelta(seconds=seconds)
@@ -53,10 +49,8 @@ cdef class EventsCache:
     def save(self,
             int[:, :, :] histograms,
             double[:] bins,
-            int[:] N_frames):#,
-            #int[:] rm_frames,
-            #double start_time,
-            #double end_frame_time):
+            int[:] filter_frames,
+            int[:] veto_frames):
         """
         Store data in the cache
         :param histograms: the histogram data (periods, N_det, bin)
@@ -67,15 +61,13 @@ cdef class EventsCache:
         :param start_time: the start time
         :param end_frame_time: the last frame start time
         """
+        N = len(self.N_event_frames)
+        if len(filter_frames) != N or len(veto_frames) != N:
+            raise RuntimeError("The list of frames does not match")
         self.histograms = histograms
         self.bins = bins
-        self.N_frames = N_frames
-        self.N_good_frames = N_frames
-        self.N_requested_frames = N_frames
-        #self.rm_frames = rm_frames
-        #self.start_time = start_time
-        # add 32 micro sec to the end of the last frame (ns)
-        #self.end_time = end_frame_time + 32.0e3
+        self.N_filter_frames = filter_frames
+        self.N_veto_frames = veto_frames
 
     def get_histograms(self):
         """
@@ -85,57 +77,59 @@ cdef class EventsCache:
             raise RuntimeError("The cache is empty, cannot get histograms")
         return np.asarray(self.histograms), np.asarray(self.bins)
 
-    def get_total_frames(self):
+    def frame_check(self):
         """
-        :return: the total number of frames
+        Check that the cache has data, if not return error
         """
         if self.empty():
             raise RuntimeError("The cache is empty, cannot get frames")
-        return self.N_frames
 
-    def set_good_frames(self, int[:] N):
+    @property
+    def get_discarded_good_frames(self):
         """
-        :param N: the number of good frames
+        :return: the number of discarded good frames (filtered + veto)
         """
+        self.frame_check()
+        return np.asarray(self.N_filter_frames) + np.asarray(self.N_veto_frames)
 
-        if len(N) != len(self.N_good_frames):
-            raise RuntimeError(f"The number of good frames {N} "
-                               "must be the same length as number "
-                               "of frames {self.N_frames}")
-        self.N_good_frames = N
+    @property
+    def get_discarded_raw_frames(self):
+        """
+        :return: the number of discarded raw frames (filtered)
+        """
+        self.frame_check()
+        return np.asarray(self.N_filter_frames)
 
+    @property
     def get_good_frames(self):
         """
         :return: the number of good frames
         """
-        if self.empty():
-            raise RuntimeError("The cache is empty, cannot get frames")
-        return self.N_good_frames
+        self.frame_check()
+        return np.asarray(self.N_event_frames) - self.get_discarded_good_frames
 
-    def set_requested_frames(self, int[:] N):
+    @property
+    def get_raw_frames(self):
         """
-        :param N: the number of requested frames
+        :return: the number of raw frames
         """
-
-        if len(N) != len(self.N_good_frames):
-            raise RuntimeError(f"The number of requested frames {N} "
-                               "must be the same length as number "
-                               "of frames {self.N_frames}")
-        self.N_requested_frames = N
-
-    def get_requested_frames(self):
-        """
-        :return: the number of good frames
-        """
-        if self.empty():
-            raise RuntimeError("The cache is empty, cannot get frames")
-        return self.N_requested_frames
+        self.frame_check()
+        return np.asarray(self.N_event_frames) - self.get_discarded_raw_frames
 
     def empty(self):
         """
         Check if the cache is empty
         :return: if the cache is empty as a bool
         """
-        if len(self.N_frames)==0:
+        if len(self.N_filter_frames)==0:
             return True
         return False
+
+    @property
+    def get_count_duration(self):
+        """
+        good frames * (100 ms)/4 then convert to seconds
+        :return: the duration of the experiment, while on, in seconds
+        """
+        self.frame_check()
+        return self.get_good_frames*0.025

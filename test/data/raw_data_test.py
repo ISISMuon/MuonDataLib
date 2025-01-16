@@ -7,6 +7,7 @@ from MuonDataLib.test_helpers.raw_data import RawDataTestTemplate
 from MuonDataLib.cython_ext.events_cache import EventsCache
 import unittest
 import numpy as np
+import datetime
 
 
 class _RawDataTest(RawDataTestTemplate, TestHelper):
@@ -57,7 +58,8 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
 
     def create_data(self):
         args = super().create_data()
-        cache = EventsCache()
+        date = datetime.datetime(2024, 11, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([args[8]], dtype=np.int32))
         raw = EventsRawData(cache,
                             args[1], args[2],
                             args[3], args[4],
@@ -66,8 +68,9 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
                             args[10], args[11])
         counts = np.asarray([[[1]]], dtype=np.int32)
         bins = np.asarray([1, 2], dtype=np.double)
-        cache.save(counts, bins, np.asarray([args[8]], dtype=np.int32))
-        cache.set_good_frames(np.asarray([args[0]], dtype=np.int32))
+        cache.save(counts, bins,
+                   np.asarray([0], dtype=np.int32),
+                   np.asarray([41], dtype=np.int32))
         return raw, args[9], args[10]
 
     def save(self, raw, file):
@@ -82,9 +85,9 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
         """
         super().test_raw_data_object_stores_correct_info()
 
-        good = np.asarray(self.raw._cache.get_good_frames())
+        good = np.asarray(self.raw._cache.get_good_frames)
         self.assertEqual(good, 10)
-        total = np.asarray(self.raw._cache.get_total_frames())
+        total = np.asarray(self.raw._cache.get_raw_frames)
         self.assertEqual(total, 51)
 
 

@@ -44,6 +44,7 @@ class LoadEventsTest(unittest.TestCase):
         events = mock.Mock()
         load_data.return_value = (0, events)
         data_cache = mock.Mock()
+        events.get_total_frames = mock.MagicMock(return_value=100)
         cache.return_value = data_cache
         file = os.path.join(os.path.dirname(__file__),
                             '..',

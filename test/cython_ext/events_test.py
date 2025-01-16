@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import os
 import json
+import datetime
 
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.cython_ext.event_data import Events
@@ -57,7 +58,8 @@ class EventsTest(TestHelper):
         self.assertArrays(mat[1], [0, 0, 1, 0, 1, 0, 1])
 
     def test_cache_histogram(self):
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         self.assertTrue(cache.empty())
         mat, bins = self._events.histogram(1.2, 4.2, .2, cache)
 
@@ -66,7 +68,7 @@ class EventsTest(TestHelper):
         self.assertArrays(bins, c_bins)
         # cache adds a list for periods, need to remove it
         self.assertEqual(len(mat), len(c_mat[0]))
-        self.assertEqual(cache.get_total_frames()[0], 3)
+        self.assertEqual(cache.get_good_frames[0], 100)
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
@@ -190,26 +192,28 @@ class EventsTest(TestHelper):
 
     def test_filter_histogram(self):
         self._events.add_filter('test', 1.2, 1.7)
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 2)
         self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
         self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
-        self.assertEqual(cache.get_total_frames()[0], 2)
+        self.assertEqual(cache.get_good_frames[0], 99)
 
     def test_filters_overlap_works(self):
         self._events.add_filter('test', 1.2, 1.7)
         self._events.add_filter('unit', 1.6, 1.9)
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 2)
         self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
         self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
-        self.assertEqual(cache.get_total_frames()[0], 2)
+        self.assertEqual(cache.get_good_frames[0], 99)
 
 
 if __name__ == '__main__':
