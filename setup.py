@@ -2,7 +2,7 @@ from setuptools import find_packages, setup, Extension
 import numpy
 
 
-version = "0.9.0b2"
+version = "0.9.0b3"
 
 
 PACKAGE_NAME = 'MuonDataLib'
@@ -28,6 +28,10 @@ extensions = [
               Extension(
                 "MuonDataLib.cython_ext.filter",
                 sources=["src/MuonDataLib/cython_ext/filter.pyx"]
+                ),
+              Extension(
+                "MuonDataLib.cython_ext.utils",
+                sources=["src/MuonDataLib/cython_ext/utils.pyx"]
                 ),
               ]
 setup(

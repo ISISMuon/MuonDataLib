@@ -11,6 +11,9 @@ import cython
 cnp.import_array()
 
 
+cdef double ns_to_s = 1.e-9
+
+
 cdef class Events:
     """
     Class for storing event information
@@ -23,7 +26,6 @@ cdef class Events:
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
-    cdef readonly double mean
 
 
     def __init__(self,
@@ -47,14 +49,13 @@ cdef class Events:
         self.start_index_list = start_i
         self.end_index_list = np.append(start_i[1:], np.int32(len(IDs)))
         self.frame_start_time = frame_start
-        self.mean = np.mean(frame_start[1:] - frame_start[:-1], dtype=np.double)
         self.filter_start = {}
         self.filter_end = {}
 
     def get_start_times(self):
         """
-        Get the frame start times
-        :returns: the frame start times
+        Get the frame start times (stored in ns)
+        :returns: the frame start times in seconds
         """
         return np.asarray(self.frame_start_time)
 
@@ -156,11 +157,14 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(f_start, f_end, self.mean)
-            f_i_start, f_i_end, frames = rm_overlaps(f_i_start, f_i_end)
-
+            f_i_start, f_i_end = get_indices(ns_to_s*np.asarray(self.get_start_times()),
+                                             ns_to_s*np.asarray(f_start),
+                                             ns_to_s*np.asarray(f_end),
+                                             'frame start time',
+                                             'seconds')
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # update the number of frames for the histogram
-            frames -= frames
+            frames -= rm_frames
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)

@@ -2,6 +2,7 @@ from MuonDataLib.data.muon_data import MuonData, MuonEventData
 from MuonDataLib.data.loader.load_events import load_events
 from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
+import numpy as np
 import os
 import json
 from unittest import mock
@@ -188,15 +189,15 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         start_time = data.get_frame_start_times()
 
-        self.assertArrays(start_time, [0.0,
-                                       0.02012,
-                                       0.04023,
-                                       0.06035,
-                                       0.08046,
-                                       0.1006,
-                                       0.1207,
-                                       0.1408,
-                                       0.1609])
+        self.assertArrays(start_time, np.asarray([0.0,
+                                                  0.02012,
+                                                  0.04023,
+                                                  0.06035,
+                                                  0.08046,
+                                                  0.1006,
+                                                  0.1207,
+                                                  0.1408,
+                                                  0.1609]))
 
     def test_add_time_filter(self):
         """
