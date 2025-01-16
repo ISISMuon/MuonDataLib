@@ -42,12 +42,12 @@ cdef class EventsCache:
         self.N_good_frames = np.asarray([], dtype=np.int32)
         self.N_requested_frames = np.asarray([], dtype=np.int32)
         self.rm_frames = np.asarray([], dtype=np.int32)
-        self.start_time = dt.datetime(2018, 12, 24, 13, 32, 1)
-        self.end_time = dt.datetime(2018, 12, 25, 14, 42, 10)
+        self.start_time = dt.datetime(2024, 12, 18, 13, 43, 03)
+        self.end_time = dt.datetime(2024, 12, 18, 14, 43, 30)
 
     def test(self, seconds):
         t = dt.timedelta(seconds=seconds)
-        print(self.start_time, t)
+        print(self.start_time, self.end_time)
         return self.start_time + t
 
     def save(self,
