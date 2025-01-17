@@ -44,23 +44,43 @@ class UtilsTest(TestHelper):
         self.assertEqual(result, 5)
 
     @mock.patch('MuonDataLib.cython_ext.utils.warning')
-    def test_target_is_too_small(self, warning_mock):
+    def test_target_is_too_small_default(self, warning_mock):
         times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
         result = binary_search(times, 0, len(times), -12)
         self.assertEqual(result, 0)
         self.assertEqual(warning_mock.call_count, 1)
-        msg = ("The target -12.0 is before the first frame 0.0. "
-               "Difference is 12.0")
+        msg = ("The target -12.0 is before the first value 0.0 . "
+               "Difference is 12.0 ")
+        warning_mock.assert_called_with(msg)
+
+    @mock.patch('MuonDataLib.cython_ext.utils.warning')
+    def test_target_is_too_large_default(self, warning_mock):
+        times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
+        result = binary_search(times, 0, len(times), 250)
+        self.assertEqual(result, 6)
+        self.assertEqual(warning_mock.call_count, 1)
+        msg = ("The target 250.0 is after the last value 14.0 . "
+               "Difference is 236.0 ")
+        warning_mock.assert_called_with(msg)
+
+    @mock.patch('MuonDataLib.cython_ext.utils.warning')
+    def test_target_is_too_small(self, warning_mock):
+        times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
+        result = binary_search(times, 0, len(times), -12, 'Temp', 'K')
+        self.assertEqual(result, 0)
+        self.assertEqual(warning_mock.call_count, 1)
+        msg = ("The target -12.0 is before the first Temp 0.0 K. "
+               "Difference is 12.0 K")
         warning_mock.assert_called_with(msg)
 
     @mock.patch('MuonDataLib.cython_ext.utils.warning')
     def test_target_is_too_large(self, warning_mock):
         times = np.asarray([0, 2, 4, 6, 10, 12, 14], dtype=np.double)
-        result = binary_search(times, 0, len(times), 250)
+        result = binary_search(times, 0, len(times), 250, 'Temp', 'K')
         self.assertEqual(result, 6)
         self.assertEqual(warning_mock.call_count, 1)
-        msg = ("The target 250.0 is after the last frame start time 14.0. "
-               "Difference is 236.0")
+        msg = ("The target 250.0 is after the last Temp 14.0 K. "
+               "Difference is 236.0 K")
         warning_mock.assert_called_with(msg)
 
 

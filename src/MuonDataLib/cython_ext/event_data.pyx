@@ -11,6 +11,9 @@ import cython
 cnp.import_array()
 
 
+cdef double ns_to_s = 1.e-9
+
+
 cdef class Events:
     """
     Class for storing event information
@@ -154,7 +157,11 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(self.get_start_times(), f_start, f_end)
+            f_i_start, f_i_end = get_indices(ns_to_s*np.asarray(self.get_start_times()),
+                                             ns_to_s*np.asarray(f_start),
+                                             ns_to_s*np.asarray(f_end),
+                                             'frame start time',
+                                             'seconds')
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # update the number of frames for the histogram
             # remove the filtered data from the event lists

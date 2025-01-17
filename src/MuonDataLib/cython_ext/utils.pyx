@@ -17,7 +17,9 @@ cpdef binary_search(
                     double[:] values,
                     int start,
                     int stop,
-                    double target):
+                    double target,
+                    str name='value',
+                    str unit=''):
 
     """
     A simple recursive binary search. The expectation is that
@@ -32,12 +34,12 @@ cpdef binary_search(
     :returns: The index of the left bounding bin of the target
     """
     if values[0] > target:
-        warning(f'The target {target} is before the first frame {values[0]}. Difference is {values[0]-target}')
+        warning(f'The target {target} is before the first {name} {values[0]} {unit}. Difference is {values[0]-target} {unit}')
 
 
     elif values[len(values)-1] < target:
         i = len(values) - 1
-        warning(f'The target {target} is after the last frame start time {values[i]}. Difference is {target-values[i]}')
+        warning(f'The target {target} is after the last {name} {values[i]} {unit}. Difference is {target-values[i]} {unit}')
 
 
     return _binary_search(values, start, stop, target)
