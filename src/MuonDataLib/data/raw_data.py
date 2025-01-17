@@ -10,7 +10,7 @@ class _RawData(HDF5):
     muon nexus v2 file
     """
     def __init__(self, IDF, definition, inst, title, notes,
-                 run_number, duration, start_time, end_time, ID):
+                 run_number, ID):
         """
         Creates the raw data object, which holds all of the information
         for the raw data section of a muon nexus v2 file
@@ -21,8 +21,6 @@ class _RawData(HDF5):
         :param notes: the additional notes/comments
         :param run_number: the run number
         :param duration: the duration of the experiment
-        :param start_time: the start time of the experiment
-        :param end_time: the end time of the experiment
         :param ID: a string identifier for the experiment
         """
         super().__init__()
@@ -32,17 +30,17 @@ class _RawData(HDF5):
         self._dict['title'] = title
         self._dict['notes'] = notes
         self._dict['run_number'] = run_number
-        self._dict['duration'] = duration
-        self._dict['start'] = start_time
-        self._dict['end'] = end_time
         self._dict['ID'] = ID
 
-    def save_nxs2(self, file, good_frames, raw_frames):
+    def save_nxs2(self, file, good_frames, raw_frames,
+                  start_time, end_time, duration):
         """
         A method to save the information into a muon nexus v2 file
         :param file: the open file to write to.
         :param good_frames: the number of good frames
         :param raw_frames: the number of raw frames
+        :param start_time: the start date time
+        :param end_time: the end date time
         """
         tmp = file.require_group('raw_data_1')
         tmp.attrs['NX_class'] = 'NXentry'
@@ -54,16 +52,21 @@ class _RawData(HDF5):
         self.save_str('title', self._dict['title'], tmp)
         self.save_str('notes', self._dict['notes'], tmp)
         self.save_int('run_number', self._dict['run_number'], tmp)
-        self.save_float('duration', self._dict['duration'], tmp)
+
+        dur = self.save_float('duration', duration, tmp)
+        dur.attrs.create('units', 'seconds'.encode(), dtype='S7')
+
         self.save_int('raw_frames', raw_frames, tmp)
         self.save_str('start_time',
-                      convert_date_for_NXS(self._dict['start']),
+                      convert_date_for_NXS(start_time),
                       tmp)
-        self.save_str('end_time', convert_date_for_NXS(self._dict['end']), tmp)
+        self.save_str('end_time', convert_date_for_NXS(end_time), tmp)
         self.save_str('experiment_identifier', self._dict['ID'], tmp)
 
-        tmp = tmp.require_group('instrument')
-        self.save_str('name', self._dict['inst'], tmp)
+        tmp2 = tmp.require_group('instrument')
+        self.save_str('name', self._dict['inst'], tmp2)
+
+        return tmp
 
 
 class RawData(_RawData):
@@ -90,11 +93,13 @@ class RawData(_RawData):
         :param ID: a string identifier for the experiment
         """
         super().__init__(IDF, definition, inst, title, notes,
-                         run_number, duration,
-                         start_time, end_time, ID)
+                         run_number, ID)
 
         self._dict['good_frames'] = good_frames
         self._dict['raw_frames'] = raw_frames
+        self._dict['start'] = start_time
+        self._dict['end'] = end_time
+        self._dict['duration'] = duration
 
     def save_nxs2(self, file):
         """
@@ -103,7 +108,11 @@ class RawData(_RawData):
         """
         super().save_nxs2(file,
                           self._dict['good_frames'],
-                          self._dict['raw_frames'])
+                          self._dict['raw_frames'],
+                          self._dict['start'],
+                          self._dict['end'],
+                          self._dict['duration'],
+                          )
 
 
 class EventsRawData(_RawData):
@@ -112,7 +121,7 @@ class EventsRawData(_RawData):
     muon nexus v2 file
     """
     def __init__(self, cache, IDF, definition, inst, title, notes,
-                 run_number, duration, start_time, end_time, ID):
+                 run_number, ID):
         """
         Creates the raw data object, which holds all of the information
         for the raw data section of a muon nexus v2 file
@@ -123,25 +132,37 @@ class EventsRawData(_RawData):
         :param title: the title of the experiment
         :param notes: the additional notes/comments
         :param run_number: the run number
-        :param duration: the duration of the experiment
-        :param start_time: the start time of the experiment
-        :param end_time: the end time of the experiment
         :param ID: a string identifier for the experiment
         """
         super().__init__(IDF, definition, inst, title, notes,
-                         run_number, duration, start_time,
-                         end_time, ID)
+                         run_number, ID)
 
         self._cache = cache
 
     def save_nxs2(self, file):
         """
         A method to save the information into a muon nexus v2 file
+        Will need to edit this for multi-period
         :param file: the open file to write to.
         """
-        super().save_nxs2(file,
-                          self._cache.get_good_frames[0],
-                          self._cache.get_raw_frames[0])
+        tmp = super().save_nxs2(file,
+                                self._cache.get_good_frames[0],
+                                self._cache.get_raw_frames[0],
+                                self._cache.get_start_time,
+                                self._cache.get_end_time,
+                                self._cache.get_duration
+                                )
+
+        self.save_int('discarded_raw_frames',
+                      self._cache.get_discarded_raw_frames[0],
+                      tmp)
+
+        dur = self.save_float('count_duration',
+                              self._cache.get_count_duration[0],
+                              tmp)
+
+        dur.attrs.create('units', 'seconds'.encode(), dtype='S7')
+        print('count_duration', self._cache.get_count_duration[0], tmp)
 
 
 def read_raw_data_from_histogram(file):

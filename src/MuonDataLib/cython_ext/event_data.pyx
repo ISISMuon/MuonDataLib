@@ -149,7 +149,7 @@ cdef class Events:
         # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int rm_frames = 0
-        cdef double[:] times, f_start, f_end
+        cdef double[:] times, f_start, f_end, frame_times
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -157,7 +157,8 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(ns_to_s*np.asarray(self.get_start_times()),
+            frame_times = ns_to_s*np.asarray(self.get_start_times())
+            f_i_start, f_i_end = get_indices(frame_times,
                                              ns_to_s*np.asarray(f_start),
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
@@ -179,9 +180,24 @@ cdef class Events:
                                     max_time,
                                     width)
         if cache is not None:
+            if f_i_start[0] > 0:
+                first_time = frame_times[0]
+            else:
+                first_time = frame_times[f_i_end[0] + 1]
+
+            if f_i_end[-1] < len(frame_times):
+                last_time = frame_times[-1]
+            else:
+                last_time = frame_times[f_i_start[-1]]
+
+
+
+
             cache.save(np.asarray([hist]), bins,
                        np.asarray([rm_frames], dtype=np.int32),
-                       veto_frames=np.zeros(1, dtype=np.int32))
+                       veto_frames=np.zeros(1, dtype=np.int32),
+                       first_time=first_time,
+                       last_time=last_time)
 
         return hist, bins
 

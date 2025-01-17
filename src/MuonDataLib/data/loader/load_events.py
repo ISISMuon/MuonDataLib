@@ -24,13 +24,10 @@ def load_events(file_name, N):
         tmp = file.require_group('raw_data_1')
         run_number = int(tmp['run_number'][()])
         start_time = convert_date(tmp['start_time'][()].decode().split('+')[0])
-        end_time = convert_date(tmp['end_time'][()].decode().split('+')[0])
 
     _, events = load_data(file_name, N)
     cache = EventsCache(start_time,
                         np.asarray([events.get_total_frames], dtype=np.int32))
-
-    duration = (end_time - start_time).total_seconds()
 
     raw_data = EventsRawData(cache,
                              2,
@@ -39,9 +36,6 @@ def load_events(file_name, N):
                              'Title: test',
                              'Notes: test',
                              run_number,
-                             duration,
-                             start_time,
-                             end_time,
                              'raw ID: test')
 
     sample = Sample('sample ID: test',
