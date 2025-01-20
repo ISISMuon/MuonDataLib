@@ -71,7 +71,6 @@ cdef class EventsCache:
         self.N_filter_frames = filter_frames
         self.N_veto_frames = veto_frames
 
-        print("moo", self.start_time, first_time, dt.timedelta(seconds=first_time))
         self.first_good_time = self.start_time + dt.timedelta(seconds=first_time)
         self.last_good_time = self.start_time + dt.timedelta(seconds=last_time)
 

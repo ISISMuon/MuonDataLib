@@ -1,6 +1,5 @@
 from MuonDataLib.data.utils import (convert_date_for_NXS,
                                     convert_date)
-
 from MuonDataLib.data.hdf5 import HDF5
 
 
@@ -162,7 +161,6 @@ class EventsRawData(_RawData):
                               tmp)
 
         dur.attrs.create('units', 'seconds'.encode(), dtype='S7')
-        print('count_duration', self._cache.get_count_duration[0], tmp)
 
 
 def read_raw_data_from_histogram(file):
@@ -185,3 +183,47 @@ def read_raw_data_from_histogram(file):
                    convert_date(tmp['start_time'][0].decode()),
                    convert_date(tmp['end_time'][0].decode()),
                    tmp['experiment_identifier'][0].decode())
+
+
+def warning(name):
+    print("WARNING:", f'The metadata {name} is missing. Using fallback values')
+
+
+def read_raw_data_from_events(file):
+    """
+    A function for reading the additional raw data information
+    from a muon nexus event file
+    :param file: the open file to read from
+    :return: the inputs for the event raw data object
+    """
+    tmp = file['raw_data_1']
+
+    """
+    At present (20/01/25) the event nexus file is not
+    recording all of the metadata. Therefore,
+    we will need to check if the metadata exists/occupied
+    and if not replace it with some fall back values.
+    The notes metadata is not present at all
+    """
+    run = tmp['run_number'][()]
+    title = tmp['title'][()].decode(),
+    notes = "Notes: test"
+    exp_ID = tmp['experiment_identifier'][()].decode()
+
+    if run <= 0:
+        warning("run")
+        run = 0
+    if title[0] == '':
+        warning('title')
+        title = 'Title: test'
+    if exp_ID == '':
+        exp_ID = 'raw ID: test'
+
+    return ((tmp["IDF_version"][()],
+             tmp['definition'][()].decode(),
+             tmp['name'][()].decode(),
+             title,
+             notes,
+             run,
+             exp_ID),
+            convert_date(tmp['start_time'][()].decode().split('+')[0]))

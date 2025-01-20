@@ -149,7 +149,9 @@ cdef class Events:
         # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int rm_frames = 0
-        cdef double[:] times, f_start, f_end, frame_times
+        cdef double[:] times, f_start, f_end
+
+        cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -157,7 +159,6 @@ cdef class Events:
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
             # calculate the frames that are excluded by the filter
-            frame_times = ns_to_s*np.asarray(self.get_start_times())
             f_i_start, f_i_end = get_indices(frame_times,
                                              ns_to_s*np.asarray(f_start),
                                              ns_to_s*np.asarray(f_end),
@@ -171,7 +172,8 @@ cdef class Events:
         else:
             IDs = self.IDs
             times = self.times
-
+            f_i_start = np.asarray([], dtype=np.int32)
+            f_i_end = np.asarray([], dtype=np.int32)
 
         hist, bins = make_histogram(times,
                                     IDs,
@@ -180,19 +182,10 @@ cdef class Events:
                                     max_time,
                                     width)
         if cache is not None:
-            if f_i_start[0] > 0:
-                first_time = frame_times[0]
-            else:
-                first_time = frame_times[f_i_end[0] + 1]
 
-            if f_i_end[-1] < len(frame_times):
-                last_time = frame_times[-1]
-            else:
-                last_time = frame_times[f_i_start[-1]]
-
-
-
-
+            first_time, last_time = self._start_and_end_times(frame_times,
+                                                              f_i_start,
+                                                              f_i_end)
             cache.save(np.asarray([hist]), bins,
                        np.asarray([rm_frames], dtype=np.int32),
                        veto_frames=np.zeros(1, dtype=np.int32),
@@ -200,6 +193,26 @@ cdef class Events:
                        last_time=last_time)
 
         return hist, bins
+
+    def _start_and_end_times(self, double[:] frame_times,
+                             int[:] f_i_start,
+                             int[:] f_i_end):
+
+        cdef double first_time, last_time
+
+        if len(f_i_start) == 0:
+            return frame_times[0], frame_times[-1]
+        if f_i_start[0] > 0:
+            first_time = frame_times[0]
+        else:
+            first_time = frame_times[f_i_end[0] + 1]
+
+        if f_i_end[-1] < len(frame_times):
+            last_time = frame_times[-1]
+        else:
+            last_time = frame_times[f_i_start[-1]]
+        return first_time, last_time
+
 
     @property
     def get_N_spec(self):

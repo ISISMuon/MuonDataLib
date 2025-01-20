@@ -11,7 +11,7 @@ DATADIR = os.path.join(os.path.dirname(__file__),
                        'data_files')
 INFILE = os.path.join(DATADIR, 'HIFI00183810.nxs')
 REFFILE = os.path.join(DATADIR, 'HIFI51.nxs')
-OUTFILE = 'single_period_test.nxs'
+OUTFILE = 'multiperiod_test.nxs'
 
 
 class SinglePeriodSystemTest(unittest.TestCase):

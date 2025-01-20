@@ -88,6 +88,7 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
                    np.asarray([3.2, 5.6], dtype=np.double),
                    np.asarray([0], dtype=np.int32),
                    np.asarray([500], dtype=np.int32),
+                   0.0, 100.0
                    )
 
         return events
@@ -104,7 +105,8 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
                                [[20, 21], [1, 3]]], dtype=np.int32),
                    np.asarray([3.2, 5.6], dtype=np.double),
                    np.asarray([0, 0], dtype=np.int32),
-                   np.asarray([500, 100], dtype=np.int32))
+                   np.asarray([500, 100], dtype=np.int32),
+                   0.0, 100.0)
         return events
 
     def save(self, period, file):
