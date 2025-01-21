@@ -1,6 +1,8 @@
 from MuonDataLib.data.utils import (convert_date_for_NXS,
                                     convert_date)
 from MuonDataLib.data.hdf5 import HDF5
+import re
+import numpy as np
 
 
 class _RawData(HDF5):
@@ -209,10 +211,12 @@ def read_raw_data_from_events(file):
     title = tmp['title'][()].decode(),
     notes = "Notes: test"
     exp_ID = tmp['experiment_identifier'][()].decode()
+    name = tmp['name'][()].decode(),
 
     if run <= 0:
         warning("run")
-        run = 0
+        split = re.compile('([a-zA-Z]+)([0-9]+)')
+        run = np.int32(split.match(name[0]).groups()[1])
     if title[0] == '':
         warning('title')
         title = 'Title: test'
@@ -221,7 +225,7 @@ def read_raw_data_from_events(file):
 
     return ((tmp["IDF_version"][()],
              tmp['definition'][()].decode(),
-             tmp['name'][()].decode(),
+             name[0],
              title,
              notes,
              run,

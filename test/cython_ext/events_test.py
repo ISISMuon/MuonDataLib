@@ -215,6 +215,62 @@ class EventsTest(TestHelper):
         # check filter updates number of frames correctly
         self.assertEqual(cache.get_good_frames[0], 99)
 
+    def test_get_filtered_data(self):
+        self._events.add_filter('test', 1.2, 1.7)
+
+        results = self._events._get_filtered_data(1.e-9*self._frame_time)
+        f_start, f_end, rm, IDs, times = results
+        self.assertArrays(np.asarray(f_start), [0])
+        self.assertArrays(np.asarray(f_end), [0])
+
+        self.assertEqual(rm, 1)
+        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1])
+        self.assertArrays(np.asarray(times), [3000., 4000.,
+                                              5000., 6000.])
+
+    def test_get_filtered_data_no_filter(self):
+
+        results = self._events._get_filtered_data(1.e-9*self._frame_time)
+        f_start, f_end, rm, IDs, times = results
+        self.assertArrays(np.asarray(f_start), [])
+        self.assertArrays(np.asarray(f_end), [])
+
+        self.assertEqual(rm, 0)
+        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1])
+        self.assertArrays(np.asarray(times), [1000., 2000.,
+                                              3000., 4000.,
+                                              5000., 6000.])
+
+    def test_start_and_end_times_filter_in_middle(self):
+        frame_times = np.arange(1, 20, dtype=np.double)
+        f_start = np.asarray([4, 16], dtype=np.int32)
+        f_end = np.asarray([5, 17], dtype=np.int32)
+        first, last = self._events._start_and_end_times(frame_times,
+                                                        f_start,
+                                                        f_end)
+        self.assertEqual(first, 1.0)
+        self.assertEqual(last, 19.0)
+
+    def test_start_and_end_times_filter_at_start(self):
+        frame_times = np.arange(1, 20, dtype=np.double)
+        f_start = np.asarray([0, 7], dtype=np.int32)
+        f_end = np.asarray([5, 8], dtype=np.int32)
+        first, last = self._events._start_and_end_times(frame_times,
+                                                        f_start,
+                                                        f_end)
+        self.assertEqual(first, 7.0)
+        self.assertEqual(last, 19.0)
+
+    def test_start_and_end_times_filter_at_end(self):
+        frame_times = np.arange(1, 20, dtype=np.double)
+        f_start = np.asarray([4, 18], dtype=np.int32)
+        f_end = np.asarray([5, 18], dtype=np.int32)
+        first, last = self._events._start_and_end_times(frame_times,
+                                                        f_start,
+                                                        f_end)
+        self.assertEqual(first, 1.0)
+        self.assertEqual(last, 18.0)
+
 
 if __name__ == '__main__':
     unittest.main()

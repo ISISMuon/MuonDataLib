@@ -132,6 +132,44 @@ cdef class Events:
     def get_total_frames(self):
         return len(self.start_index_list)
 
+    def _get_filtered_data(self, frame_times):
+        """
+        A method to get the information about the applied filters.
+        This includes the list of events after the filter has been applied,
+        the number of removed frames and the indices for the filters.
+        :param frame_times: the times for the start of each frame (in seconds).
+        The number of removed frames. The list of filtered detector IDs and
+        event time stamps.
+        """
+
+        cdef int[:] IDs, f_i_start, f_i_end
+        cdef int rm_frames = 0
+        cdef double[:] times, f_start, f_end
+
+        if len(self.filter_start.keys())>0:
+            # sort the filter data
+            f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
+            f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
+
+            # calculate the frames that are excluded by the filter
+            f_i_start, f_i_end = get_indices(frame_times,
+                                             ns_to_s*np.asarray(f_start),
+                                             ns_to_s*np.asarray(f_end),
+                                             'frame start time',
+                                             'seconds')
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+            # remove the filtered data from the event lists
+            IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
+            times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+        else:
+            # no filters
+            IDs = self.IDs
+            times = self.times
+            f_i_start = np.asarray([], dtype=np.int32)
+            f_i_end = np.asarray([], dtype=np.int32)
+
+        return f_i_start, f_i_end, rm_frames, IDs, times
+
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,
@@ -146,34 +184,13 @@ cdef class Events:
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-        # can add check for filter
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int rm_frames = 0
-        cdef double[:] times, f_start, f_end
+        cdef double[:] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        if len(self.filter_start.keys())>0:
-            # sort the filter data
-            f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
-            f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
-
-            # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(frame_times,
-                                             ns_to_s*np.asarray(f_start),
-                                             ns_to_s*np.asarray(f_end),
-                                             'frame start time',
-                                             'seconds')
-            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
-            # update the number of frames for the histogram
-            # remove the filtered data from the event lists
-            IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
-            times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
-        else:
-            IDs = self.IDs
-            times = self.times
-            f_i_start = np.asarray([], dtype=np.int32)
-            f_i_end = np.asarray([], dtype=np.int32)
+        f_i_start, f_i_end, rm_frames, IDs, times = self._get_filtered_data(frame_times)
 
         hist, bins = make_histogram(times,
                                     IDs,
@@ -194,25 +211,56 @@ cdef class Events:
 
         return hist, bins
 
-    def _start_and_end_times(self, double[:] frame_times,
+    @staticmethod
+    def _start_and_end_times(double[:] frame_times,
                              int[:] f_i_start,
                              int[:] f_i_end):
-
+        """
+        A method to get the start and end time for the filtered
+        data. Each frame at best contains about 20ms of events
+        and these will always be at the start of the frame.
+        So if the beam goes down, the next frame could be an hour
+        later but the events will all be within the
+        first 20ms of the frame. Therefore,
+        we can estimate the end time by using the time passed
+        between the start time and the time stamp for the start
+        of the last frame. Since the 20ms will make little
+        difference to the end tiime as a first order approximation
+        (we only record to an accuracy of seconds). The start time
+        is from the first frame that is included in the filtered
+        data.
+        :param frame_times: the timestamps for the start of the
+        frames.
+        :param f_i_start: the list of indices for the start
+        of the filters.
+        :param f_i_end: the list of indices for the end
+        of the filters
+        :returns: the start and end times for the filtered data
+        """
         cdef double first_time, last_time
-
+        # no filters
         if len(f_i_start) == 0:
             return frame_times[0], frame_times[-1]
+
         if f_i_start[0] > 0:
+            # if first filter is after first frame
             first_time = frame_times[0]
         else:
+            # the first filter includes first frame
             first_time = frame_times[f_i_end[0] + 1]
 
-        if f_i_end[-1] < len(frame_times):
+        if f_i_end[-1] < len(frame_times)-1:
+            # if the last filter is before the last frame
             last_time = frame_times[-1]
         else:
-            last_time = frame_times[f_i_start[-1]]
+            """
+            If the last filter includes the last frame.
+            Want to get the time of the frame just
+            before the last filter starts.
+            Hence, f_i_start[-1] - 1.
+            """
+            last_time = frame_times[f_i_start[-1] - 1]
         return first_time, last_time
-
 
     @property
     def get_N_spec(self):
