@@ -214,13 +214,14 @@ def read_raw_data_from_events(file):
     name = tmp['name'][()].decode(),
 
     if run <= 0:
-        warning("run")
+        warning("**RUN**")
         split = re.compile('([a-zA-Z]+)([0-9]+)')
         run = np.int32(split.match(name[0]).groups()[1])
     if title[0] == '':
-        warning('title')
+        warning('**TITLE**')
         title = 'Title: test'
     if exp_ID == '':
+        warning('**EXPERIMENT IDENTIFIER**')
         exp_ID = 'raw ID: test'
 
     return ((tmp["IDF_version"][()],
