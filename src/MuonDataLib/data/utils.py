@@ -4,6 +4,7 @@ import datetime
 
 # some useful names
 INT32 = np.int32
+UINT32 = np.uint32
 FLOAT32 = np.float32
 
 

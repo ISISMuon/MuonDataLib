@@ -1,5 +1,6 @@
 from MuonDataLib.data.sample import Sample
-from MuonDataLib.data.raw_data import EventsRawData
+from MuonDataLib.data.raw_data import (EventsRawData,
+                                       read_raw_data_from_events)
 from MuonDataLib.data.source import Source
 from MuonDataLib.data.user import User
 from MuonDataLib.data.periods import EventsPeriods
@@ -7,7 +8,6 @@ from MuonDataLib.data.detector1 import EventsDetector_1 as Det1
 from MuonDataLib.data.muon_data import MuonEventData
 from MuonDataLib.cython_ext.load_events import load_data
 from MuonDataLib.cython_ext.events_cache import EventsCache
-from MuonDataLib.data.utils import convert_date
 
 import h5py
 import numpy as np
@@ -21,27 +21,14 @@ def load_events(file_name, N):
     :return: a MuonEventData object
     """
     with h5py.File(file_name, 'r') as file:
-        tmp = file.require_group('raw_data_1')
-        run_number = int(tmp['run_number'][()])
-        start_time = convert_date(tmp['start_time'][()].decode().split('+')[0])
-        end_time = convert_date(tmp['end_time'][()].decode().split('+')[0])
+        raw_args, start_time = read_raw_data_from_events(file)
 
-    cache = EventsCache()
     _, events = load_data(file_name, N)
-
-    duration = (end_time - start_time).total_seconds()
+    cache = EventsCache(start_time,
+                        np.asarray([events.get_total_frames], dtype=np.int32))
 
     raw_data = EventsRawData(cache,
-                             2,
-                             'pulsedTD',
-                             'HIFI',
-                             'Title: test',
-                             'Notes: test',
-                             run_number,
-                             duration,
-                             start_time,
-                             end_time,
-                             'raw ID: test')
+                             *raw_args)
 
     sample = Sample('sample ID: test',
                     1.1,

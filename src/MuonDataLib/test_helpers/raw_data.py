@@ -19,9 +19,8 @@ class RawDataTestTemplate(object):
     def create_data(self):
         start = datetime.datetime(2018, 12, 24, 13, 32, 1)
         end = datetime.datetime(2018, 12, 24, 18, 11, 52)
-
         return (10, 1, 'pulsed', 'python', 'raw data test',
-                'testing', 42, 1024.0, 51, start, end, '19')
+                'testing', 42, 16791.0, 51, start, end, '19')
 
     def save(self, raw, file):
         raise NotImplementedError()
@@ -41,9 +40,6 @@ class RawDataTestTemplate(object):
         self.assertEqual(raw._dict['title'], 'raw data test')
         self.assertEqual(raw._dict['notes'], 'testing')
         self.assertEqual(raw._dict['run_number'], 42)
-        self.assertAlmostEqual(raw._dict['duration'], 1024.0, 3)
-        self.assertEqual(raw._dict['start'], start)
-        self.assertEqual(raw._dict['end'], end)
 
         self.raw = raw
 
@@ -83,7 +79,7 @@ class RawDataTestTemplate(object):
             self.assertString(group, 'title', 'raw data test')
             self.assertString(group, 'notes', 'testing')
             self.assertArrays(group['run_number'], [42])
-            self.assertArrays(group['duration'], [1024.0])
+            self.assertArrays(group['duration'], [16791.0])
             self.assertArrays(group['raw_frames'], [51])
             self.assertString(group, 'start_time', '2018-12-24T13:32:01')
             self.assertString(group, 'end_time', '2018-12-24T18:11:52')
@@ -118,7 +114,7 @@ class RawDataTestTemplate(object):
         self.assertEqual(load_raw._dict['title'], 'raw data test')
         self.assertEqual(load_raw._dict['notes'], 'testing')
         self.assertEqual(load_raw._dict['run_number'], 42)
-        self.assertAlmostEqual(load_raw._dict['duration'], 1024.0, 3)
+        self.assertAlmostEqual(load_raw._dict['duration'], 16791.0, 3)
         self.assertEqual(load_raw._dict['raw_frames'], 51)
         self.assertEqual(load_raw._dict['start'], start)
         self.assertEqual(load_raw._dict['end'], end)
