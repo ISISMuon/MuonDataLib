@@ -8,6 +8,7 @@ from MuonDataLib.cython_ext.events_cache import EventsCache
 
 import unittest
 import numpy as np
+import datetime
 
 
 class _PeriodsTest(PeriodsTestTemplate, TestHelper):
@@ -77,21 +78,25 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
 
     def create_single_period_data(self):
         args = super().create_single_period_data()
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray(args[4], dtype=np.int32))
         events = EventsPeriods(cache,
                                args[0], args[1],
                                args[2], args[5],
                                args[7])
         cache.save(np.asarray([[[2, 3], [5, 2]]], dtype=np.int32),
                    np.asarray([3.2, 5.6], dtype=np.double),
-                   np.asarray(args[4], dtype=np.int32))
+                   np.asarray([0], dtype=np.int32),
+                   np.asarray([500], dtype=np.int32),
+                   0.0, 100.0
+                   )
 
-        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
         return events
 
     def create_multiperiod_data(self):
         args = super().create_multiperiod_data()
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+        cache = EventsCache(date, np.asarray(args[4], dtype=np.int32))
         events = EventsPeriods(cache,
                                args[0], args[1],
                                args[2], args[5],
@@ -99,8 +104,9 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
         cache.save(np.asarray([[[2, 3], [5, 2]],
                                [[20, 21], [1, 3]]], dtype=np.int32),
                    np.asarray([3.2, 5.6], dtype=np.double),
-                   np.asarray(args[4], dtype=np.int32))
-        cache.set_requested_frames(np.asarray(args[3], dtype=np.int32))
+                   np.asarray([0, 0], dtype=np.int32),
+                   np.asarray([500, 100], dtype=np.int32),
+                   0.0, 100.0)
         return events
 
     def save(self, period, file):

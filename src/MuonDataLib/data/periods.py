@@ -114,8 +114,8 @@ class EventsPeriods(_Periods):
             counts[k] = float(np.sum(hist[k]))/1.e6
 
         super().save_nxs2(file,
-                          np.asarray(self._cache.get_requested_frames()),
-                          np.asarray(self._cache.get_total_frames()),
+                          np.asarray(self._cache.get_good_frames),
+                          np.asarray(self._cache.get_raw_frames),
                           counts)
 
 
