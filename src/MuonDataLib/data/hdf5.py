@@ -1,4 +1,5 @@
-from MuonDataLib.data.utils import (INT32, FLOAT32,
+from MuonDataLib.data.utils import (INT32, UINT32,
+                                    FLOAT32,
                                     stype)
 
 import numpy as np
@@ -9,7 +10,9 @@ def is_list(values):
 
 
 def is_int(value):
-    return isinstance(value, int) or isinstance(value, INT32)
+    return (isinstance(value, int) or
+            isinstance(value, INT32) or
+            isinstance(value, UINT32))
 
 
 def is_float(value):

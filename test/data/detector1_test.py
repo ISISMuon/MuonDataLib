@@ -6,6 +6,7 @@ from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.test_helpers.detector1 import Det1TestTemplate
 import unittest
 import numpy as np
+import datetime
 
 
 class _Detector1Test(Det1TestTemplate, TestHelper):
@@ -74,25 +75,32 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         args = super().create_single_period_data()
         bins = np.asarray(args[1], dtype=np.double)
         counts = np.asarray(args[3], dtype=np.int32)
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 11, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         events = EventsDetector_1(cache, args[0],
                                   args[2], args[4],
                                   args[5], args[6],
                                   args[7])
-        cache.save(counts, bins, np.asarray([1], dtype=np.int32))
+        cache.save(counts, bins, np.asarray([1], dtype=np.int32),
+                   np.asarray([0], dtype=np.int32),
+                   0.0, 100.0)
         return events
 
     def create_multiperiod_data(self):
+        # this is her to be updated when multiperiod works
         args = super().create_multiperiod_data()
         bins = np.asarray(args[1], dtype=np.double)
         counts = np.asarray(args[3], dtype=np.int32)
-        cache = EventsCache()
+        date = datetime.datetime(2024, 12, 11, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         events = EventsDetector_1(cache, args[0],
                                   args[2], args[4],
                                   args[5], args[6],
                                   args[7])
         cache.save(counts, bins,
-                   np.asarray([1], dtype=np.int32))
+                   np.asarray([1], dtype=np.int32),
+                   np.asarray([0], dtype=np.int32),
+                   0.0, 100.0)
         return events
 
     def setUp(self):
