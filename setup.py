@@ -2,7 +2,7 @@ from setuptools import find_packages, setup, Extension
 import numpy
 
 
-version = "0.9.1b1"
+version = "0.9.1b2"
 
 
 PACKAGE_NAME = 'MuonDataLib'
