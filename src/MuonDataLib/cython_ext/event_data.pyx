@@ -78,7 +78,6 @@ cdef class Events:
         N = 0
         cdef cnp.ndarray[int] start = np.zeros(len(x), dtype=np.int32)
         cdef cnp.ndarray[int] stop = np.zeros(len(x), dtype=np.int32)
-        print("booo", min_filter, max_filter, np.asarray(y))
 
         if (min_filter is not NONE and y[0] < min_filter or
             max_filter is not NONE and y[0] > max_filter):
@@ -207,16 +206,13 @@ cdef class Events:
             f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
-            print("filter times", np.asarray(f_start), np.asarray(f_end))
             # calculate the frames that are excluded by the filter
             f_i_start, f_i_end = get_indices(frame_times,
                                              ns_to_s*np.asarray(f_start),
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
-            print('filter indices', np.asarray(f_i_start), np.asarray(f_i_end))
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
-            print('rm indices', np.asarray(f_i_start), np.asarray(f_i_end))
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
