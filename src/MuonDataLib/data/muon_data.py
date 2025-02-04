@@ -1,4 +1,5 @@
 import h5py
+from MuonDataLib.data.sample_logs import SampleLogs
 
 
 class MuonData(object):
@@ -55,17 +56,33 @@ class MuonEventData(MuonData):
         """
         self._events = events
         self._cache = cache
+        self._logs = SampleLogs()
         super().__init__(sample, raw_data, source, user, periods, detector1)
 
-    def save_histograms(self, file_name):
+    def histogram(self, name, resolution=0.016):
+        (x1, y1,
+         x2, y2) = self._events.apply_log_filter(*self._logs.get_filter(name))
+
+        if self._cache.empty() or self._cache.resolution != resolution:
+            return (*self._events.histogram(width=resolution,
+                                            cache=self._cache),
+                    x1, y1, x2, y2)
+        return *self._cache.get_histograms(), x1, y1, x2, y2
+
+    def save_histograms(self, file_name, resolution=0.016):
         """
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
         """
-        if self._cache.empty():
-            self._events.histogram(cache=self._cache)
+        _, _ = self.histogram(resolution)
         super().save_histograms(file_name)
+
+    def add_sample_log(self, name, x_data, y_data):
+        self._logs.add_sample_log(name, x_data, y_data)
+
+    def keep_data_sample_log_between(self, log_name, min_value, max_value):
+        self._logs.add_filter(log_name, min_value, max_value)
 
     def get_frame_start_times(self):
         """

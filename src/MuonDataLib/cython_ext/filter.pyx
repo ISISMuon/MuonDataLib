@@ -1,5 +1,5 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.cython_ext.utils import binary_search
-
 import numpy as np
 cimport numpy as cnp
 import cython
@@ -197,3 +197,26 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
         good_doubles[N] = double_array[v]
         N += 1
     return _good_doubles[:N]
+
+"""
+These need to be classes to pass function argument
+in Cython
+"""
+
+cdef class Func:
+    cdef compare(self, double threshold, double y):
+        raise NotImplementedError()
+
+cdef class cf_less(Func):
+    cdef compare(self, double threshold, double y):
+        return y < threshold
+
+cdef class cf_greater(Func):
+    cdef compare(self, double threshold, double y):
+        return y > threshold
+
+cpdef remove_data(double threshold, status, double y, Func cf):
+    return threshold != NONE and not status and cf.compare(threshold, y)
+
+cpdef keep_data(double threshold, status, double y, Func cf):
+    return threshold != NONE and status and cf.compare(threshold, y)

@@ -25,6 +25,7 @@ cdef class EventsCache:
     cdef readonly dt.datetime start_time
     cdef readonly dt.datetime first_good_time
     cdef readonly dt.datetime last_good_time
+    cdef readonly resolution
 
     def __init__(self, dt.datetime start_time, int[:] event_frames):
         """
@@ -40,6 +41,7 @@ cdef class EventsCache:
         """
         self.histograms = None
         self.bins = None
+        self.resolution = None
         self.N_filter_frames = np.asarray([], dtype=np.int32)
         self.N_veto_frames = np.asarray([], dtype=np.int32)
         self.first_good_time = dt.datetime(2000, 1, 1, 1, 1, 1)
@@ -51,7 +53,8 @@ cdef class EventsCache:
             int[:] filter_frames,
             int[:] veto_frames,
             double first_time,
-            double last_time):
+            double last_time,
+            double resolution):
         """
         Store data in the cache
         :param histograms: the histogram data (periods, N_det, bin)
@@ -73,6 +76,8 @@ cdef class EventsCache:
 
         self.first_good_time = self.start_time + dt.timedelta(seconds=first_time)
         self.last_good_time = self.start_time + dt.timedelta(seconds=last_time)
+
+        self.resolution = resolution
 
     def get_histograms(self):
         """

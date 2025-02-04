@@ -1,5 +1,10 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.cython_ext.stats import make_histogram
-from MuonDataLib.cython_ext.filter import (get_indices,
+from MuonDataLib.cython_ext.filter import (cf_less,
+                                           cf_greater,
+                                           remove_data,
+                                           keep_data,
+                                           get_indices,
                                            rm_overlaps,
                                            good_values_ints,
                                            good_values_double)
@@ -21,8 +26,8 @@ cdef class Events:
     cdef public int [:] IDs
     cdef public double[:] times
     cdef readonly int N_spec
-    cdef readonly int[:] start_index_list
-    cdef readonly int[:] end_index_list
+    cdef public int[:] start_index_list
+    cdef public int[:] end_index_list
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
@@ -65,6 +70,57 @@ cdef class Events:
         :returns: the filter dicts
         """
         return self.filter_start, self.filter_end
+
+    def apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+        status = False
+
+        cdef Py_ssize_t j, N
+        N = 0
+        cdef cnp.ndarray[int] start = np.zeros(len(x), dtype=np.int32)
+        cdef cnp.ndarray[int] stop = np.zeros(len(x), dtype=np.int32)
+        print("booo", min_filter, max_filter, np.asarray(y))
+
+        if (min_filter is not NONE and y[0] < min_filter or
+            max_filter is not NONE and y[0] > max_filter):
+            status = True
+            start[0] = 0
+
+        less = cf_less()
+        greater = cf_greater()
+
+        for j in range(1, len(y)):
+            if (remove_data(min_filter, status, y[j], less) or
+                remove_data(max_filter, status, y[j], greater)):
+                status = True
+                # since it crosses before the current value
+                start[N] = j-1
+            elif (keep_data(min_filter, status, y[j], greater) and
+                  keep_data(max_filter, status, y[j], less)):
+                status = False
+                stop[N] = j
+                N += 1
+
+        # if its on, turn it off
+        if status:
+            stop[N] = len(y) - 1
+            N += 1
+
+        for j in range(N):
+            self.add_filter(f'name_{j}', x[start[j]]/ns_to_s,
+                            x[stop[j]]/ns_to_s)
+
+        #########
+        x1 = []
+        y1 = []
+        x2 = []
+        y2 = []
+        for j in range(N):
+            x1.append(x[start[j]])
+            y1.append(y[start[j]])
+            x2.append(x[stop[j]])
+            y2.append(y[stop[j]])
+        return x1, y1, x2, y2
+
 
     def add_filter(self, str name, double start, double end):
         """
@@ -151,13 +207,16 @@ cdef class Events:
             f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
             f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
 
+            print("filter times", np.asarray(f_start), np.asarray(f_end))
             # calculate the frames that are excluded by the filter
             f_i_start, f_i_end = get_indices(frame_times,
                                              ns_to_s*np.asarray(f_start),
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
+            print('filter indices', np.asarray(f_i_start), np.asarray(f_i_end))
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+            print('rm indices', np.asarray(f_i_start), np.asarray(f_i_end))
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -170,6 +229,19 @@ cdef class Events:
 
         return f_i_start, f_i_end, rm_frames, IDs, times
 
+    """
+    def filter_log(self, f_i_start, f_i_end, log_x, log_y):
+        new_x = np.zeros(len(log_x))
+        new_y = np.zeros(len(log_y))
+
+        N = 0
+        record = True
+        if log_x[0] > self.start_index_list[f_i_start]:
+            record = False
+
+        for j in range(len(log_x)):
+            if record and log_x[j]
+    """
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,
@@ -207,7 +279,8 @@ cdef class Events:
                        np.asarray([rm_frames], dtype=np.int32),
                        veto_frames=np.zeros(1, dtype=np.int32),
                        first_time=first_time,
-                       last_time=last_time)
+                       last_time=last_time,
+                       resolution=width)
 
         return hist, bins
 
