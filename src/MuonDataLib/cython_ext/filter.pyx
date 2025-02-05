@@ -198,6 +198,30 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
         N += 1
     return _good_doubles[:N]
 
+
+cpdef apply_filter(x, y, times):
+    fx = np.zeros(len(x))
+    fy = np.zeros(len(y))
+    N = 0
+    k = 0
+    for j in range(len(x)):
+        if x[j] < times[k][0]:
+            fx[N] = x[j]
+            fy[N] = y[j]
+            N += 1
+        #elif x[j] > times[k][0] and x[j] < times[k][1]:
+        #    # skip data
+
+        elif x[j] >= times[k][1]:
+            k += 1
+            if k < len(times) and x[j] < times[k][0]:
+                fx[N] = x[j]
+                fy[N] = y[j]
+                N += 1
+    return fx[:N], fy[:N]
+
+
+
 """
 These need to be classes to pass function argument
 in Cython

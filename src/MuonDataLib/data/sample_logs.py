@@ -1,3 +1,4 @@
+from MuonDataLib.cython_ext.filter import apply_filter
 from MuonDataLib.data.utils import NONE
 from MuonDataLib.data.hdf5 import (HDF5,
                                    is_list,
@@ -50,6 +51,19 @@ class SampleLogs(HDF5):
         self._int_dict = {}
         self._bool_dict = {}
         self._look_up = {}
+
+    def apply_filter(self, name, times):
+        if name not in self._look_up.keys():
+            raise RuntimeError(f"The sample log {name} does not "
+                               "exist in the sample logs")
+        dtype = self._look_up[name]
+        if dtype == 'int':
+            x, y = self._int_dict[name].get_values()
+        elif dtype == 'float':
+            x, y = self._float_dict[name].get_values()
+            self._float_dict[name].set_filter_values(*apply_filter(x,
+                                                                   y,
+                                                                   times))
 
     def add_filter(self, name, min_value, max_value):
         if name not in self._look_up.keys():
