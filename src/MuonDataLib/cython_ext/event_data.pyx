@@ -107,24 +107,15 @@ cdef class Events:
             N += 1
 
         if start[0] == 0:
-            self.add_filter(f'{name}_{j}', 0,
+            self.add_filter(f'{name}_0', 0,
                             x[stop[0]]/ns_to_s)
+        else:
+            self.add_filter(f'{name}_0', x[start[0]]/ns_to_s,
+                            x[stop[0]]/ns_to_s)
+
         for j in range(1, N):
             self.add_filter(f'{name}_{j}', x[start[j]]/ns_to_s,
                             x[stop[j]]/ns_to_s)
-
-        #########
-        x1 = []
-        y1 = []
-        x2 = []
-        y2 = []
-        for j in range(N):
-            x1.append(x[start[j]])
-            y1.append(y[start[j]])
-            x2.append(x[stop[j]])
-            y2.append(y[stop[j]])
-        return x1, y1, x2, y2
-
 
     def add_filter(self, str name, double start, double end):
         """
@@ -230,19 +221,6 @@ cdef class Events:
 
         return f_i_start, f_i_end, rm_frames, IDs, times
 
-    """
-    def filter_log(self, f_i_start, f_i_end, log_x, log_y):
-        new_x = np.zeros(len(log_x))
-        new_y = np.zeros(len(log_y))
-
-        N = 0
-        record = True
-        if log_x[0] > self.start_index_list[f_i_start]:
-            record = False
-
-        for j in range(len(log_x)):
-            if record and log_x[j]
-    """
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,

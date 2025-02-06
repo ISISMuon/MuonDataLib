@@ -69,6 +69,7 @@ class EventsTest(TestHelper):
         # cache adds a list for periods, need to remove it
         self.assertEqual(len(mat), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
+        self.assertEqual(cache.resolution, 0.2)
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
@@ -270,6 +271,46 @@ class EventsTest(TestHelper):
                                                         f_end)
         self.assertEqual(first, 1.0)
         self.assertEqual(last, 18.0)
+
+    def test_apply_log_filter_keep_ends_band(self):
+        name = "test"
+        x = np.arange(0, 10., 0.1, dtype=np.double)
+        y = 2.1*np.sin(1.6*x)
+        min_ = -1.1
+        max_ = 1.2
+        self._events.apply_log_filter(name, x, y, min_, max_)
+
+        filters = self._events.report_filters()
+        self.assertEqual(len(filters), 5)
+
+        expected_start = [0.3, 2.3, 4.3, 6.2, 8.2]
+        expected_end = [1.6, 3.6, 5.6, 7.6, 9.5]
+        for j, key in enumerate(filters.keys()):
+            values = filters[key]
+            # convert back to seconds from ns
+            self.assertAlmostEqual(values[0]*1e-9, expected_start[j], 1)
+            self.assertAlmostEqual(values[1]*1e-9, expected_end[j], 1)
+
+    def test_apply_log_filter_keep_middle_band(self):
+        name = "test"
+        x = np.arange(0, 10.001, 0.001, dtype=np.double)
+        y = 2.1*x - 1.6
+        min_ = 0.1
+        max_ = 2.8
+        self._events.apply_log_filter(name, x, y, min_, max_)
+
+        filters = self._events.report_filters()
+        self.assertEqual(len(filters), 2)
+
+        expected_start = [0, 2.095]
+        expected_end = [0.810, 10.000]
+        expected_key = ['test_0', 'test_1']
+        for j, key in enumerate(filters.keys()):
+            self.assertEqual(key, expected_key[j])
+            values = filters[key]
+            # convert back to seconds from ns
+            self.assertAlmostEqual(values[0]*1e-9, expected_start[j], 3)
+            self.assertAlmostEqual(values[1]*1e-9, expected_end[j], 3)
 
 
 if __name__ == '__main__':

@@ -205,7 +205,7 @@ cpdef apply_filter(x, y, times):
     N = 0
     k = 0
     for j in range(len(x)):
-        if x[j] < times[k][0]:
+        if k == len(times) or x[j] < times[k][0]:
             fx[N] = x[j]
             fy[N] = y[j]
             N += 1
@@ -218,6 +218,7 @@ cpdef apply_filter(x, y, times):
                 fx[N] = x[j]
                 fy[N] = y[j]
                 N += 1
+
     return fx[:N], fy[:N]
 
 
@@ -225,6 +226,9 @@ cpdef apply_filter(x, y, times):
 """
 These need to be classes to pass function argument
 in Cython
+The below are not tested directly, in the interest
+of run time speed (the function classes are
+not fully exposed to Python).
 """
 
 cdef class Func:

@@ -62,20 +62,16 @@ class MuonEventData(MuonData):
     def histogram(self, resolution=0.016):
         for name in self._logs.get_names():
             result = self._logs.get_filter(name)
-            (x1,
-             y1,
-             x2,
-             y2) = self._events.apply_log_filter(*result)
+            self._events.apply_log_filter(*result)
 
         filter_times = list(self.report_filters().values())
         for name in self._logs.get_names():
             self._logs.apply_filter(name, filter_times)
 
-        if self._cache.empty() or self._cache.resolution != resolution:
-            return (*self._events.histogram(width=resolution,
-                                            cache=self._cache),
-                    x1, y1, x2, y2)
-        return *self._cache.get_histograms(), x1, y1, x2, y2
+        if self._cache.empty() or self._cache.get_resolution() != resolution:
+            return self._events.histogram(width=resolution,
+                                          cache=self._cache)
+        return self._cache.get_histograms()
 
     def save_histograms(self, file_name, resolution=0.016):
         """
@@ -89,7 +85,13 @@ class MuonEventData(MuonData):
     def add_sample_log(self, name, x_data, y_data):
         self._logs.add_sample_log(name, x_data, y_data)
 
+    def get_sample_log(self, name):
+        return self._logs.get_sample_log(name)
+
     def keep_data_sample_log_between(self, log_name, min_value, max_value):
+        if max_value <= min_value:
+            raise RuntimeError("The max filter value is smaller "
+                               "than the min value")
         self._logs.add_filter(log_name, min_value, max_value)
 
     def get_frame_start_times(self):

@@ -93,6 +93,47 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(data._events, 'events')
         self.assertEqual(data._cache, 'cache')
 
+    def test_add_sample_log(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        data.add_sample_log('Temp', [1, 2], [3, 4])
+        data.add_sample_log('B', [11, 12], [13, 14])
+
+        # check only 2 sample logs
+        self.assertEqual(len(data._logs._look_up.keys()), 2)
+        result = data.get_sample_log("Temp").get_values()
+        self.assertArrays(result[0], np.asarray([1, 2]))
+        self.assertArrays(result[1], np.asarray([3, 4]))
+
+        result = data.get_sample_log("B").get_values()
+        self.assertArrays(result[0], np.asarray([11, 12]))
+        self.assertArrays(result[1], np.asarray([13, 14]))
+
+    def test_keep_data_sample_log_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        data.add_sample_log('Temp', [1.0, 2.0], [3.0, 4.0])
+        data.keep_data_sample_log_between("Temp", 1.1, 3.3)
+        log = data._logs._float_dict['Temp']
+        self.assertEqual(log._min, 1.1)
+        self.assertEqual(log._max, 3.3)
+
+    def test_keep_data_sample_log_between_bad_values(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        data.add_sample_log('Temp', [1.0, 2.0], [3.0, 4.0])
+        with self.assertRaises(RuntimeError):
+            data.keep_data_sample_log_between("Temp", 7.1, 3.3)
+
     def test_save_histogram_empty_cache(self):
         """
         Want to test that all of the individual
@@ -108,7 +149,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         detector_1 = fake_nxs_part()
 
         events = mock.Mock()
-        events.histogram = mock.Mock()
+        events.histogram = mock.Mock(return_value=([1], [2]))
+        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=True)
@@ -124,7 +166,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.save_histograms('tmp.nxs')
 
         cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(cache=cache)
+        events.histogram.assert_called_once_with(width=0.016, cache=cache)
         sample.assert_called_once()
         raw_data.assert_called_once()
         source.assert_called_once()
@@ -148,11 +190,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         detector_1 = fake_nxs_part()
 
         events = mock.Mock()
-        events.histogram = mock.Mock()
+        events.histogram = mock.Mock(return_value=([1], [2]))
+        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-
+        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
                              sample,

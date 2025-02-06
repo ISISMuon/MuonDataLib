@@ -94,6 +94,11 @@ cdef class EventsCache:
         if self.empty():
             raise RuntimeError("The cache is empty, cannot get frames")
 
+    def get_resolution(self):
+        if self.resolution is None:
+            raise RuntimeError("The cache is empty, cannot get resolution")
+        return self.resolution
+
     @property
     def _discarded_good_frames(self):
         """
