@@ -72,6 +72,8 @@ cdef class Events:
         return self.filter_start, self.filter_end
 
     def apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+        if min_filter == NONE and max_filter == NONE:
+            return [], [], [], []
         status = False
 
         cdef Py_ssize_t j, N
@@ -104,8 +106,11 @@ cdef class Events:
             stop[N] = len(y) - 1
             N += 1
 
-        for j in range(N):
-            self.add_filter(f'name_{j}', x[start[j]]/ns_to_s,
+        if start[0] == 0:
+            self.add_filter(f'{name}_{j}', 0,
+                            x[stop[0]]/ns_to_s)
+        for j in range(1, N):
+            self.add_filter(f'{name}_{j}', x[start[j]]/ns_to_s,
                             x[stop[j]]/ns_to_s)
 
         #########

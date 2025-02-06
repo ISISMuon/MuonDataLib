@@ -52,6 +52,9 @@ class SampleLogs(HDF5):
         self._bool_dict = {}
         self._look_up = {}
 
+    def get_names(self):
+        return list(self._look_up.keys())
+
     def apply_filter(self, name, times):
         if name not in self._look_up.keys():
             raise RuntimeError(f"The sample log {name} does not "

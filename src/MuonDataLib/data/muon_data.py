@@ -59,11 +59,17 @@ class MuonEventData(MuonData):
         self._logs = SampleLogs()
         super().__init__(sample, raw_data, source, user, periods, detector1)
 
-    def histogram(self, name, resolution=0.016):
-        (x1, y1,
-         x2, y2) = self._events.apply_log_filter(*self._logs.get_filter(name))
+    def histogram(self, resolution=0.016):
+        for name in self._logs.get_names():
+            result = self._logs.get_filter(name)
+            (x1,
+             y1,
+             x2,
+             y2) = self._events.apply_log_filter(*result)
+
         filter_times = list(self.report_filters().values())
-        self._logs.apply_filter(name, filter_times)
+        for name in self._logs.get_names():
+            self._logs.apply_filter(name, filter_times)
 
         if self._cache.empty() or self._cache.resolution != resolution:
             return (*self._events.histogram(width=resolution,
