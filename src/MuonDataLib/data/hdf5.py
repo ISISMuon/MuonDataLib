@@ -20,7 +20,7 @@ def is_float(value):
 
 
 def is_string(value):
-    return isinstnace(value, str)
+    return isinstance(value, str)
 
 
 class HDF5(object):
