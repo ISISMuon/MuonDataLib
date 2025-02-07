@@ -49,8 +49,39 @@ class SampleLogs(HDF5):
         """
         self._float_dict = {}
         self._int_dict = {}
-        self._bool_dict = {}
         self._look_up = {}
+
+    def add_sample_log(self, name, x_data, y_data):
+        if name in self._look_up.keys():
+            raise RuntimeError(f"The sample log {name} "
+                               "already exists in the sample logs")
+        if is_list(y_data):
+            y = y_data[0]
+            if is_int(y):
+                self._int_dict[name] = LogData(x_data, y_data)
+                self._look_up[name] = 'int'
+                return
+            elif is_float(y):
+                self._float_dict[name] = LogData(x_data, y_data)
+                self._look_up[name] = 'float'
+                return
+        raise RuntimeError(f"The sample log {name} is "
+                           "not currently supported")
+
+    def get_sample_log(self, name):
+        if name not in self._look_up.keys():
+            raise RuntimeError(f"The sample log {name} does"
+                               "not exist in the sample logs")
+        dtype = self._look_up[name]
+        if dtype == 'int':
+            return self._int_dict[name]
+        elif dtype == 'float':
+            return self._float_dict[name]
+
+    def clear(self):
+        self._float_dict.clear()
+        self._int_dict.clear()
+        self._look_up.clear()
 
     def get_names(self):
         return list(self._look_up.keys())
@@ -89,39 +120,6 @@ class SampleLogs(HDF5):
             return self._int_dict[name].get_filter()
         elif dtype == 'float':
             return self._float_dict[name].get_filter()
-
-    def add_sample_log(self, name, x_data, y_data):
-        if name in self._look_up.keys():
-            raise RuntimeError(f"The sample log {name} "
-                               "already exists in the sample logs")
-        if is_list(y_data):
-            y = y_data[0]
-            if is_int(y):
-                self._int_dict[name] = LogData(x_data, y_data)
-                self._look_up[name] = 'int'
-                return
-            elif is_float(y):
-                self._float_dict[name] = LogData(x_data, y_data)
-                self._look_up[name] = 'float'
-                return
-        raise RuntimeError(f"The sample log {name} is "
-                           "not currently supported")
-
-    def get_sample_log(self, name):
-        if name not in self._look_up.keys():
-            raise RuntimeError(f"The sample log {name} does"
-                               "not exist in the sample logs")
-        dtype = self._look_up[name]
-        if dtype == 'int':
-            return self._int_dict[name]
-        elif dtype == 'float':
-            return self._float_dict[name]
-
-    def clear(self):
-        self._float_dict.clear()
-        self._int_dict.clear()
-        self._bool_dict.clear()
-        self._look_up.clear()
 
     def save_nxs2(self, file):
         """
