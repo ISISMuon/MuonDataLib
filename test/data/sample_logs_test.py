@@ -319,8 +319,7 @@ class SampleLogsTest(TestHelper):
                                  np.arange(15, 20, 1, dtype=np.double),
                                  np.arange(25, 30, 1, dtype=np.double))
         x = np.arange(17, 19, 1, dtype=np.double)
-        y = np.arange(27, 29, 1, dtype=np.double))
-
+        y = np.arange(27, 29, 1, dtype=np.double)
 
         self.logs._float_dict['test'].set_filter_values(x, y)
 
