@@ -5,6 +5,11 @@ from MuonDataLib.data.sample_logs import (LogData,
 from MuonDataLib.test_helpers.unit_test import TestHelper
 import numpy as np
 import unittest
+import h5py
+import os
+
+
+FILENAME = 'logs.nxs'
 
 
 class LogDataTest(TestHelper):
@@ -270,6 +275,74 @@ class SampleLogsTest(TestHelper):
         self.assertArrays(fx, np.asarray([-5, -4, -3, -2, 2, 3, 4]))
         """
         pass
+
+    def test_save_nxs2_no_filter(self):
+        self.logs.add_sample_log('unit',
+                                 np.arange(-5, 5, 1, dtype=np.double),
+                                 np.arange(5, 10, 1, dtype=np.double))
+
+        self.logs.add_sample_log('test',
+                                 np.arange(15, 20, 1, dtype=np.double),
+                                 np.arange(25, 30, 1, dtype=np.double))
+
+        with h5py.File(FILENAME, 'w') as file:
+            self.logs.save_nxs2(file)
+        del self.logs
+
+        with h5py.File(FILENAME, 'r') as file:
+            tmp = file['raw_data_1']['selog']
+            self.compare_keys(tmp, ['unit', 'test'])
+
+            log = tmp['unit']['value_log']
+            x = np.arange(-5, 5, 1, dtype=np.double)
+            y = np.arange(5, 10, 1, dtype=np.double)
+
+            self.assertArrays(log['time'], x)
+            self.assertArrays(log['value'], y)
+            log = tmp['test']['value_log']
+            x = np.arange(15, 20, 1, dtype=np.double)
+            y = np.arange(25, 30, 1, dtype=np.double)
+            self.assertArrays(log['time'], x)
+            self.assertArrays(log['value'], y)
+        os.remove(FILENAME)
+
+    def test_save_nxs2_with_filter(self):
+        self.logs.add_sample_log('unit',
+                                 np.arange(-5, 5, 1, dtype=np.double),
+                                 np.arange(5, 10, 1, dtype=np.double))
+        x = np.arange(0, 3, 1, dtype=np.double),
+        y = np.arange(6, 9, 1, dtype=np.double))
+
+       self.logs._float_dict['unit'].set_filter_values(x, y)
+
+        self.logs.add_sample_log('test',
+                                 np.arange(15, 20, 1, dtype=np.double),
+                                 np.arange(25, 30, 1, dtype=np.double))
+        x = np.arange(17, 19, 1, dtype=np.double)
+        y = np.arange(27, 29, 1, dtype=np.double))
+
+
+        self.logs._float_dict['test'].set_filter_values(x, y)
+
+        with h5py.File(FILENAME, 'w') as file:
+            self.logs.save_nxs2(file)
+        del self.logs
+
+        with h5py.File(FILENAME, 'r') as file:
+            tmp = file['raw_data_1']['selog']
+            self.compare_keys(tmp, ['unit', 'test'])
+
+            log = tmp['unit']['value_log']
+            self.assertArrays(log['time'],
+                              np.arange(0, 3, 1, dtype=np.double))
+            self.assertArrays(log['value'],
+                              np.arange(6, 9, 1, dtype=np.double))
+            log = tmp['test']['value_log']
+            self.assertArrays(log['time'],
+                              np.arange(17, 19, 1, dtype=np.double))
+            self.assertArrays(log['value'],
+                              np.arange(27, 29, 1, dtype=np.double))
+        os.remove(FILENAME)
 
 
 if __name__ == '__main__':

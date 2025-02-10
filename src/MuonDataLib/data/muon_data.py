@@ -56,19 +56,20 @@ class MuonEventData(MuonData):
         """
         self._events = events
         self._cache = cache
-        self._logs = SampleLogs()
         super().__init__(sample, raw_data, source, user, periods, detector1)
+        self._dict['logs'] = SampleLogs()
 
     def histogram(self, resolution=0.016):
-        for name in self._logs.get_names():
-            result = self._logs.get_filter(name)
-            self._events.apply_log_filter(*result)
+        is_cache_empty = self._cache.empty()
+        if is_cache_empty:
+            for name in self._dict['logs'].get_names():
+                result = self._dict['logs'].get_filter(name)
+                self._events.apply_log_filter(*result)
+            filter_times = list(self.report_filters().values())
+            for name in self._dict['logs'].get_names():
+                self._dict['logs'].apply_filter(name, filter_times)
 
-        filter_times = list(self.report_filters().values())
-        for name in self._logs.get_names():
-            self._logs.apply_filter(name, filter_times)
-
-        if self._cache.empty() or self._cache.get_resolution() != resolution:
+        if is_cache_empty or self._cache.get_resolution() != resolution:
             return self._events.histogram(width=resolution,
                                           cache=self._cache)
         return self._cache.get_histograms()
@@ -79,20 +80,21 @@ class MuonEventData(MuonData):
         nexus v2 histogram file
         :param file_name: the name of the file to save to
         """
-        _, _ = self.histogram(resolution)
+        self.histogram(resolution)
         super().save_histograms(file_name)
 
     def add_sample_log(self, name, x_data, y_data):
-        self._logs.add_sample_log(name, x_data, y_data)
+        self._cache.clear()
+        self._dict['logs'].add_sample_log(name, x_data, y_data)
 
     def get_sample_log(self, name):
-        return self._logs.get_sample_log(name)
+        return self._dict['logs'].get_sample_log(name)
 
     def keep_data_sample_log_between(self, log_name, min_value, max_value):
         if max_value <= min_value:
             raise RuntimeError("The max filter value is smaller "
                                "than the min value")
-        self._logs.add_filter(log_name, min_value, max_value)
+        self._dict['logs'].add_filter(log_name, min_value, max_value)
 
     def get_frame_start_times(self):
         """

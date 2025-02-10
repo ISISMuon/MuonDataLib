@@ -126,11 +126,16 @@ class SampleLogs(HDF5):
         Write the user information to a
         muon nexus v2 file.
         :param file: the open file to write to
-
-        tmp = file.require_group('raw_data_1')
-        tmp = tmp.require_group('user_1')
-        tmp.attrs['NX_class'] = 'NXuser'
-        for key in self._dict.keys():
-            self.save_str(key, self._dict[key], tmp)
         """
-        return
+        selog = file.require_group('raw_data_1')
+        selog = selog.require_group('selog')
+        selog.attrs['NX_class'] = 'IXselog'
+        for key in self._look_up.keys():
+            dtype = self._look_up[key]
+            if dtype == 'float':
+                logs = self.get_sample_log(key)
+                tmp = selog.require_group(key)
+                tmp = tmp.require_group('value_log')
+                x, y = logs.get_values()
+                self.save_float_array('time', x, tmp)
+                self.save_float_array('value', y, tmp)

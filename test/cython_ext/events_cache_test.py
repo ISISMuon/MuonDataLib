@@ -23,8 +23,7 @@ class EventsCacheTest(TestHelper):
             self.cache.get_good_frames
         with self.assertRaises(RuntimeError):
             self.cache.get_raw_frames
-        with self.assertRaises(RuntimeError):
-            self.cache.get_resolution()
+        self.assertEqual(self.cache.get_resolution(), 0.016)
 
     def test_save_to_cache(self):
         self.assertTrue(self.cache.empty())
@@ -73,8 +72,7 @@ class EventsCacheTest(TestHelper):
             self.cache.get_good_frames
         with self.assertRaises(RuntimeError):
             self.cache.get_raw_frames
-        with self.assertRaises(RuntimeError):
-            self.cache.get_resolution()
+        self.assertEqual(self.cache.get_resolution(), 0.016)
 
     def test_set_too_many_filter_frames(self):
         self.assertTrue(self.cache.empty())

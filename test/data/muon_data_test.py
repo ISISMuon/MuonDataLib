@@ -70,7 +70,8 @@ class MuonDataTest(unittest.TestCase):
 
 class MuonEventDataTest(TestHelper, unittest.TestCase):
 
-    def test_MuonEventData_init(self):
+    @mock.patch('MuonDataLib.data.muon_data.SampleLogs')
+    def test_MuonEventData_init(self, logs):
         '''
         Instead of creating the full objects we
         will just use strings. Since we only need
@@ -87,9 +88,11 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              'user',
                              'periods',
                              'detector_1')
+        logs.assert_called_once()
 
         for key in data._dict.keys():
-            self.assertEqual(key, data._dict[key])
+            if key != 'logs':
+                self.assertEqual(key, data._dict[key])
         self.assertEqual(data._events, 'events')
         self.assertEqual(data._cache, 'cache')
 
@@ -99,11 +102,38 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.add_sample_log('Temp', [1, 2], [3, 4])
-        data.add_sample_log('B', [11, 12], [13, 14])
+        data.add_sample_log('Temp', np.asarray([1, 2], dtype=np.double),
+                            np.asarray([3, 4], dtype=np.double))
+        data.add_sample_log('B', np.asarray([11, 12], dtype=np.double),
+                            np.asarray([13, 14], dtype=np.double))
 
+        self.assertEqual(data._cache.empty(), True)
         # check only 2 sample logs
-        self.assertEqual(len(data._logs._look_up.keys()), 2)
+        self.assertEqual(len(data._dict['logs']._look_up.keys()), 2)
+        result = data.get_sample_log("Temp").get_values()
+        self.assertArrays(result[0], np.asarray([1, 2]))
+        self.assertArrays(result[1], np.asarray([3, 4]))
+
+        result = data.get_sample_log("B").get_values()
+        self.assertArrays(result[0], np.asarray([11, 12]))
+        self.assertArrays(result[1], np.asarray([13, 14]))
+
+    def test_add_sample_log_and_clear(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        data.add_sample_log('Temp', np.asarray([1, 2], dtype=np.double),
+                            np.asarray([3, 4], dtype=np.double))
+        data.histogram()
+        self.assertEqual(data._cache.empty(), False)
+
+        data.add_sample_log('B', np.asarray([11, 12], dtype=np.double),
+                            np.asarray([13, 14], dtype=np.double))
+        self.assertEqual(data._cache.empty(), True)
+        # check only 2 sample logs
+        self.assertEqual(len(data._dict['logs']._look_up.keys()), 2)
         result = data.get_sample_log("Temp").get_values()
         self.assertArrays(result[0], np.asarray([1, 2]))
         self.assertArrays(result[1], np.asarray([3, 4]))
@@ -120,7 +150,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         data.add_sample_log('Temp', [1.0, 2.0], [3.0, 4.0])
         data.keep_data_sample_log_between("Temp", 1.1, 3.3)
-        log = data._logs._float_dict['Temp']
+        log = data._dict['logs']._float_dict['Temp']
         self.assertEqual(log._min, 1.1)
         self.assertEqual(log._max, 3.3)
 
@@ -175,6 +205,111 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         detector_1.assert_called_once()
 
         os.remove('tmp.nxs')
+
+    def test_histogram_with_logs_no_cache(self):
+        sample = fake_nxs_part()
+        raw_data = fake_nxs_part()
+        source = fake_nxs_part()
+        user = fake_nxs_part()
+        periods = fake_nxs_part()
+        detector_1 = fake_nxs_part()
+
+        events = mock.Mock()
+        events.histogram = mock.Mock(return_value=([1], [2]))
+        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+        events.apply_log_filter = mock.Mock()
+
+        cache = mock.Mock()
+        cache.empty = mock.Mock(return_value=True)
+        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+        data = MuonEventData(events,
+                             cache,
+                             sample,
+                             raw_data,
+                             source,
+                             user,
+                             periods,
+                             detector_1)
+        data.add_sample_log('B', [1], [2])
+        data.add_sample_log('T', [3], [4])
+        data._dict['logs'].apply_filter = mock.Mock()
+        data.histogram(0.016)
+
+        cache.empty.assert_called_once()
+        events.histogram.assert_called_once_with(width=0.016, cache=cache)
+        self.assertEqual(2, data._dict['logs'].apply_filter.call_count)
+        self.assertEqual(2, events.apply_log_filter.call_count)
+
+    def test_histogram_with_logs_with_cache(self):
+        sample = fake_nxs_part()
+        raw_data = fake_nxs_part()
+        source = fake_nxs_part()
+        user = fake_nxs_part()
+        periods = fake_nxs_part()
+        detector_1 = fake_nxs_part()
+
+        events = mock.Mock()
+        events.histogram = mock.Mock(return_value=([1], [2]))
+        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+        events.apply_log_filter = mock.Mock()
+
+        cache = mock.Mock()
+        cache.empty = mock.Mock(return_value=False)
+        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+        data = MuonEventData(events,
+                             cache,
+                             sample,
+                             raw_data,
+                             source,
+                             user,
+                             periods,
+                             detector_1)
+        data.add_sample_log('B', [1], [2])
+        data.add_sample_log('T', [3], [4])
+        data._dict['logs'].apply_filter = mock.Mock()
+        data.histogram(0.016)
+
+        cache.empty.assert_called_once()
+        self.assertEqual(0, events.histogram.call_count)
+        self.assertEqual(0, events.apply_log_filter.call_count)
+        self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
+
+    def test_histogram_with_logs_with_cache_new_resolution(self):
+        sample = fake_nxs_part()
+        raw_data = fake_nxs_part()
+        source = fake_nxs_part()
+        user = fake_nxs_part()
+        periods = fake_nxs_part()
+        detector_1 = fake_nxs_part()
+
+        events = mock.Mock()
+        events.histogram = mock.Mock(return_value=([1], [2]))
+        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+        events.apply_log_filter = mock.Mock()
+
+        cache = mock.Mock()
+        cache.empty = mock.Mock(return_value=False)
+        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+        data = MuonEventData(events,
+                             cache,
+                             sample,
+                             raw_data,
+                             source,
+                             user,
+                             periods,
+                             detector_1)
+        data.add_sample_log('B', [1], [2])
+        data.add_sample_log('T', [3], [4])
+        data._dict['logs'].apply_filter = mock.Mock()
+        data.histogram(0.01)
+
+        cache.empty.assert_called_once()
+        self.assertEqual(1, events.histogram.call_count)
+        self.assertEqual(0, events.apply_log_filter.call_count)
+        self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
 
     def test_save_histogram_occupied_cache(self):
         """
@@ -372,6 +507,44 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(f_start['unit'], 3.1)
         self.assertEqual(f_end['test'], 8.2)
         self.assertEqual(f_end['unit'], 6.6)
+
+    def test_save_histogram(self):
+        """
+        Want to test that all of the individual
+        parts are called when saving. So will use
+        mocks.
+        """
+        events = mock.MagicMock()
+        cache = mock.MagicMock()
+        sample = fake_nxs_part()
+        raw_data = fake_nxs_part()
+        source = fake_nxs_part()
+        user = fake_nxs_part()
+        periods = fake_nxs_part()
+        detector_1 = fake_nxs_part()
+
+        data = MuonEventData(events,
+                             cache,
+                             sample,
+                             raw_data,
+                             source,
+                             user,
+                             periods,
+                             detector_1)
+        data.add_sample_log('T',
+                             np.arange(0, 5, dtype=np.double),
+                             np.arange(5, 10, dtype=np.double))
+        data._dict['logs'].save_nxs2 = mock.Mock()
+        data.save_histograms('tmp.nxs')
+
+        sample.assert_called_once()
+        raw_data.assert_called_once()
+        source.assert_called_once()
+        user.assert_called_once()
+        periods.assert_called_once()
+        detector_1.assert_called_once()
+        data._dict['logs'].save_nxs2.assert_called_once()
+        os.remove('tmp.nxs')
 
 
 if __name__ == '__main__':

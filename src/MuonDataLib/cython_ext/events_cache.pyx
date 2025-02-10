@@ -25,7 +25,7 @@ cdef class EventsCache:
     cdef readonly dt.datetime start_time
     cdef readonly dt.datetime first_good_time
     cdef readonly dt.datetime last_good_time
-    cdef readonly resolution
+    cdef readonly double resolution
 
     def __init__(self, dt.datetime start_time, int[:] event_frames):
         """
@@ -41,7 +41,7 @@ cdef class EventsCache:
         """
         self.histograms = None
         self.bins = None
-        self.resolution = None
+        self.resolution = 0.016
         self.N_filter_frames = np.asarray([], dtype=np.int32)
         self.N_veto_frames = np.asarray([], dtype=np.int32)
         self.first_good_time = dt.datetime(2000, 1, 1, 1, 1, 1)
@@ -95,8 +95,6 @@ cdef class EventsCache:
             raise RuntimeError("The cache is empty, cannot get frames")
 
     def get_resolution(self):
-        if self.resolution is None:
-            raise RuntimeError("The cache is empty, cannot get resolution")
         return self.resolution
 
     @property
