@@ -63,11 +63,15 @@ class Det1TestTemplate(object):
         self.det = det
 
     def test_detector1_object_saves_correct_info_single_period(self):
+        det = self.create_single_period_data()
+        res = self._detector1_object_saves_correct_info_single_period(det)
+        self.assertEqual(res, 16000)
+
+    def _detector1_object_saves_correct_info_single_period(self, det):
         """
         Test that the class can save to a nexus file
         correctly
         """
-        det = self.create_single_period_data()
 
         with h5py.File(self.filename, 'w') as file:
             self.save(det, file)
@@ -91,7 +95,7 @@ class Det1TestTemplate(object):
                                              ])
 
             # check values
-            self.assertEqual(group['resolution'][0], 16000)
+            res = group['resolution'][0]
             self.assertArrays(group['raw_time'][:], [1., 2., 3.])
             self.assertArrays(group['spectrum_index'][:], [4, 5, 6, 7])
             self.assertArrays(group['counts'][:], [
@@ -115,6 +119,9 @@ class Det1TestTemplate(object):
             self.assertEqual(tmp.attrs['t0_bin'], 3)
             self.assertEqual(tmp.attrs['first_good_bin'], 250)
             self.assertEqual(tmp.attrs['last_good_bin'], 2625)
+
+        os.remove(self.filename)
+        return res
 
     def test_load_detector1_gets_correct_info_single_period(self):
         """
@@ -166,11 +173,15 @@ class Det1TestTemplate(object):
         self.det = det
 
     def test_detector1_object_saves_correct_info_multiperiod(self):
+        det = self.create_multiperiod_data()
+        res = self._detector1_object_saves_correct_info_multiperiod(det)
+        self.assertEqual(res, 16000)
+
+    def _detector1_object_saves_correct_info_multiperiod(self, det):
         """
         Test that the class can save to a nexus file
         correctly
         """
-        det = self.create_multiperiod_data()
 
         with h5py.File(self.filename, 'w') as file:
             self.save(det, file)
@@ -194,7 +205,6 @@ class Det1TestTemplate(object):
                                              ])
 
             # check values
-            self.assertEqual(group['resolution'][0], 16000)
             self.assertArrays(group['raw_time'][:], [1., 2., 3.])
             self.assertArrays(group['spectrum_index'][:], [4, 5])
             self.assertArrays(group['counts'][:], [
@@ -217,7 +227,9 @@ class Det1TestTemplate(object):
             self.assertEqual(tmp.attrs['t0_bin'], 3)
             self.assertEqual(tmp.attrs['first_good_bin'], 250)
             self.assertEqual(tmp.attrs['last_good_bin'], 2625)
+            res = group['resolution'][0]
         os.remove(self.filename)
+        return res
 
     def test_load_detector1_gets_correct_info_multiperiod(self):
         """
