@@ -532,8 +532,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              periods,
                              detector_1)
         data.add_sample_log('T',
-                             np.arange(0, 5, dtype=np.double),
-                             np.arange(5, 10, dtype=np.double))
+                            np.arange(0, 5, dtype=np.double),
+                            np.arange(5, 10, dtype=np.double))
         data._dict['logs'].save_nxs2 = mock.Mock()
         data.save_histograms('tmp.nxs')
 
