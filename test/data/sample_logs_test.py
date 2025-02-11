@@ -310,7 +310,7 @@ class SampleLogsTest(TestHelper):
         self.logs.add_sample_log('unit',
                                  np.arange(-5, 5, 1, dtype=np.double),
                                  np.arange(5, 10, 1, dtype=np.double))
-        x = np.arange(0, 3, 1, dtype=np.double),
+        x = np.arange(0, 3, 1, dtype=np.double)
         y = np.arange(6, 9, 1, dtype=np.double)
 
         self.logs._float_dict['unit'].set_filter_values(x, y)
