@@ -243,12 +243,12 @@ cdef class Events:
 
         f_i_start, f_i_end, rm_frames, IDs, times = self._get_filtered_data(frame_times)
 
-        hist, bins = make_histogram(times,
-                                    IDs,
-                                    self.N_spec,
-                                    min_time,
-                                    max_time,
-                                    width)
+        hist, bins, N = make_histogram(times,
+                                       IDs,
+                                       self.N_spec,
+                                       min_time,
+                                       max_time,
+                                       width)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
@@ -259,7 +259,8 @@ cdef class Events:
                        veto_frames=np.zeros(1, dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,
-                       resolution=width)
+                       resolution=width,
+                       N_events=N)
 
         return hist, bins
 

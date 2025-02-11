@@ -77,7 +77,7 @@ class EventsRawDataTest(RawDataTestTemplate, TestHelper):
                    np.asarray([0], dtype=np.int32),
                    np.asarray([41], dtype=np.int32),
                    0, (args[10] - args[9]).total_seconds(),
-                   0.016)
+                   0.016, 1e6)
         return raw, args[9], args[10]
 
     def save(self, raw, file):

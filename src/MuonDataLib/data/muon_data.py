@@ -83,6 +83,11 @@ class MuonEventData(MuonData):
         self.histogram(resolution)
         super().save_histograms(file_name)
 
+    def clear_filters(self):
+        self._cache.clear()
+        self._dict['logs'].clear_filters()
+        self._events.clear_filters()
+
     def add_sample_log(self, name, x_data, y_data):
         self._cache.clear()
         self._dict['logs'].add_sample_log(name, x_data, y_data)

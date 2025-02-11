@@ -121,6 +121,10 @@ class SampleLogs(HDF5):
         elif dtype == 'float':
             return self._float_dict[name].get_filter()
 
+    def clear_filters(self):
+        for name in self._float_dict.keys():
+            self._float_dict[name].clear_filters()
+
     def save_nxs2(self, file):
         """
         Write the user information to a

@@ -83,7 +83,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
                                   args[7])
         cache.save(counts, bins, np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0, resolution=0.016)
+                   0.0, 100.0, resolution=0.016, N_events=1e6)
         return events
 
     def create_multiperiod_data(self):
@@ -100,7 +100,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         cache.save(counts, bins,
                    np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0, resolution=0.016)
+                   0.0, 100.0, resolution=0.016, N_events=1e6)
         return events
 
     def create_single_period_data_custom_resolution(self):
@@ -115,7 +115,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
                                   args[7])
         cache.save(counts, bins, np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0, resolution=0.01)
+                   0.0, 100.0, resolution=0.01, N_events=1e6)
         return events
 
     def create_multiperiod_data_custom_resolution(self):
@@ -132,7 +132,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         cache.save(counts, bins,
                    np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0, resolution=0.01)
+                   0.0, 100.0, resolution=0.01, N_events=1e6)
         return events
 
     def setUp(self):
