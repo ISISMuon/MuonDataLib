@@ -1,5 +1,6 @@
 import h5py
 from MuonDataLib.data.sample_logs import SampleLogs
+import numpy as np
 
 
 class MuonData(object):
@@ -71,9 +72,12 @@ class MuonEventData(MuonData):
 
             # apply the filters from the logs
             filter_times = list(self.report_filters().values())
+            filter_times = np.asarray([np.asarray(filter_times[k],
+                                                  dtype=np.double)
+                                       for k in range(len(filter_times))],
+                                      dtype=np.double)
 
-            for name in log_names:
-                self._dict['logs'].apply_filter(name, filter_times)
+            self._dict['logs'].apply_filter(filter_times)
 
         if is_cache_empty or self._cache.get_resolution() != resolution:
             return self._events.histogram(width=resolution,
