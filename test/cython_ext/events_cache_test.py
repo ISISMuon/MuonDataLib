@@ -49,6 +49,7 @@ class EventsCacheTest(TestHelper):
         self.assertArrays(self.cache.get_raw_frames,
                           np.asarray([80], dtype=np.int32))
         self.assertEqual(self.cache.get_resolution(), 1.)
+        self.assertEqual(self.cache.get_N_events, 1e6)
 
     def test_clear_cache(self):
         self.assertTrue(self.cache.empty())
@@ -73,6 +74,7 @@ class EventsCacheTest(TestHelper):
         with self.assertRaises(RuntimeError):
             self.cache.get_raw_frames
         self.assertEqual(self.cache.get_resolution(), 0.016)
+        self.assertEqual(self.cache.get_N_events, 0)
 
     def test_set_too_many_filter_frames(self):
         self.assertTrue(self.cache.empty())

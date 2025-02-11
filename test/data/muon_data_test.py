@@ -546,6 +546,26 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data._dict['logs'].save_nxs2.assert_called_once()
         os.remove('tmp.nxs')
 
+    def test_clear_filters(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        # add filter via sample log
+        data.add_sample_log('Temp',
+                            np.asarray([1.0, 2.0], dtype=np.double),
+                            np.asarray([3.0, 4.0], dtype=np.double))
+        data.add_sample_log('B',
+                            np.asarray([11.0, 12.0], dtype=np.double),
+                            np.asarray([32.0, 44.0], dtype=np.double))
+
+        # make log filter into time filter
+        _ = data.histogram()
+
+        data.clear_filters()
+        self.assertEqual(data.report_filters(), {})
+
 
 if __name__ == '__main__':
     unittest.main()

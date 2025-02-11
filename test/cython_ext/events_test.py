@@ -70,6 +70,7 @@ class EventsTest(TestHelper):
         self.assertEqual(len(mat), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
         self.assertEqual(cache.resolution, 0.2)
+        self.assertEqual(cache.get_N_events, 3)
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
@@ -202,6 +203,7 @@ class EventsTest(TestHelper):
         self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
         self.assertEqual(cache.get_good_frames[0], 99)
+        self.assertEqual(cache.get_N_events, 4)
 
     def test_filters_overlap_works(self):
         self._events.add_filter('test', 1.2, 1.7)
@@ -215,6 +217,7 @@ class EventsTest(TestHelper):
         self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
         self.assertEqual(cache.get_good_frames[0], 99)
+        self.assertEqual(cache.get_N_events, 4)
 
     def test_get_filtered_data(self):
         self._events.add_filter('test', 1.2, 1.7)

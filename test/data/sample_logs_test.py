@@ -343,6 +343,38 @@ class SampleLogsTest(TestHelper):
                               np.arange(27, 29, 1, dtype=np.double))
         os.remove(FILENAME)
 
+    def test_clear_filters(self):
+        self.logs.add_sample_log('unit',
+                                 np.arange(-5, 5, 1, dtype=np.double),
+                                 np.arange(5, 10, 1, dtype=np.double))
+        self.logs.add_filter('unit', -.1, .1)
+        self.logs.add_sample_log('test',
+                                 np.arange(15, 20, 1, dtype=np.double),
+                                 np.arange(25, 30, 1, dtype=np.double))
+
+        self.logs.add_filter('test', .5, .7)
+
+        self.assertEqual(len(self.logs.get_names()), 2)
+
+        tmp = self.logs.get_sample_log('unit')
+        self.assertEqual(tmp._min, -.1)
+        self.assertEqual(tmp._max, .1)
+
+        tmp = self.logs.get_sample_log('test')
+        self.assertEqual(tmp._min, .5)
+        self.assertEqual(tmp._max, .7)
+
+        self.logs.clear_filters()
+        self.assertEqual(len(self.logs.get_names()), 2)
+
+        tmp = self.logs.get_sample_log('unit')
+        self.assertEqual(tmp._min, NONE)
+        self.assertEqual(tmp._max, NONE)
+
+        tmp = self.logs.get_sample_log('test')
+        self.assertEqual(tmp._min, NONE)
+        self.assertEqual(tmp._max, NONE)
+
 
 if __name__ == '__main__':
     unittest.main()
