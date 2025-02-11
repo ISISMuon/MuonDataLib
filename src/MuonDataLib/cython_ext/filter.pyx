@@ -199,6 +199,8 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
     return _good_doubles[:N]
 
 
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing.
 cpdef apply_filter(x, y, times):
     fx = np.zeros(len(x))
     fy = np.zeros(len(y))
@@ -209,8 +211,6 @@ cpdef apply_filter(x, y, times):
             fx[N] = x[j]
             fy[N] = y[j]
             N += 1
-        #elif x[j] > times[k][0] and x[j] < times[k][1]:
-        #    # skip data
 
         elif x[j] >= times[k][1]:
             k += 1

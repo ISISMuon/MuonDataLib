@@ -71,7 +71,9 @@ cdef class Events:
         """
         return self.filter_start, self.filter_end
 
-    def apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
+    cpdef apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
         if min_filter == NONE and max_filter == NONE:
             return [], [], [], []
         status = False
@@ -107,6 +109,10 @@ cdef class Events:
             N += 1
 
         if start[0] == 0:
+            """
+            This does cause a warning, but makes sure that the
+            first event is excluded.
+            """
             self.add_filter(f'{name}_0', 0,
                             x[stop[0]]/ns_to_s)
         else:

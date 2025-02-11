@@ -62,11 +62,17 @@ class MuonEventData(MuonData):
     def histogram(self, resolution=0.016):
         is_cache_empty = self._cache.empty()
         if is_cache_empty:
-            for name in self._dict['logs'].get_names():
+            # if only resolution changed
+            # -> filters are the same so can skip this
+            log_names = self._dict['logs'].get_names()
+            for name in log_names:
                 result = self._dict['logs'].get_filter(name)
                 self._events.apply_log_filter(*result)
+
+            # apply the filters from the logs
             filter_times = list(self.report_filters().values())
-            for name in self._dict['logs'].get_names():
+
+            for name in log_names:
                 self._dict['logs'].apply_filter(name, filter_times)
 
         if is_cache_empty or self._cache.get_resolution() != resolution:
