@@ -47,8 +47,6 @@ cdef class LogData:
         return (np.asarray(self.x, dtype=np.double),
                 np.asarray(self.y, dtype=np.double))
 
-
-
     cpdef get_values(self):
         if len(self.fx) > 0:
             return (np.asarray(self.fx, dtype=np.double),
