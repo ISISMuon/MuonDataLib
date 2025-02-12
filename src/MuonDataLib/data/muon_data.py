@@ -60,25 +60,30 @@ class MuonEventData(MuonData):
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
+    def _filter_logs(self):
+        # if only resolution changed
+        # -> filters are the same so can skip this
+        log_names = self._dict['logs'].get_names()
+        for name in log_names:
+            result = self._dict['logs'].get_filter(name)
+            self._events.apply_log_filter(*result)
+
+        # apply the filters from the logs
+        filters = self.report_filters().values()
+        if not filters:
+            return
+        filter_times = list(filters)
+        filter_times = np.asarray([np.asarray(filter_times[k],
+                                              dtype=np.double)
+                                   for k in range(len(filter_times))],
+                                  dtype=np.double)
+
+        self._dict['logs'].apply_filter(filter_times)
+
     def histogram(self, resolution=0.016):
         is_cache_empty = self._cache.empty()
         if is_cache_empty:
-            # if only resolution changed
-            # -> filters are the same so can skip this
-            log_names = self._dict['logs'].get_names()
-            for name in log_names:
-                result = self._dict['logs'].get_filter(name)
-                self._events.apply_log_filter(*result)
-
-            # apply the filters from the logs
-            filter_times = list(self.report_filters().values())
-            filter_times = np.asarray([np.asarray(filter_times[k],
-                                                  dtype=np.double)
-                                       for k in range(len(filter_times))],
-                                      dtype=np.double)
-
-            self._dict['logs'].apply_filter(filter_times)
-
+            self._filter_logs()
         if is_cache_empty or self._cache.get_resolution() != resolution:
             return self._events.histogram(width=resolution,
                                           cache=self._cache)

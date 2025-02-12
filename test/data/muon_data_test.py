@@ -148,7 +148,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.add_sample_log('Temp', [1.0, 2.0], [3.0, 4.0])
+        data.add_sample_log('Temp',
+                            np.asarray([1.0, 2.0], dtype=np.double),
+                            np.asarray([3.0, 4.0], dtype=np.double))
         data.keep_data_sample_log_between("Temp", 1.1, 3.3)
         log = data._dict['logs']._float_dict['Temp']
         self.assertEqual(log._min, 1.1)
@@ -160,7 +162,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.add_sample_log('Temp', [1.0, 2.0], [3.0, 4.0])
+        data.add_sample_log('Temp',
+                            np.asarray([1.0, 2.0], dtype=np.double),
+                            np.asarray([3.0, 4.0], dtype=np.double))
         with self.assertRaises(RuntimeError):
             data.keep_data_sample_log_between("Temp", 7.1, 3.3)
 
@@ -231,14 +235,18 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              user,
                              periods,
                              detector_1)
-        data.add_sample_log('B', [1], [2])
-        data.add_sample_log('T', [3], [4])
+        data.add_sample_log('B',
+                            np.asarray([1], dtype=np.double),
+                            np.asarray([2], dtype=np.double))
+        data.add_sample_log('T',
+                            np.asarray([3], dtype=np.double),
+                            np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
         data.histogram(0.016)
 
         cache.empty.assert_called_once()
         events.histogram.assert_called_once_with(width=0.016, cache=cache)
-        self.assertEqual(2, data._dict['logs'].apply_filter.call_count)
+        self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
         self.assertEqual(2, events.apply_log_filter.call_count)
 
     def test_histogram_with_logs_with_cache(self):
@@ -266,8 +274,12 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              user,
                              periods,
                              detector_1)
-        data.add_sample_log('B', [1], [2])
-        data.add_sample_log('T', [3], [4])
+        data.add_sample_log('B',
+                            np.asarray([1], dtype=np.double),
+                            np.asarray([2], dtype=np.double))
+        data.add_sample_log('T',
+                            np.asarray([3], dtype=np.double),
+                            np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
         data.histogram(0.016)
 
@@ -301,8 +313,12 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              user,
                              periods,
                              detector_1)
-        data.add_sample_log('B', [1], [2])
-        data.add_sample_log('T', [3], [4])
+        data.add_sample_log('B',
+                            np.asarray([1], dtype=np.double),
+                            np.asarray([2], dtype=np.double))
+        data.add_sample_log('T',
+                            np.asarray([3], dtype=np.double),
+                            np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
         data.histogram(0.01)
 
@@ -515,6 +531,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         mocks.
         """
         events = mock.MagicMock()
+        events.report_filters = mock.Mock(return_value={})
         cache = mock.MagicMock()
         sample = fake_nxs_part()
         raw_data = fake_nxs_part()
