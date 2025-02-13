@@ -1,9 +1,6 @@
 from MuonDataLib.data.utils import NONE
 from MuonDataLib.cython_ext.stats import make_histogram
-from MuonDataLib.cython_ext.filter import (cf_less,
-                                           cf_greater,
-                                           remove_data,
-                                           keep_data,
+from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
                                            good_values_ints,
@@ -18,6 +15,55 @@ cnp.import_array()
 
 cdef double ns_to_s = 1.e-9
 
+
+"""
+These need to be classes to pass function argument
+in Cython
+The below are not tested directly, in the interest
+of run time speed (the function classes are
+not exposed to Python).
+
+Need to be in the
+same file as they used in order to use type defs.
+Need to use
+https://docs.cython.org/en/latest/src/userguide/sharing_declarations.html
+to split into multiple files (not got time)
+"""
+cdef class cf:
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        raise NotImplementedError()
+
+cdef class cf_band(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        return (keep_data(min_filter, status, y, greater) and
+                keep_data(max_filter, status, y, less))
+
+cdef class cf_max(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        return keep_data(max_filter, status, y, less)
+
+cdef class cf_min(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        return keep_data(min_filter, status, y, greater)
+
+
+cdef class Func:
+    cdef compare(self, double threshold, double y):
+        raise NotImplementedError()
+
+cdef class cf_less(Func):
+    cdef compare(self, double threshold, double y):
+        return y < threshold
+
+cdef class cf_greater(Func):
+    cdef compare(self, double threshold, double y):
+        return y > threshold
+
+cdef remove_data(double threshold, status, double y, Func cf):
+    return threshold != NONE and not status and cf.compare(threshold, y)
+
+cdef keep_data(double threshold, status, double y, Func cf):
+    return threshold != NONE and status and cf.compare(threshold, y)
 
 cdef class Events:
     """
@@ -74,8 +120,15 @@ cdef class Events:
     @cython.boundscheck(False)  # Deactivate bounds checking
     @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+        cdef cf compare
         if min_filter == NONE and max_filter == NONE:
             return [], [], [], []
+        elif min_filter == NONE:
+            compare = cf_max()
+        elif max_filter == NONE:
+            compare = cf_min()
+        else:
+            compare = cf_band()
         status = False
 
         cdef Py_ssize_t j, N
@@ -88,8 +141,8 @@ cdef class Events:
             status = True
             start[0] = 0
 
-        less = cf_less()
-        greater = cf_greater()
+        cdef cf_less less = cf_less()
+        cdef cf_greater greater = cf_greater()
 
         for j in range(1, len(y)):
             if (remove_data(min_filter, status, y[j], less) or
@@ -97,8 +150,7 @@ cdef class Events:
                 status = True
                 # since it crosses before the current value
                 start[N] = j-1
-            elif (keep_data(min_filter, status, y[j], greater) and
-                  keep_data(max_filter, status, y[j], less)):
+            elif compare.cf(min_filter, max_filter, status, y[j], greater, less):
                 status = False
                 stop[N] = j
                 N += 1

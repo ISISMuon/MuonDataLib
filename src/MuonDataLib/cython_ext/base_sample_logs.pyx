@@ -144,6 +144,9 @@ cdef class BaseSampleLogs:
         elif dtype == 'float':
             return self._float_dict[name].get_filter()
 
+    cpdef clear_filter(self, name):
+        self._float_dict[name].clear_filters()
+
     @cython.boundscheck(False)  # Deactivate bounds checking
     @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef clear_filters(self):

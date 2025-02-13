@@ -1,6 +1,8 @@
 import h5py
 from MuonDataLib.data.sample_logs import SampleLogs
+from MuonDataLib.data.utils import NONE
 import numpy as np
+import json
 
 
 class MuonData(object):
@@ -57,12 +59,35 @@ class MuonEventData(MuonData):
         """
         self._events = events
         self._cache = cache
+        self._time_filter = {}
+        self._keep_times = {}
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
     def _filter_logs(self):
         # if only resolution changed
         # -> filters are the same so can skip this
+
+        # remove time filters
+        for name in self._time_filter.keys():
+            start, end = self._time_filter[name]
+            self._events.add_filter(name, start/ns_to_s, end/ns_to_s)
+
+        # keep time filters
+        N = len(self._keep_times)
+        if N > 0:
+            data_end = self.get_frame_start_times()[-1] + 1.
+            # remove from start (assume 0) to first window
+            self._events.add_filter('keep_0', 0.0,
+                                    self._keep_times[0][0]/ns_to_s)
+            for j in range(1, len(self._keep_times)):
+                self._events.add_filter(f'keep_{j}',
+                                        self._keep_times[j-1][1]/ns_to_s,
+                                        self._keep_times[j][0]/ns_to_s)
+            self._events.add_filter(f'keep_{N}',
+                                    self._keep_times[N-1][1]/ns_to_s,
+                                    data_end/ns_to_s)
+
         log_names = self._dict['logs'].get_names()
         for name in log_names:
             result = self._dict['logs'].get_filter(name)
@@ -77,7 +102,6 @@ class MuonEventData(MuonData):
                                               dtype=np.double)
                                    for k in range(len(filter_times))],
                                   dtype=np.double)
-
         self._dict['logs'].apply_filter(filter_times)
 
     def histogram(self, resolution=0.016):
@@ -101,6 +125,7 @@ class MuonEventData(MuonData):
     def clear_filters(self):
         self._cache.clear()
         self._dict['logs'].clear_filters()
+        self._time_filters.clear()
         self._events.clear_filters()
 
     def add_sample_log(self, name, x_data, y_data):
@@ -110,11 +135,39 @@ class MuonEventData(MuonData):
     def get_sample_log(self, name):
         return self._dict['logs'].get_sample_log(name)
 
+    def keep_data_sample_log_below(self, log_name, max_value):
+        self._dict['logs'].add_filter(log_name, NONE, max_value)
+
+    def keep_data_sample_log_above(self, log_name, min_value):
+        self._dict['logs'].add_filter(log_name, min_value, NONE)
+
     def keep_data_sample_log_between(self, log_name, min_value, max_value):
         if max_value <= min_value:
             raise RuntimeError("The max filter value is smaller "
                                "than the min value")
         self._dict['logs'].add_filter(log_name, min_value, max_value)
+
+    def only_keep_data_time_between(self, times):
+        # add check in order and correct format
+        self._cache.clear()
+        self._keep_times = times
+
+    def delete_sample_log_filter(self, name):
+        self._dict['logs'].clear_filter(name)
+
+    def delete_only_keep_data_time_between(self):
+        self._cache.clear()
+        self._keep_times = []
+
+    def remove_data_time_between(self, name, start, end):
+        if name in self._time_filter.keys():
+            raise RuntimeError(f'The name {name} already exists')
+        self._cache.clear()
+        self._time_filter[name] = (start, end)
+
+    def delete_remove_data_time_between(self, name):
+        self._cache.clear()
+        del self._time_filter[name]
 
     def get_frame_start_times(self):
         """
@@ -174,11 +227,39 @@ class MuonEventData(MuonData):
         This will apply all of the filters from the file.
         :param file_name: the name of the json file
         """
-        self._events.load_filters(file_name)
+        self._cache.clear()
+        self._events.clear_filters()
+        with open(file_name, 'r') as file:
+            data = json.load(file)
+        tmp = data['time_filters']
+        self._time_filter = tmp['remove_filters']
+
+        tmp = tmp['keep_filters']
+        self._keep_times = []
+        for val in tmp.values():
+            self._keep_times.append(val)
+
+        tmp = data['sample_log_filters']
+        for name in tmp.keys():
+            self._dict['logs'].add_filter(name, *tmp[name])
 
     def save_filters(self, file_name):
         """
         A method to save the current filters to a file.
         :param file_name: the name of the json file to save to.
         """
-        self._events.save_filters(file_name)
+        data = {}
+        tmp = {f'keep_{j}': self._keep_times[j]
+               for j in range(len(self._keep_times))}
+        data['time_filters'] = {'remove_filters': self._time_filter,
+                                'keep_filters': tmp}
+        tmp = {}
+        for name in self._dict['logs'].get_names():
+            result = self._dict['logs'].get_filter(name)
+            if result[3] != NONE or result[4] != NONE:
+                tmp[name] = [result[3], result[4]]
+        data['sample_log_filters'] = tmp
+
+        with open(file_name, 'w') as file:
+            json.dump(data, file, ensure_ascii=False,
+                      sort_keys=True, indent=4)

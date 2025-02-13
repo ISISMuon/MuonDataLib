@@ -204,32 +204,26 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
 cpdef apply_filter(x, y, times):
     fx = np.zeros(len(x))
     fy = np.zeros(len(y))
+    cdef double[:] start_times= np.sort(np.asarray([ times[k][0] for k in range(len(times))], dtype=np.double), kind='quicksort')
+    cdef double[:] end_times= np.sort(np.asarray([ times[k][1] for k in range(len(times))], dtype=np.double), kind='quicksort')
+
     N = 0
     k = 0
     for j in range(len(x)):
-        if k == len(times) or x[j] < times[k][0]:
+        if k == len(start_times) or x[j] < start_times[k]:
             fx[N] = x[j]
             fy[N] = y[j]
             N += 1
 
-        elif x[j] >= times[k][1]:
+        elif x[j] >= end_times[k]:
             k += 1
-            if k < len(times) and x[j] < times[k][0]:
+            if k < len(start_times) and x[j] < start_times[k]:
                 fx[N] = x[j]
                 fy[N] = y[j]
                 N += 1
 
     return fx[:N], fy[:N]
 
-
-
-"""
-These need to be classes to pass function argument
-in Cython
-The below are not tested directly, in the interest
-of run time speed (the function classes are
-not fully exposed to Python).
-"""
 
 cdef class Func:
     cdef compare(self, double threshold, double y):
