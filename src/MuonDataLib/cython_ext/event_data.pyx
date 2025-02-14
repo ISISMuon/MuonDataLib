@@ -6,7 +6,6 @@ from MuonDataLib.cython_ext.filter import (
                                            good_values_ints,
                                            good_values_double)
 import numpy as np
-import json
 import time
 cimport numpy as cnp
 import cython
@@ -215,27 +214,6 @@ cdef class Events:
         for key in self.filter_start.keys():
             data[key] = (self.filter_start[key], self.filter_end[key])
         return data
-
-    def load_filters(self, str file_name):
-        """
-        A method to filters from a json file.
-        This will apply all of the filters from the file.
-        :param file_name: the name of the json file
-        """
-        with open(file_name, 'r') as file:
-            data = json.load(file)
-
-        for key in data.keys():
-            self.add_filter(key, *data[key])
-
-    def save_filters(self, str file_name):
-        """
-        A method to save the current filters to a file.
-        :param file_name: the name of the json file to save to.
-        """
-        data = self.report_filters()
-        with open(file_name, 'w') as file:
-            json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=4)
 
     @property
     def get_total_frames(self):
