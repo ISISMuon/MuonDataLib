@@ -4,6 +4,7 @@ import os
 import json
 import datetime
 
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.cython_ext.event_data import Events
 from MuonDataLib.cython_ext.events_cache import EventsCache
@@ -274,6 +275,55 @@ class EventsTest(TestHelper):
                                                         f_end)
         self.assertEqual(first, 1.0)
         self.assertEqual(last, 18.0)
+
+    def test_apply_log_filter_no_filter(self):
+        name = "test"
+        x = np.arange(0, 10., 0.1, dtype=np.double)
+        y = 2.1*np.sin(1.6*x)
+        min_ = NONE
+        max_ = NONE
+        self._events.apply_log_filter(name, x, y, min_, max_)
+
+        filters = self._events.report_filters()
+        self.assertEqual(len(filters), 0)
+
+    def test_apply_log_filter_min_value(self):
+        name = "test"
+        x = np.arange(0, 10., 0.1, dtype=np.double)
+        y = 2.1*np.sin(1.6*x)
+        min_ = -1.1
+        max_ = NONE
+        self._events.apply_log_filter(name, x, y, min_, max_)
+
+        filters = self._events.report_filters()
+        self.assertEqual(len(filters), 3)
+
+        expected_start = [0., 2.3, 6.2]
+        expected_end = [0.1, 3.6, 7.6]
+        for j, key in enumerate(filters.keys()):
+            values = filters[key]
+            # convert back to seconds from ns
+            self.assertAlmostEqual(values[0]*1e-9, expected_start[j], 1)
+            self.assertAlmostEqual(values[1]*1e-9, expected_end[j], 1)
+
+    def test_apply_log_filter_max_value(self):
+        name = "test"
+        x = np.arange(0, 10., 0.1, dtype=np.double)
+        y = 2.1*np.sin(1.6*x)
+        min_ = NONE
+        max_ = 1.2
+        self._events.apply_log_filter(name, x, y, min_, max_)
+
+        filters = self._events.report_filters()
+        self.assertEqual(len(filters), 3)
+
+        expected_start = [0.3, 4.3, 8.2]
+        expected_end = [1.6, 5.6, 9.5]
+        for j, key in enumerate(filters.keys()):
+            values = filters[key]
+            # convert back to seconds from ns
+            self.assertAlmostEqual(values[0]*1e-9, expected_start[j], 1)
+            self.assertAlmostEqual(values[1]*1e-9, expected_end[j], 1)
 
     def test_apply_log_filter_keep_ends_band(self):
         name = "test"

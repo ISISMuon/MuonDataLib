@@ -93,6 +93,15 @@ class FilterTest(TestHelper):
         self.assertEqual(len(result), 20)
         self.assertArrays(result, np.arange(0.2, 0.4, step=0.01))
 
+    def test_apply_filter_unordered(self):
+        x = np.arange(0, 10, dtype=np.double)
+        y = 2.*x + 1
+        times = [[8, 10], [0, 3]]
+        fx, fy = apply_filter(x, y, times)
+        # include the end of filter as it is within the band to keep
+        self.assertArrays(fx, np.asarray([3, 4, 5, 6, 7], dtype=np.double))
+        self.assertArrays(fy, np.asarray([7, 9, 11, 13, 15], dtype=np.double))
+
     def test_apply_filter_keep_middle(self):
         x = np.arange(0, 10, dtype=np.double)
         y = 2.*x + 1
