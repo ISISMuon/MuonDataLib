@@ -28,7 +28,8 @@ cpdef make_histogram(
     :param max_time: the last bin edge
     :param width: the bin width
     :param conversion: for unit conversions
-    :returns: a matrix of histograms, the bin edges
+    :returns: a matrix of histograms, the bin edges, the
+    number of events in the histogram
     """
 
     cdef Py_ssize_t det, k, j_bin

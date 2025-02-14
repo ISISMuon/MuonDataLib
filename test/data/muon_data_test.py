@@ -228,6 +228,32 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertArrays(data._keep_times[0], np.asarray([1, 2]))
         self.assertArrays(data._keep_times[1], np.asarray([5, 6]))
 
+    def test_only_keep_data_time_between_no_times(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        data.only_keep_data_time_between([])
+        self.assertEqual(data._keep_times, {})
+
+    def test_only_keep_data_time_between_bad_times(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        self.fill_cache(data)
+        with self.assertRaises(RuntimeError):
+            data.only_keep_data_time_between(np.asarray([np.asarray([2, 1]),
+                                                         np.asarray([5, 6])]))
+
+        with self.assertRaises(RuntimeError):
+            data.only_keep_data_time_between(np.asarray([np.asarray([1])]))
+        with self.assertRaises(RuntimeError):
+            data.only_keep_data_time_between(np.asarray([np.asarray([1,
+                                                                     2, 3])]))
+
     def test_remove_data_time_between(self):
         file = os.path.join(os.path.dirname(__file__),
                             '..',

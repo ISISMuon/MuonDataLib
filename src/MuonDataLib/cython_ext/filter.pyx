@@ -202,8 +202,16 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef apply_filter(x, y, times):
+    """
+    Applies the time filters to the sample log values
+    :param x: the x values for the sample log
+    :param y: the y values for the sample log
+    :param times: a list of the [start, end] times
+    within which the data will be removed
+    """
     fx = np.zeros(len(x))
     fy = np.zeros(len(y))
+    # need to make sure the times are in the correct order
     cdef double[:] start_times= np.sort(np.asarray([ times[k][0] for k in range(len(times))], dtype=np.double), kind='quicksort')
     cdef double[:] end_times= np.sort(np.asarray([ times[k][1] for k in range(len(times))], dtype=np.double), kind='quicksort')
 
@@ -223,22 +231,3 @@ cpdef apply_filter(x, y, times):
                 N += 1
 
     return fx[:N], fy[:N]
-
-
-cdef class Func:
-    cdef compare(self, double threshold, double y):
-        raise NotImplementedError()
-
-cdef class cf_less(Func):
-    cdef compare(self, double threshold, double y):
-        return y < threshold
-
-cdef class cf_greater(Func):
-    cdef compare(self, double threshold, double y):
-        return y > threshold
-
-cpdef remove_data(double threshold, status, double y, Func cf):
-    return threshold != NONE and not status and cf.compare(threshold, y)
-
-cpdef keep_data(double threshold, status, double y, Func cf):
-    return threshold != NONE and status and cf.compare(threshold, y)

@@ -68,6 +68,8 @@ cdef class EventsCache:
         (at present doesnt account for multiperiod data)
         :param fist_time: the time (s) for the first good frame
         :param last_time: the last frame start time
+        :param resolution: the resolution of the histogram (bin width)
+        :param N_events: the number of events in the histogram
         """
         N = len(self.N_event_frames)
         if len(filter_frames) != N or len(veto_frames) != N:
@@ -84,6 +86,9 @@ cdef class EventsCache:
 
     @property
     def get_N_events(self):
+        """
+        :return: the number of events in the histogram
+        """
         return int(self.N_events)
 
     def get_histograms(self):
@@ -102,6 +107,9 @@ cdef class EventsCache:
             raise RuntimeError("The cache is empty, cannot get frames")
 
     def get_resolution(self):
+        """
+        :return: the resolution of the histogram
+        """
         return self.resolution
 
     @property

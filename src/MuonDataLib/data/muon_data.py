@@ -65,19 +65,19 @@ class MuonEventData(MuonData):
         self._dict['logs'] = SampleLogs()
 
     def _filter_remove_times(self):
-        # if only resolution changed
-        # -> filters are the same so can skip this
-
-        # remove time filters
+        """
+        A method for getting getting time filter values
+        from the remove_data_time_between method
+        """
         for name in self._time_filter.keys():
             start, end = self._time_filter[name]
             self._events.add_filter(name, start/ns_to_s, end/ns_to_s)
 
     def _filter_keep_times(self):
-        # if only resolution changed
-        # -> filters are the same so can skip this
-
-        # keep time filters
+        """
+        A method for getting the time filter values
+        from the keep_data_time_between method.
+        """
         N = len(self._keep_times)
         if N > 0:
             data_end = self.get_frame_start_times()[-1] + 1.
@@ -93,9 +93,13 @@ class MuonEventData(MuonData):
                                     data_end/ns_to_s)
 
     def _filter_logs(self):
-        # if only resolution changed
-        # -> filters are the same so can skip this
-
+        """
+        A method for getting the time filter values
+        from the sample logs:
+        - keep_data_sample_log_between
+        - keep_data_sample_log_below
+        - keep_data_sample_log_above
+        """
         log_names = self._dict['logs'].get_names()
         for name in log_names:
             result = self._dict['logs'].get_filter(name)
@@ -113,11 +117,25 @@ class MuonEventData(MuonData):
         self._dict['logs'].apply_filter(filter_times)
 
     def _filters(self):
+        """
+        A simple wrapper method for getting
+        all of the possible time filters
+        """
         self._filter_remove_times()
         self._filter_keep_times()
         self._filter_logs()
 
     def histogram(self, resolution=0.016):
+        """
+        A method for constructing a histogram.
+        This will skip calculating the filters
+        if the cache is occupied.
+        If just the resolution has changed it will
+        not alter the filtered values.
+        :param resolution: the resolution of the
+        histogram
+        :return: the histograms and bins
+        """
         is_cache_empty = self._cache.empty()
         if is_cache_empty:
             self._filters()
@@ -131,11 +149,15 @@ class MuonEventData(MuonData):
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
+        :param resolution: the resolution for the histogram
         """
         self.histogram(resolution)
         super().save_histograms(file_name)
 
     def clear_filters(self):
+        """
+        A method to remove all of the filters
+        """
         self._cache.clear()
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
@@ -143,21 +165,49 @@ class MuonEventData(MuonData):
         self._events.clear_filters()
 
     def add_sample_log(self, name, x_data, y_data):
+        """
+        A method to add a sample log
+        :param name: the name of the sample log
+        :param x_data: the x values (assumed to be time in seconds)
+        :param y_data: the y values
+        """
         self._cache.clear()
         self._dict['logs'].add_sample_log(name, x_data, y_data)
 
     def get_sample_log(self, name):
+        """
+        :param name: the name of the sample log
+        :return: the requested sample log object
+        """
         return self._dict['logs'].get_sample_log(name)
 
     def keep_data_sample_log_below(self, log_name, max_value):
+        """
+        Sets a filter to remove data above a value
+        :param log_name: the name of the log
+        :param max_value: the value to remove data if its above it
+        """
         self._cache.clear()
         self._dict['logs'].add_filter(log_name, NONE, max_value)
 
     def keep_data_sample_log_above(self, log_name, min_value):
+        """
+        Sets a filter to remove data below a value
+        :param log_name: the name of the log
+        :param max_value: the value to remove data if its below it
+        """
         self._cache.clear()
         self._dict['logs'].add_filter(log_name, min_value, NONE)
 
     def keep_data_sample_log_between(self, log_name, min_value, max_value):
+        """
+        Sets a filter to remove data if its outside of the range
+        :param log_name: the name of the log
+        :param min_value: the kept data will be above this
+        :param max_value: the kept data will be below this
+        """
+        self._cache.clear()
+
         if max_value <= min_value:
             raise RuntimeError("The max filter value is smaller "
                                "than the min value")
@@ -165,11 +215,31 @@ class MuonEventData(MuonData):
         self._dict['logs'].add_filter(log_name, min_value, max_value)
 
     def only_keep_data_time_between(self, times):
-        # add check in order and correct format
+        """
+        Adds a filter that keeps data between given times
+        :param times: a list of the start, end times (as a list)
+        """
+        if len(times) == 0:
+            return
+        else:
+            for k in range(len(times)):
+                if len(times[k]) != 2:
+                    raise RuntimeError("Expect a start and end time")
+                start = times[k][0]
+                end = times[k][1]
+                if start > end:
+                    error = (f'the start time {start} is after '
+                             f'the end time {end}')
+                    raise RuntimeError(error)
         self._cache.clear()
         self._keep_times = times
 
     def remove_data_time_between(self, name, start, end):
+        """
+        A method to remove events between 2 time stamps.
+        :param name: the name for the filter
+        :param start: the time to start removing data from
+        """
         if name in self._time_filter.keys():
             raise RuntimeError(f'The name {name} already exists')
         if start > end:
@@ -178,14 +248,29 @@ class MuonEventData(MuonData):
         self._time_filter[name] = (start, end)
 
     def delete_sample_log_filter(self, name):
+        """
+        A method to remove a sample log filter,
+        but not the sample log itself.
+        :param name: the name of the sample log
+        to remove the filter from
+        """
         self._cache.clear()
         self._dict['logs'].clear_filter(name)
 
     def delete_only_keep_data_time_between(self):
+        """
+        A method to remove the filters that
+        define time bands to keep date within
+        """
         self._cache.clear()
         self._keep_times = []
 
     def delete_remove_data_time_between(self, name):
+        """
+        A method to remove a filter that defines a band
+        of data to discard events from
+        :param name: the name of the filter to remove
+        """
         self._cache.clear()
         del self._time_filter[name]
 
@@ -197,12 +282,19 @@ class MuonEventData(MuonData):
         return self._events.get_start_times()*ns_to_s
 
     def _report_raw_filters(self):
+        """
+        Gets the filters from the events
+        :return: dict of filters in time
+        """
         data = self._events.report_filters()
         for key in data.keys():
             data[key] = [x*ns_to_s for x in data[key]]
         return data
 
     def report_filters(self):
+        """
+        :returns: the applied filters as a structured dict
+        """
         data = {}
         # add sample logs
         tmp = {}
@@ -221,7 +313,7 @@ class MuonEventData(MuonData):
 
     def load_filters(self, file_name):
         """
-        A method to filters from a json file.
+        A method to get filters from a json file.
         This will apply all of the filters from the file.
         :param file_name: the name of the json file
         """

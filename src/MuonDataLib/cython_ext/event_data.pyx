@@ -29,39 +29,102 @@ https://docs.cython.org/en/latest/src/userguide/sharing_declarations.html
 to split into multiple files (not got time)
 """
 cdef class cf:
+    """
+    Simple class for comparing values
+    """
     cdef cf(self, min_filter, max_filter, status, y, greater, less):
         raise NotImplementedError()
 
 cdef class cf_band(cf):
     cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is within a band of accepted values
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method
+        :param less: the comparion method
+        """
         return (keep_data(min_filter, status, y, greater) and
                 keep_data(max_filter, status, y, less))
 
 cdef class cf_max(cf):
     cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is below a max accepted value
+        :param min_filter: the min accepted y value - not used
+        :param max_filter: the max accepted y value
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method - not used
+        :param less: the comparion method
+        """
         return keep_data(max_filter, status, y, less)
 
 cdef class cf_min(cf):
     cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is below an accepted value
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value - not used
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method
+        :param less: the comparion method - not used
+        """
         return keep_data(min_filter, status, y, greater)
 
 
 cdef class Func:
+    """
+    compares a pair of values
+    Need this as sometimes the comparison are flipped
+    when doing the checks. So want a unified interface
+    """
     cdef compare(self, double threshold, double y):
         raise NotImplementedError()
 
 cdef class cf_less(Func):
     cdef compare(self, double threshold, double y):
+        """
+        Is y < threshold
+        :param threshold: the threshold value
+        :param y: the y value
+        :return: a bool of is y < threshold
+        """
         return y < threshold
 
 cdef class cf_greater(Func):
     cdef compare(self, double threshold, double y):
+        """
+        Is y > threshold
+        :param threshold: the threshold value
+        :param y: the y value
+        :return: a bool of is y > threshold
+        """
         return y > threshold
 
 cdef remove_data(double threshold, status, double y, Func cf):
+    """
+    Checks if the data should be removed
+    :param threshold: the threshold value
+    :param status: it data is currently being removed
+    :param y: the y value being considered
+    :param cf: the comparison function to use
+    :return: a bool of if the y data point is to be removed
+    """
     return threshold != NONE and not status and cf.compare(threshold, y)
 
 cdef keep_data(double threshold, status, double y, Func cf):
+    """
+    Checks if the data should be kept
+    :param threshold: the threshold value
+    :param status: it data is currently being removed
+    :param y: the y value being considered
+    :param cf: the comparison function to use
+    :return: a bool of if the y data point is to be kept
+    """
     return threshold != NONE and status and cf.compare(threshold, y)
 
 cdef class Events:
@@ -119,6 +182,15 @@ cdef class Events:
     @cython.boundscheck(False)  # Deactivate bounds checking
     @cython.wraparound(False)   # Deactivate negative indexing.
     cpdef apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+        """
+        A method for extracting the filters from the logs.
+        :param name: the name of the log to filter against
+        :param x: the x values for the log
+        :param y: the y values for the log
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value
+        """
+
         cdef cf compare
         if min_filter == NONE and max_filter == NONE:
             return [], [], [], []
