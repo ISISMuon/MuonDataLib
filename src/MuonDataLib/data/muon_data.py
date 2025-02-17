@@ -78,18 +78,31 @@ class MuonEventData(MuonData):
         A method for getting the time filter values
         from the keep_data_time_between method.
         """
-        N = len(self._keep_times)
+
+        start_times = []
+        end_times = []
+        for key in self._keep_times.keys():
+            tmp = self._keep_times[key]
+            start_times.append(tmp[0])
+            end_times.append(tmp[1])
+
+        start_times = np.sort(np.asarray(start_times), kind='quicksort')
+        end_times = np.sort(np.asarray(end_times), kind='quicksort')
+
+        N = len(start_times)
         if N > 0:
             data_end = self.get_frame_start_times()[-1] + 1.
             # remove from start (assume 0) to first window
             self._events.add_filter('keep_0', 0.0,
-                                    self._keep_times[0][0]/ns_to_s)
+                                    start_times[0]/ns_to_s)
             for j in range(1, len(self._keep_times)):
                 self._events.add_filter(f'keep_{j}',
-                                        self._keep_times[j-1][1]/ns_to_s,
-                                        self._keep_times[j][0]/ns_to_s)
+                                        end_times[j-1]/ns_to_s,
+                                        start_times[j]/ns_to_s)
+            # dont use the real name as we have changed the order and
+            # its only used internally
             self._events.add_filter(f'keep_{N}',
-                                    self._keep_times[N-1][1]/ns_to_s,
+                                    end_times[-1]/ns_to_s,
                                     data_end/ns_to_s)
 
     def _filter_logs(self):
@@ -161,7 +174,7 @@ class MuonEventData(MuonData):
         self._cache.clear()
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
-        self._keep_times = []
+        self._keep_times = {}
         self._events.clear_filters()
 
     def add_sample_log(self, name, x_data, y_data):
@@ -214,25 +227,19 @@ class MuonEventData(MuonData):
         self._cache.clear()
         self._dict['logs'].add_filter(log_name, min_value, max_value)
 
-    def only_keep_data_time_between(self, times):
+    def only_keep_data_time_between(self, name, start, end):
         """
         Adds a filter that keeps data between given times
         :param times: a list of the start, end times (as a list)
         """
-        if len(times) == 0:
-            return
-        else:
-            for k in range(len(times)):
-                if len(times[k]) != 2:
-                    raise RuntimeError("Expect a start and end time")
-                start = times[k][0]
-                end = times[k][1]
-                if start > end:
-                    error = (f'the start time {start} is after '
-                             f'the end time {end}')
-                    raise RuntimeError(error)
+        if name in self._keep_times.keys():
+            raise RuntimeError(f'The name {name} is already in use')
+        elif start > end:
+            error = (f'the start time {start} is after '
+                     f'the end time {end}')
+            raise RuntimeError(error)
         self._cache.clear()
-        self._keep_times = times
+        self._keep_times[name] = [start, end]
 
     def remove_data_time_between(self, name, start, end):
         """
@@ -257,13 +264,15 @@ class MuonEventData(MuonData):
         self._cache.clear()
         self._dict['logs'].clear_filter(name)
 
-    def delete_only_keep_data_time_between(self):
+    def delete_only_keep_data_time_between(self, name):
         """
         A method to remove the filters that
         define time bands to keep date within
         """
+        if name not in self._keep_times.keys():
+            raise RuntimeError(f'The name {name} is not present')
         self._cache.clear()
-        self._keep_times = []
+        del self._keep_times[name]
 
     def delete_remove_data_time_between(self, name):
         """
@@ -305,9 +314,7 @@ class MuonEventData(MuonData):
         data['sample_log_filters'] = tmp
 
         # add time filters
-        tmp = {f'keep_{j}': self._keep_times[j]
-               for j in range(len(self._keep_times))}
-        data['time_filters'] = {'keep_filters': tmp,
+        data['time_filters'] = {'keep_filters': self._keep_times,
                                 'remove_filters': self._time_filter}
         return data
 
@@ -325,9 +332,9 @@ class MuonEventData(MuonData):
         self._time_filter = tmp['remove_filters']
 
         tmp = tmp['keep_filters']
-        self._keep_times = []
-        for val in tmp.values():
-            self._keep_times.append(val)
+        self._keep_times = {}
+        for key in tmp.keys():
+            self._keep_times[key] = tmp[key]
 
         tmp = data['sample_log_filters']
         for name in tmp.keys():
