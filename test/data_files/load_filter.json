@@ -7,11 +7,11 @@
     },
     "time_filters": {
         "keep_filters": {
-            "keep_0": [
+            "first": [
                 0.01,
                 0.02
             ],
-            "keep_1": [
+            "second": [
                 0.05,
                 0.06
             ]

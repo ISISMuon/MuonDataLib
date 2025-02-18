@@ -222,20 +222,25 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI0.nxs')
         data = load_events(file, 64)
         self.fill_cache(data)
-        data.only_keep_data_time_between(np.asarray([np.asarray([1, 2]),
-                                                     np.asarray([5, 6])]))
-        self.assertEqual(data._cache.empty(), True)
-        self.assertArrays(data._keep_times[0], np.asarray([1, 2]))
-        self.assertArrays(data._keep_times[1], np.asarray([5, 6]))
 
-    def test_only_keep_data_time_between_no_times(self):
+        data.only_keep_data_time_between('first', 1, 2)
+        self.assertEqual(data._cache.empty(), True)
+
+        data.only_keep_data_time_between('second', 5, 7)
+
+        self.assertArrays(list(data._keep_times.keys()), ['first', 'second'])
+        self.assertArrays(data._keep_times['first'], np.asarray([1, 2]))
+        self.assertArrays(data._keep_times['second'], np.asarray([5, 7]))
+
+    def test_only_keep_data_time_between_duplicate(self):
         file = os.path.join(os.path.dirname(__file__),
                             '..',
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.only_keep_data_time_between([])
-        self.assertEqual(data._keep_times, {})
+        data.only_keep_data_time_between('first', 1, 2)
+        with self.assertRaises(RuntimeError):
+            data.only_keep_data_time_between('first', 3, 4)
 
     def test_only_keep_data_time_between_bad_times(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -245,14 +250,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         self.fill_cache(data)
         with self.assertRaises(RuntimeError):
-            data.only_keep_data_time_between(np.asarray([np.asarray([2, 1]),
-                                                         np.asarray([5, 6])]))
-
-        with self.assertRaises(RuntimeError):
-            data.only_keep_data_time_between(np.asarray([np.asarray([1])]))
-        with self.assertRaises(RuntimeError):
-            data.only_keep_data_time_between(np.asarray([np.asarray([1,
-                                                                     2, 3])]))
+            data.only_keep_data_time_between('first', 6, 4)
 
     def test_remove_data_time_between(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -322,12 +320,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.only_keep_data_time_between(np.asarray([np.asarray([1, 2]),
-                                                     np.asarray([5, 6])]))
+        data.only_keep_data_time_between('one', 1, 2)
+        data.only_keep_data_time_between('two', 13, 24)
         self.fill_cache(data)
-        data.delete_only_keep_data_time_between()
+        data.delete_only_keep_data_time_between('one')
         self.assertEqual(data._cache.empty(), True)
-        self.assertArrays(data._keep_times, [])
+        self.assertArrays(list(data._keep_times.keys()), ['two'])
+        self.assertArrays(data._keep_times['two'], np.asarray([13, 24]))
 
     def test_delete_remove_data_time_between(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -373,8 +372,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
-        data.only_keep_data_time_between(np.asarray([np.asarray([.01, .02]),
-                                                     np.asarray([.05, .06])]))
+        data.only_keep_data_time_between('one', .01, .02)
+        data.only_keep_data_time_between('two', .05, .06)
 
         data._filter_keep_times()
 
@@ -422,8 +421,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.add_sample_log('Temp', x,
                             2*x)
         data.keep_data_sample_log_between("Temp", 0.0044, .163)
-        data.only_keep_data_time_between(np.asarray([np.asarray([.01, .02]),
-                                                     np.asarray([.05, .06])]))
+        data.only_keep_data_time_between('first', .01, .02)
+        data.only_keep_data_time_between('second', .05, .06)
 
         data.remove_data_time_between('one', 1, 2)
         data.remove_data_time_between('two', 5, 7)
@@ -463,8 +462,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.add_sample_log('Temp', x,
                             2*x)
         data.keep_data_sample_log_between("Temp", 0.0044, .163)
-        data.only_keep_data_time_between(np.asarray([np.asarray([.01, .02]),
-                                                     np.asarray([.05, .06])]))
+        data.only_keep_data_time_between('first', .01, .02)
+        data.only_keep_data_time_between('second', .05, .06)
 
         data.remove_data_time_between('one', 1, 2)
         data.remove_data_time_between('two', 5, 7)
@@ -477,7 +476,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(log._min, NONE)
         self.assertEqual(log._max, NONE)
 
-        self.assertEqual(data._keep_times, [])
+        self.assertEqual(data._keep_times, {})
         self.assertEqual(data._time_filter, {})
 
     def test_save_histogram_empty_cache(self):
@@ -766,8 +765,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.add_sample_log('Temp', x,
                             2*x)
         data.keep_data_sample_log_between("Temp", 0.0044, .163)
-        data.only_keep_data_time_between([[.01, .02],
-                                          [.05, .06]])
+        data.only_keep_data_time_between('first', .01, .02)
+        data.only_keep_data_time_between('second', .05, .06)
 
         data.remove_data_time_between('one', 1, 2)
         data.remove_data_time_between('two', 5, 7)
@@ -786,9 +785,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertArrays(tmp['two'], [5, 7])
 
         tmp = result['time_filters']['keep_filters']
-        self.assertArrays(list(tmp.keys()), ['keep_0', 'keep_1'])
-        self.assertArrays(tmp['keep_0'], [0.01, 0.02])
-        self.assertArrays(tmp['keep_1'], [0.05, 0.06])
+        self.assertArrays(list(tmp.keys()), ['first', 'second'])
+        self.assertArrays(tmp['first'], [0.01, 0.02])
+        self.assertArrays(tmp['second'], [0.05, 0.06])
 
         tmp = result['sample_log_filters']
         self.assertArrays(list(tmp.keys()), ['Temp'])
