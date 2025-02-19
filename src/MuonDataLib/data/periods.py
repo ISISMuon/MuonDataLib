@@ -98,6 +98,26 @@ class EventsPeriods(_Periods):
         super().__init__(number, labels, p_type, output, sequences)
         self._cache = cache
 
+    def set_number(self, N):
+        self._dict['number'] = N
+        print('moooooo', N)
+        label = ''
+        for k in range(N):
+            label += f'period_{k};'
+        label = label[:-1]
+        self._dict['labels'] = label
+        self._dict['sequences'] = np.asarray([1 for k in range(N)],
+                                             dtype=np.int32)
+        self._dict['type'] = np.ones(N, dtype=np.int32)
+        self._dict['requested'] = np.asarray([1 for k in range(N)],
+                                             dtype=np.int32)
+
+        #  good = self._cache.get_good_frames[0]
+        raw = self._cache.get_raw_frames[0]
+        self._dict['raw'] = np.asarray([raw for _ in range(N)],
+                                       dtype=np.int32)
+        self._dict['output'] = np.ones(N, dtype=np.int32)
+
     def save_nxs2(self, file):
         """
         A method to save the periods information as a muon
@@ -113,10 +133,24 @@ class EventsPeriods(_Periods):
             # store MeV
             counts[k] = float(np.sum(hist[k]))/1.e6
 
+        """
         super().save_nxs2(file,
                           np.asarray(self._cache.get_good_frames),
                           np.asarray(self._cache.get_raw_frames),
                           counts)
+        """
+        tmp = file.require_group('raw_data_1')
+        tmp = tmp.require_group('periods')
+
+        tmp.attrs['NX_class'] = 'NXperiod'
+        self.save_int('number', self._dict['number'], tmp)
+        self.save_int_array('sequences', self._dict['sequences'], tmp)
+        self.save_str('labels', self._dict['labels'], tmp)
+        self.save_int_array('type', self._dict['type'], tmp)
+        self.save_int_array('frames_requested', self._dict['requested'], tmp)
+        self.save_int_array('raw_frames', self._dict['raw'], tmp)
+        self.save_int_array('output', self._dict['output'], tmp)
+        self.save_float_array('total_counts', counts, tmp)
 
 
 def read_periods_from_histogram(file):

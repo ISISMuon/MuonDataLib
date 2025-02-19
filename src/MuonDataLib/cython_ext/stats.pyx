@@ -10,6 +10,7 @@ cpdef make_histogram(
         double[:] times,
         cnp.int32_t[:] spec,
         int N_spec,
+        int[:] periods,
         double min_time=0,
         double max_time=30.,
         double width=0.5,
@@ -32,21 +33,22 @@ cpdef make_histogram(
     number of events in the histogram
     """
 
-    cdef Py_ssize_t det, k, j_bin
+    cdef Py_ssize_t det, k, j_bin, p
     cdef int N = 0
     cdef double time
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
 
-    cdef cnp.ndarray[int, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.int32)
-    cdef int[:, :] mat = result
+    cdef cnp.ndarray[int, ndim=3] result = np.zeros((np.max(periods)+1, N_spec, len(bins)-1), dtype=np.int32)
+    cdef int[:, :, :] mat = result
 
     for k in range(len(times)):
         det = spec[k]
         time = times[k] * conversion
         if time <= max_time and time >= min_time:
+            p = periods[k]
             j_bin = int((time - min_time) // width)
-            mat[det, j_bin] += 1
+            mat[p, det, j_bin] += 1
             N += 1
     return result, bins, N
 
