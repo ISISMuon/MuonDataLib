@@ -27,7 +27,9 @@ class SampleLogs(HDF5, BaseSampleLogs):
             if dtype == 'float':
                 logs = self.get_sample_log(key)
                 tmp = selog.require_group(key)
+                tmp.attrs['NX_class'] = 'IXseblock'
                 tmp = tmp.require_group('value_log')
+                tmp.attrs['NX_class'] = 'NXlog'
                 x, y = logs.get_values()
                 self.save_float_array('time', x, tmp)
                 self.save_float_array('value', y, tmp)
