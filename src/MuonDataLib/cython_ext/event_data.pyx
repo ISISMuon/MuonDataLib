@@ -306,9 +306,25 @@ cdef class Events:
         event time stamps.
         """
 
-        cdef int[:] IDs, f_i_start, f_i_end, periods
+        cdef cnp.ndarray[int, ndim=1] _periods = np.zeros(len(self.times), dtype=np.int32)
+        cdef int[:] IDs, f_i_start, f_i_end
+        cdef int[:] periods = _periods
         cdef int rm_frames = 0
         cdef double[:] times, f_start, f_end
+
+        """
+         lets move this to a special function get_good_periods
+         Then we filter the data and populate the long form with
+         a single loop instead of 2.
+        """
+        start = 0
+
+        for k in range(len(self.start_index_list)-1):
+            end = self.start_index_list[k+1]
+            periods[start:end] = self.periods[k]
+            start = end
+        periods[start:len(self.times)] = self.periods[len(self.periods)-1]
+
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -324,7 +340,7 @@ cdef class Events:
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
-            periods = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.periods)
+            periods = good_values_ints(f_i_start, f_i_end, self.start_index_list, periods)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
         else:
             # no filters
@@ -332,7 +348,6 @@ cdef class Events:
             times = self.times
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
-            periods = self.periods
 
         return f_i_start, f_i_end, rm_frames, IDs, times, periods
 
@@ -358,13 +373,13 @@ cdef class Events:
 
         f_i_start, f_i_end, rm_frames, IDs, times, periods = self._get_filtered_data(frame_times)
 
-        hist, bins, N = make_histogram(times,
-                                       IDs,
-                                       self.N_spec,
-                                       periods,
-                                       min_time,
-                                       max_time,
-                                       width)
+        hist, bins, N = make_histogram(times=times,
+                                       spec=IDs,
+                                       N_spec=self.N_spec,
+                                       periods=periods,
+                                       min_time=min_time,
+                                       max_time=max_time,
+                                       width=width)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,

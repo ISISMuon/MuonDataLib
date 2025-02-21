@@ -40,7 +40,6 @@ def _load_data(file_name):
 
             if 'period_number' in tmp.keys():
                 tmp['period_number'].read_direct(periods)
-
         return IDs, start_j, times, amps, start_t, periods
 
 def load_data(file_name, N_det):

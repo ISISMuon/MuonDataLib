@@ -41,7 +41,6 @@ cpdef make_histogram(
 
     cdef cnp.ndarray[int, ndim=3] result = np.zeros((np.max(periods)+1, N_spec, len(bins)-1), dtype=np.int32)
     cdef int[:, :, :] mat = result
-
     for k in range(len(times)):
         det = spec[k]
         time = times[k] * conversion
