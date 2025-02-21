@@ -138,8 +138,9 @@ class SampleLogsTest(TestHelper):
         with h5py.File(FILENAME, 'r') as file:
             tmp = file['raw_data_1']['selog']
             self.compare_keys(tmp, ['unit', 'test'])
-
+            self.assertEqual(tmp['unit'].attrs['NX_class'], 'IXseblock')
             log = tmp['unit']['value_log']
+            self.assertEqual(log.attrs['NX_class'], 'NXlog')
             x = np.arange(-5, 5, 1, dtype=np.double)
             y = np.arange(5, 10, 1, dtype=np.double)
 
