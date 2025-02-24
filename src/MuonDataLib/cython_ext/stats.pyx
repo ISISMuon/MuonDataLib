@@ -25,6 +25,7 @@ cpdef make_histogram(
     :param times: the times for the data
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
+    :param periods: a list of the periods each event belongs to
     :param min_time: the first bin edge
     :param max_time: the last bin edge
     :param width: the bin width
