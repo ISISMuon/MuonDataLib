@@ -491,6 +491,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         source = fake_nxs_part()
         user = fake_nxs_part()
         periods = fake_nxs_part()
+        periods.set_number = mock.Mock()
         detector_1 = fake_nxs_part()
 
         events = mock.Mock()
@@ -649,6 +650,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         source = fake_nxs_part()
         user = fake_nxs_part()
         periods = fake_nxs_part()
+        periods.set_number = mock.Mock()
         detector_1 = fake_nxs_part()
 
         events = mock.Mock()
@@ -688,12 +690,15 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         """
         events = mock.MagicMock()
         events.report_filters = mock.Mock(return_value={})
+        events.histogram = mock.Mock(return_value=([], []))
         cache = mock.MagicMock()
+        cache.empty = mock.MagicMock(return_value=True)
         sample = fake_nxs_part()
         raw_data = fake_nxs_part()
         source = fake_nxs_part()
         user = fake_nxs_part()
         periods = fake_nxs_part()
+        periods.set_number = mock.Mock()
         detector_1 = fake_nxs_part()
 
         data = MuonEventData(events,

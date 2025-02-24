@@ -20,7 +20,7 @@ class LoadEventDataTest(TestHelper):
                             '..',
                             'data_files',
                             'simple_test.nxs')
-        IDs, start_j, times, amps, start_t = _load_data(file)
+        IDs, start_j, times, amps, start_t, periods = _load_data(file)
 
         self.assertLongArrays(IDs, [1, 2, 3, 2122, 4000], 4060,
                               [0, 0, 1, 4, 60])
@@ -47,18 +47,20 @@ class LoadEventDataTest(TestHelper):
         times = [0, .1, .2, .3]
         amps = [4, 5, 6]
         start_t = [0, 2]
+        periods = [0, 0]
 
         def fake_load(file_name):
             # add a sleep so we can test the timer
             time.sleep(1.0)
-            return IDs, start_j, times, amps, start_t
+            return IDs, start_j, times, amps, start_t, periods
 
         events_mock.return_value = mock.Mock()
         load_mock.side_effect = fake_load
         time_taken, events = load_data('test.nxs', 2)
         load_mock.assert_called_once_with("test.nxs")
         self.assertGreater(time_taken, 0.99)
-        events_mock.assert_called_once_with(IDs, times, start_j, start_t, 2)
+        events_mock.assert_called_once_with(IDs, times, start_j,
+                                            start_t, 2, periods)
 
 
 if __name__ == '__main__':

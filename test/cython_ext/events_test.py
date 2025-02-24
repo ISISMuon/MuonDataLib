@@ -16,12 +16,13 @@ class EventsTest(TestHelper):
         self._time = 1.e3*np.asarray([1., 2., 3., 4., 5., 6.], dtype=np.double)
         self._frame_i = np.asarray([0, 2, 4], dtype='int32')
         self._frame_time = np.asarray([0.0, 2.0, 4.0], dtype=np.double)
-
+        self._periods = np.zeros(len(self._frame_time), dtype=np.int32)
         self._events = Events(self._IDs,
                               self._time,
                               self._frame_i,
                               self._frame_time,
-                              2)
+                              2,
+                              self._periods)
 
     def test_get_N_spec(self):
         self.assertEqual(self._events.get_N_spec, 2)
@@ -41,7 +42,7 @@ class EventsTest(TestHelper):
         """
         mat, bins = self._events.histogram()
         self.assertArrays(bins, np.arange(0, 32.784, 0.016))
-        self.assertEqual(len(mat), 2)
+        self.assertEqual(len(mat[0]), 2)
 
     def test_custom_histogram(self):
         """
@@ -52,9 +53,9 @@ class EventsTest(TestHelper):
         """
         mat, bins = self._events.histogram(0., 7., 1.)
         self.assertArrays(bins, np.arange(0., 8., 1.))
-        self.assertEqual(len(mat), 2)
-        self.assertArrays(mat[0], [0, 1, 0, 1, 0, 1, 0])
-        self.assertArrays(mat[1], [0, 0, 1, 0, 1, 0, 1])
+        self.assertEqual(len(mat[0]), 2)
+        self.assertArrays(mat[0][0], [0, 1, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[0][1], [0, 0, 1, 0, 1, 0, 1])
 
     def test_cache_histogram(self):
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
@@ -66,7 +67,7 @@ class EventsTest(TestHelper):
         c_mat, c_bins = cache.get_histograms()
         self.assertArrays(bins, c_bins)
         # cache adds a list for periods, need to remove it
-        self.assertEqual(len(mat), len(c_mat[0]))
+        self.assertEqual(len(mat[0]), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
         self.assertEqual(cache.resolution, 0.2)
         self.assertEqual(cache.get_N_events, 3)
@@ -159,9 +160,9 @@ class EventsTest(TestHelper):
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
-        self.assertEqual(len(mat), 2)
-        self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
-        self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
+        self.assertEqual(len(mat[0]), 2)
+        self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
         self.assertEqual(cache.get_good_frames[0], 99)
         self.assertEqual(cache.get_N_events, 4)
@@ -173,9 +174,9 @@ class EventsTest(TestHelper):
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
-        self.assertEqual(len(mat), 2)
-        self.assertArrays(mat[0], [0, 0, 0, 1, 0, 1, 0])
-        self.assertArrays(mat[1], [0, 0, 0, 0, 1, 0, 1])
+        self.assertEqual(len(mat[0]), 2)
+        self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
         # check filter updates number of frames correctly
         self.assertEqual(cache.get_good_frames[0], 99)
         self.assertEqual(cache.get_N_events, 4)
@@ -184,7 +185,7 @@ class EventsTest(TestHelper):
         self._events.add_filter('test', 1.2, 1.7)
 
         results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times = results
+        f_start, f_end, rm, IDs, times, periods = results
         self.assertArrays(np.asarray(f_start), [0])
         self.assertArrays(np.asarray(f_end), [0])
 
@@ -196,7 +197,7 @@ class EventsTest(TestHelper):
     def test_get_filtered_data_no_filter(self):
 
         results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times = results
+        f_start, f_end, rm, IDs, times, periods = results
         self.assertArrays(np.asarray(f_start), [])
         self.assertArrays(np.asarray(f_end), [])
 

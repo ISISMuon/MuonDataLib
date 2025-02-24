@@ -141,14 +141,14 @@ class EventsPeriods(_Periods):
         """
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('periods')
-
         tmp.attrs['NX_class'] = 'NXperiod'
         self.save_int('number', self._dict['number'], tmp)
         self.save_int_array('sequences', self._dict['sequences'], tmp)
         self.save_str('labels', self._dict['labels'], tmp)
         self.save_int_array('type', self._dict['type'], tmp)
-        self.save_int_array('frames_requested', self._dict['requested'], tmp)
-        self.save_int_array('raw_frames', self._dict['raw'], tmp)
+        self.save_int_array('frames_requested',
+                            self._cache.get_good_frames, tmp)
+        self.save_int_array('raw_frames', self._cache.get_raw_frames, tmp)
         self.save_int_array('output', self._dict['output'], tmp)
         self.save_float_array('total_counts', counts, tmp)
 
