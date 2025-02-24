@@ -303,13 +303,13 @@ cdef class Events:
         the number of removed frames and the indices for the filters.
         :param frame_times: the times for the start of each frame (in seconds).
         The number of removed frames. The list of filtered detector IDs and
-        event time stamps.
+        event time stamps. The list of periods for the kept events
         """
 
         cdef cnp.ndarray[int, ndim=1] _periods = np.zeros(len(self.times), dtype=np.int32)
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int[:] periods = _periods
-        cdef int rm_frames = 0
+        cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef double[:] times, f_start, f_end
 
         """
@@ -337,7 +337,7 @@ cdef class Events:
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
-            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             periods = good_values_ints(f_i_start, f_i_end, self.start_index_list, periods)
@@ -366,7 +366,7 @@ cdef class Events:
         :returns: a matrix of histograms, bin edges
         """
         cdef int[:] IDs, f_i_start, f_i_end, periods
-        cdef int rm_frames = 0
+        cdef int[:] rm_frames
         cdef double[:] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
@@ -386,7 +386,7 @@ cdef class Events:
                                                               f_i_start,
                                                               f_i_end)
             cache.save(hist, bins,
-                       np.asarray([rm_frames], dtype=np.int32),
+                       rm_frames,
                        veto_frames=np.zeros(1, dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,

@@ -189,7 +189,7 @@ class EventsTest(TestHelper):
         self.assertArrays(np.asarray(f_start), [0])
         self.assertArrays(np.asarray(f_end), [0])
 
-        self.assertEqual(rm, 1)
+        self.assertArrays(rm, [1])
         self.assertArrays(np.asarray(IDs), [0, 1, 0, 1])
         self.assertArrays(np.asarray(times), [3000., 4000.,
                                               5000., 6000.])
@@ -201,7 +201,7 @@ class EventsTest(TestHelper):
         self.assertArrays(np.asarray(f_start), [])
         self.assertArrays(np.asarray(f_end), [])
 
-        self.assertEqual(rm, 0)
+        self.assertArrays(rm, [0])
         self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1])
         self.assertArrays(np.asarray(times), [1000., 2000.,
                                               3000., 4000.,

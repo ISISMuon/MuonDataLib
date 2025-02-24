@@ -22,7 +22,9 @@ def load_events(file_name, N):
     """
     with h5py.File(file_name, 'r') as file:
         raw_args, start_time = read_raw_data_from_events(file)
-
+        tmp = file.require_group('raw_data_1')
+        tmp = tmp.require_group('periods')
+        p_type = tmp['type']
     _, events = load_data(file_name, N)
     cache = EventsCache(start_time,
                         np.asarray([events.get_total_frames], dtype=np.int32))
@@ -48,7 +50,7 @@ def load_events(file_name, N):
     periods = EventsPeriods(cache,
                             1,
                             'label test',
-                            [1],
+                            p_type,
                             [0],
                             [1])
 

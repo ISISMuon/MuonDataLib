@@ -14,7 +14,8 @@ def _load_data(file_name):
         This should make it easier to swap out later.
         :param file_name: the name of the file to load.
         :return: IDs, first index for frame, time stamps,
-        amplitudes, time at the start of the frame
+        amplitudes, time at the start of the frame,
+        list of the period each frame belongs to
         """
 
         with h5py.File(file_name, 'r') as file:

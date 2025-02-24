@@ -50,7 +50,7 @@ cpdef get_indices(double[:] times, double[:] f_start, double[:] f_end,
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef rm_overlaps(int[:] j_start, int[:] j_end):
+cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
     """
     Assume that the start and end frame values are in order.
     They can overlap, this code will remove the overlaps.
@@ -94,11 +94,10 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end):
     cdef cnp.ndarray[int, ndim=1] _final_end = np.zeros(N, dtype=np.int32)
     cdef int[:] final_start = _final_start
     cdef int[:] final_end = _final_end
-
     cdef int one = 1
     cdef int start = j_start[0]
     cdef int end = j_end[0]
-    cdef int k, next_start, next_end
+    cdef int k, next_start, next_end, j
 
     # due to overlaps the number of filters might be smaller
     N = 0
@@ -122,13 +121,21 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end):
     final_start[N] = start
     final_end[N] = end
     N = N+1
+
+    # get removed frames
+    cdef int[:] rm_frames = np.zeros(np.max(periods) + 1, dtype=np.int32)
+    for k in range(N):
+        start = _final_start[k]
+        for j in range(_final_end[k] - start + 1):
+            rm_frames[periods[start + j]] += 1
+
     """
     The plus one in the sum of removed frames to account for both the start and end being
     included. Consider the case of a frame starting and ending within the same index (i.e.
     1 to 1), then 1 frame should be removed but 1 - 1 = 0. Hence, the number of removed
     frames would be inaccurate.
     """
-    return _final_start[:N], _final_end[:N], np.sum(one + _final_end[:N] - _final_start[:N])
+    return _final_start[:N], _final_end[:N], rm_frames
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking

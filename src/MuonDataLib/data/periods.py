@@ -99,24 +99,24 @@ class EventsPeriods(_Periods):
         self._cache = cache
 
     def set_number(self, N):
+        """
+        A simple
+        """
         self._dict['number'] = N
-        print('moooooo', N)
         label = ''
         for k in range(N):
-            label += f'period_{k};'
+            label += f'period_{k + 1};'
         label = label[:-1]
         self._dict['labels'] = label
-        self._dict['sequences'] = np.asarray([1 for k in range(N)],
-                                             dtype=np.int32)
-        self._dict['type'] = np.ones(N, dtype=np.int32)
+        self._dict['sequences'] = self._cache.get_good_frames
         self._dict['requested'] = np.asarray([1 for k in range(N)],
                                              dtype=np.int32)
 
         #  good = self._cache.get_good_frames[0]
         raw = self._cache.get_raw_frames[0]
-        self._dict['raw'] = np.asarray([raw for _ in range(N)],
-                                       dtype=np.int32)
-        self._dict['output'] = np.ones(N, dtype=np.int32)
+        self._dict['raw'] = raw
+
+        self._dict['output'] = np.zeros(N, dtype=np.int32)
 
     def save_nxs2(self, file):
         """
