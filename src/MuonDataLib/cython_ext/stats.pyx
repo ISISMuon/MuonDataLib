@@ -15,7 +15,7 @@ cpdef make_histogram(
         double width=0.5,
         double conversion=1.e-3):
     """
-    This method creates histograms from a list of data.
+    This a method creates histograms from a list of data.
     It produces a matrix of histograms for multiple spectra.
     Strictly speaking these are not histograms as they
     are not normalised to bin width.
