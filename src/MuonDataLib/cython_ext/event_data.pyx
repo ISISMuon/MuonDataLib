@@ -320,6 +320,10 @@ cdef class Events:
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+
+            if len(times) == 0:
+                raise ValueError("The current filter selection results in zero data "
+                                 "for the histograms. Aborting histogram generation.")
         else:
             # no filters
             IDs = self.IDs
