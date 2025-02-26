@@ -25,6 +25,8 @@ cdef class EventsCache:
     cdef readonly dt.datetime start_time
     cdef readonly dt.datetime first_good_time
     cdef readonly dt.datetime last_good_time
+    cdef readonly double resolution
+    cdef readonly int N_events
 
     def __init__(self, dt.datetime start_time, int[:] event_frames):
         """
@@ -40,6 +42,8 @@ cdef class EventsCache:
         """
         self.histograms = None
         self.bins = None
+        self.N_events = 0
+        self.resolution = 0.016
         self.N_filter_frames = np.asarray([], dtype=np.int32)
         self.N_veto_frames = np.asarray([], dtype=np.int32)
         self.first_good_time = dt.datetime(2000, 1, 1, 1, 1, 1)
@@ -51,7 +55,9 @@ cdef class EventsCache:
             int[:] filter_frames,
             int[:] veto_frames,
             double first_time,
-            double last_time):
+            double last_time,
+            double resolution,
+            int N_events):
         """
         Store data in the cache
         :param histograms: the histogram data (periods, N_det, bin)
@@ -62,6 +68,8 @@ cdef class EventsCache:
         (at present doesnt account for multiperiod data)
         :param fist_time: the time (s) for the first good frame
         :param last_time: the last frame start time
+        :param resolution: the resolution of the histogram (bin width)
+        :param N_events: the number of events in the histogram
         """
         N = len(self.N_event_frames)
         if len(filter_frames) != N or len(veto_frames) != N:
@@ -70,9 +78,18 @@ cdef class EventsCache:
         self.bins = bins
         self.N_filter_frames = filter_frames
         self.N_veto_frames = veto_frames
-
+        self.N_events = N_events
         self.first_good_time = self.start_time + dt.timedelta(seconds=first_time)
         self.last_good_time = self.start_time + dt.timedelta(seconds=last_time)
+
+        self.resolution = resolution
+
+    @property
+    def get_N_events(self):
+        """
+        :return: the number of events in the histogram
+        """
+        return int(self.N_events)
 
     def get_histograms(self):
         """
@@ -88,6 +105,12 @@ cdef class EventsCache:
         """
         if self.empty():
             raise RuntimeError("The cache is empty, cannot get frames")
+
+    def get_resolution(self):
+        """
+        :return: the resolution of the histogram
+        """
+        return self.resolution
 
     @property
     def _discarded_good_frames(self):

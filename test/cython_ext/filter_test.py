@@ -5,7 +5,8 @@ from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.cython_ext.filter import (rm_overlaps,
                                            get_indices,
                                            good_values_ints,
-                                           good_values_double)
+                                           good_values_double,
+                                           apply_filter)
 
 
 class FilterTest(TestHelper):
@@ -91,6 +92,32 @@ class FilterTest(TestHelper):
                                     double_array)
         self.assertEqual(len(result), 20)
         self.assertArrays(result, np.arange(0.2, 0.4, step=0.01))
+
+    def test_apply_filter_unordered(self):
+        x = np.arange(0, 10, dtype=np.double)
+        y = 2.*x + 1
+        times = [[8, 10], [0, 3]]
+        fx, fy = apply_filter(x, y, times)
+        # include the end of filter as it is within the band to keep
+        self.assertArrays(fx, np.asarray([3, 4, 5, 6, 7], dtype=np.double))
+        self.assertArrays(fy, np.asarray([7, 9, 11, 13, 15], dtype=np.double))
+
+    def test_apply_filter_keep_middle(self):
+        x = np.arange(0, 10, dtype=np.double)
+        y = 2.*x + 1
+        times = [[0, 3], [8, 10]]
+        fx, fy = apply_filter(x, y, times)
+        # include the end of filter as it is within the band to keep
+        self.assertArrays(fx, np.asarray([3, 4, 5, 6, 7], dtype=np.double))
+        self.assertArrays(fy, np.asarray([7, 9, 11, 13, 15], dtype=np.double))
+
+    def test_apply_filter_keep_ends(self):
+        x = np.arange(0, 10, dtype=np.double)
+        y = 2.*x + 1
+        times = [[1, 3.2], [5.1, 7.9]]
+        fx, fy = apply_filter(x, y, times)
+        self.assertArrays(fx, np.asarray([0, 4, 5, 9], dtype=np.double))
+        self.assertArrays(fy, np.asarray([1, 9, 11, 19], dtype=np.double))
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.cython_ext.utils import binary_search
-
 import numpy as np
 cimport numpy as cnp
 import cython
@@ -197,3 +197,37 @@ cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, doubl
         good_doubles[N] = double_array[v]
         N += 1
     return _good_doubles[:N]
+
+
+@cython.boundscheck(False)  # Deactivate bounds checking
+@cython.wraparound(False)   # Deactivate negative indexing.
+cpdef apply_filter(x, y, times):
+    """
+    Applies the time filters to the sample log values
+    :param x: the x values for the sample log
+    :param y: the y values for the sample log
+    :param times: a list of the [start, end] times
+    within which the data will be removed
+    """
+    fx = np.zeros(len(x))
+    fy = np.zeros(len(y))
+    # need to make sure the times are in the correct order
+    cdef double[:] start_times= np.sort(np.asarray([ times[k][0] for k in range(len(times))], dtype=np.double), kind='quicksort')
+    cdef double[:] end_times= np.sort(np.asarray([ times[k][1] for k in range(len(times))], dtype=np.double), kind='quicksort')
+
+    N = 0
+    k = 0
+    for j in range(len(x)):
+        if k == len(start_times) or x[j] < start_times[k]:
+            fx[N] = x[j]
+            fy[N] = y[j]
+            N += 1
+
+        elif x[j] >= end_times[k]:
+            k += 1
+            if k < len(start_times) and x[j] < start_times[k]:
+                fx[N] = x[j]
+                fy[N] = y[j]
+                N += 1
+
+    return fx[:N], fy[:N]

@@ -83,7 +83,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
                                   args[7])
         cache.save(counts, bins, np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0)
+                   0.0, 100.0, resolution=0.016, N_events=1e6)
         return events
 
     def create_multiperiod_data(self):
@@ -100,7 +100,39 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         cache.save(counts, bins,
                    np.asarray([1], dtype=np.int32),
                    np.asarray([0], dtype=np.int32),
-                   0.0, 100.0)
+                   0.0, 100.0, resolution=0.016, N_events=1e6)
+        return events
+
+    def create_single_period_data_custom_resolution(self):
+        args = super().create_single_period_data()
+        bins = np.asarray(args[1], dtype=np.double)
+        counts = np.asarray(args[3], dtype=np.int32)
+        date = datetime.datetime(2024, 12, 11, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
+        events = EventsDetector_1(cache, args[0],
+                                  args[2], args[4],
+                                  args[5], args[6],
+                                  args[7])
+        cache.save(counts, bins, np.asarray([1], dtype=np.int32),
+                   np.asarray([0], dtype=np.int32),
+                   0.0, 100.0, resolution=0.01, N_events=1e6)
+        return events
+
+    def create_multiperiod_data_custom_resolution(self):
+        # this is her to be updated when multiperiod works
+        args = super().create_multiperiod_data()
+        bins = np.asarray(args[1], dtype=np.double)
+        counts = np.asarray(args[3], dtype=np.int32)
+        date = datetime.datetime(2024, 12, 11, 7, 59, 0)
+        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
+        events = EventsDetector_1(cache, args[0],
+                                  args[2], args[4],
+                                  args[5], args[6],
+                                  args[7])
+        cache.save(counts, bins,
+                   np.asarray([1], dtype=np.int32),
+                   np.asarray([0], dtype=np.int32),
+                   0.0, 100.0, resolution=0.01, N_events=1e6)
         return events
 
     def setUp(self):
@@ -109,7 +141,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
     def save(self, det, file):
         det.save_nxs2(file)
 
-    def test_detector1_object_stores_correct_info_single_period(self):
+    def test_detector1_object_saves_correct_info_single_period(self):
         """
         Check the class stores data correctly
         """
@@ -127,13 +159,50 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         self.assertEqual(len(counts[0]), 4)
         self.assertEqual(len(counts), 1)
 
-    def test_detector1_object_stores_correct_info_multiperiod(self):
+    def test_detector1_object_saves_correct_info_multiperiod(self):
         """
         Check the class stores data correctly
         """
         super().test_detector1_object_stores_correct_info_multiperiod()
 
         counts, bins = self.det._cache.get_histograms()
+        self.assertArrays(bins, [1., 2., 3.])
+        self.assertArrays(counts, [
+                                   [[1, 1, 1], [1, 1, 1]],
+                                   [[2, 2, 2], [2, 2, 2]],
+                                   [[3, 3, 3], [3, 3, 3]]])
+
+        self.assertEqual(len(counts[0][0]), 3)
+        self.assertEqual(len(counts[0]), 2)
+        self.assertEqual(len(counts), 3)
+
+    def test_detector1_object_saves_correct_info_single_period_res(self):
+        """
+        Check the class stores data correctly
+        """
+        det = self.create_single_period_data_custom_resolution()
+        res = self._detector1_object_saves_correct_info_single_period(det)
+        self.assertEqual(res, 10000)
+        counts, bins = det._cache.get_histograms()
+
+        self.assertArrays(bins, [1, 2, 3])
+        self.assertArrays(counts, [
+                                   [[1, 1, 1],
+                                    [2, 2, 2],
+                                    [3, 3, 3],
+                                    [4, 4, 4]]])
+        self.assertEqual(len(counts[0][0]), 3)
+        self.assertEqual(len(counts[0]), 4)
+        self.assertEqual(len(counts), 1)
+
+    def test_detector1_object_saves_correct_info_multiperiod_res(self):
+        """
+        Check the class stores data correctly
+        """
+        det = self.create_multiperiod_data_custom_resolution()
+        res = self._detector1_object_saves_correct_info_multiperiod(det)
+        self.assertEqual(res, 10000)
+        counts, bins = det._cache.get_histograms()
         self.assertArrays(bins, [1., 2., 3.])
         self.assertArrays(counts, [
                                    [[1, 1, 1], [1, 1, 1]],

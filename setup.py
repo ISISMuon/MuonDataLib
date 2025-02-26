@@ -2,13 +2,17 @@ from setuptools import find_packages, setup, Extension
 import numpy
 
 
-version = "0.9.1b2"
+version = "0.9.1b3"
 
 
 PACKAGE_NAME = 'MuonDataLib'
 
 
 extensions = [
+              Extension(
+                "MuonDataLib.cython_ext.base_sample_logs",
+                sources=["src/MuonDataLib/cython_ext/base_sample_logs.pyx"],
+                ),
               Extension(
                 "MuonDataLib.cython_ext.event_data",
                 sources=["src/MuonDataLib/cython_ext/event_data.pyx"],

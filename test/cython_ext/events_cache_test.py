@@ -23,6 +23,7 @@ class EventsCacheTest(TestHelper):
             self.cache.get_good_frames
         with self.assertRaises(RuntimeError):
             self.cache.get_raw_frames
+        self.assertEqual(self.cache.get_resolution(), 0.016)
 
     def test_save_to_cache(self):
         self.assertTrue(self.cache.empty())
@@ -32,7 +33,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        1.0, 120.0)
+                        1.0, 120.0, 1., 1e6)
 
         self.assertFalse(self.cache.empty())
         hist, bins = self.cache.get_histograms()
@@ -47,6 +48,8 @@ class EventsCacheTest(TestHelper):
                           np.asarray([70], dtype=np.int32))
         self.assertArrays(self.cache.get_raw_frames,
                           np.asarray([80], dtype=np.int32))
+        self.assertEqual(self.cache.get_resolution(), 1.)
+        self.assertEqual(self.cache.get_N_events, 1e6)
 
     def test_clear_cache(self):
         self.assertTrue(self.cache.empty())
@@ -56,7 +59,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        1.0, 120.0)
+                        1.0, 120.0, 1., 1e6)
 
         self.assertFalse(self.cache.empty())
 
@@ -70,6 +73,8 @@ class EventsCacheTest(TestHelper):
             self.cache.get_good_frames
         with self.assertRaises(RuntimeError):
             self.cache.get_raw_frames
+        self.assertEqual(self.cache.get_resolution(), 0.016)
+        self.assertEqual(self.cache.get_N_events, 0)
 
     def test_set_too_many_filter_frames(self):
         self.assertTrue(self.cache.empty())
@@ -80,7 +85,7 @@ class EventsCacheTest(TestHelper):
                             np.asarray([7, 8, 9], dtype=np.double),
                             np.asarray([1, 2], dtype=np.int32),
                             np.asarray([1], dtype=np.int32),
-                            1.0, 120.0)
+                            1.0, 120.0, 1.0, 1e6)
 
     def test_set_too_many_veto_frames(self):
         self.assertTrue(self.cache.empty())
@@ -91,7 +96,7 @@ class EventsCacheTest(TestHelper):
                             np.asarray([7, 8, 9], dtype=np.double),
                             np.asarray([1], dtype=np.int32),
                             np.asarray([1, 20], dtype=np.int32),
-                            1., 120.)
+                            1., 120., 1., 1e6)
 
     def test_duration(self):
 
@@ -100,7 +105,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        1, 120)
+                        1, 120, 1., 1e6)
         self.assertAlmostEqual(self.cache.get_count_duration, 1.75, 3)
 
     def test_get_start_time_zero_no_offseet(self):
@@ -110,7 +115,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        0, 120)
+                        0, 120, 1., 1e6)
         expect = convert_date_for_NXS(self.date)
         self.assertEqual(convert_date_for_NXS(self.cache.get_start_time),
                          expect)
@@ -122,7 +127,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        132, 220)
+                        132, 220, 1., 1e6)
         expect = convert_date_for_NXS(datetime.datetime(2024, 11,
                                                         21, 8, 1, 12))
         self.assertEqual(convert_date_for_NXS(self.cache.get_start_time),
@@ -135,7 +140,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        0, 220)
+                        0, 220, 1., 1e6)
         expect = convert_date_for_NXS(datetime.datetime(2024, 11,
                                                         21, 8, 2, 40))
         self.assertEqual(convert_date_for_NXS(self.cache.get_end_time),
@@ -147,7 +152,7 @@ class EventsCacheTest(TestHelper):
                         np.asarray([7, 8, 9], dtype=np.double),
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
-                        132, 220)
+                        132, 220, 1., 1e6)
         self.assertEqual(self.cache.get_duration,
                          88)
 

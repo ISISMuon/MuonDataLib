@@ -19,6 +19,10 @@ def is_float(value):
     return isinstance(value, float) or isinstance(value, FLOAT32)
 
 
+def is_string(value):
+    return isinstance(value, str)
+
+
 class HDF5(object):
     """
     A wrapper object to make it easier to write

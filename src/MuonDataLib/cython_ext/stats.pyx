@@ -28,10 +28,12 @@ cpdef make_histogram(
     :param max_time: the last bin edge
     :param width: the bin width
     :param conversion: for unit conversions
-    :returns: a matrix of histograms, the bin edges
+    :returns: a matrix of histograms, the bin edges, the
+    number of events in the histogram
     """
 
     cdef Py_ssize_t det, k, j_bin
+    cdef int N = 0
     cdef double time
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
@@ -45,5 +47,6 @@ cpdef make_histogram(
         if time <= max_time and time >= min_time:
             j_bin = int((time - min_time) // width)
             mat[det, j_bin] += 1
-    return result, bins
+            N += 1
+    return result, bins, N
 

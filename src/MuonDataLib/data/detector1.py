@@ -1,6 +1,7 @@
 from MuonDataLib.data.utils import (INT32,
                                     stype)
 from MuonDataLib.data.hdf5 import HDF5
+import numpy as np
 
 
 class _Detector_1(HDF5):
@@ -147,6 +148,14 @@ class EventsDetector_1(_Detector_1):
         super().__init__(resolution, spec_i,
                          inst, t0, first, last)
         self._cache = events_cache
+
+    @property
+    def resolution(self):
+        """
+        Get the resolution in pico seconds
+        :return the resolution in pico seconds
+        """
+        return np.int32(1e6*self._cache.get_resolution())
 
     def save_nxs2(self, file):
         """
