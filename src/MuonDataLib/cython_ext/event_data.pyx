@@ -3,6 +3,7 @@ from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
+                                           good_periods,
                                            good_values_ints,
                                            good_values_double)
 import numpy as np
@@ -310,25 +311,10 @@ cdef class Events:
         event time stamps. The list of periods for the kept events
         """
 
-        cdef cnp.ndarray[int, ndim=1] _periods = np.zeros(len(self.times), dtype=np.int32)
         cdef int[:] IDs, f_i_start, f_i_end
-        cdef int[:] periods = _periods
+        cdef int[:] periods
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef double[:] times, f_start, f_end
-
-        """
-         lets move this to a special function get_good_periods
-         Then we filter the data and populate the long form with
-         a single loop instead of 2.
-        """
-        start = 0
-
-        for k in range(len(self.start_index_list)-1):
-            end = self.start_index_list[k+1]
-            periods[start:end] = self.periods[k]
-            start = end
-        periods[start:len(self.times)] = self.periods[len(self.periods)-1]
-
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -344,7 +330,6 @@ cdef class Events:
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
-            periods = good_values_ints(f_i_start, f_i_end, self.start_index_list, periods)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
         else:
             # no filters
@@ -352,7 +337,8 @@ cdef class Events:
             times = self.times
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
-
+        # get the periods for each event
+        periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
         return f_i_start, f_i_end, rm_frames, IDs, times, periods
 
     def histogram(self,
