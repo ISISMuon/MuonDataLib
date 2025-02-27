@@ -24,10 +24,10 @@ def load_events(file_name, N):
         raw_args, start_time = read_raw_data_from_events(file)
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('periods')
-        p_type = tmp['type']
+        p_type = tmp['type'][:]
     _, events = load_data(file_name, N)
     cache = EventsCache(start_time,
-                        np.asarray([events.get_total_frames], dtype=np.int32))
+                        events.get_total_frames)
 
     raw_data = EventsRawData(cache,
                              *raw_args)

@@ -294,7 +294,11 @@ cdef class Events:
 
     @property
     def get_total_frames(self):
-        return len(self.start_index_list)
+        """
+        :return: The original number of frames in each period
+        """
+        _, frames = np.unique(self.periods, return_counts=True)
+        return np.asarray(frames, dtype=np.int32)
 
     def _get_filtered_data(self, frame_times):
         """
@@ -387,7 +391,7 @@ cdef class Events:
                                                               f_i_end)
             cache.save(hist, bins,
                        rm_frames,
-                       veto_frames=np.zeros(1, dtype=np.int32),
+                       veto_frames=np.zeros(len(rm_frames), dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,
                        resolution=width,
