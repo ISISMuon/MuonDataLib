@@ -18,20 +18,23 @@ class _PeriodsTest(PeriodsTestTemplate, TestHelper):
         self.requested = args[3]
         self.raw = args[4]
         self.counts = args[6]
+        self.sequences = args[7]
         return _Periods(args[0], args[1], args[2],
-                        args[5], args[7])
+                        args[5])
 
     def create_multiperiod_data(self):
         args = super().create_multiperiod_data()
         self.requested = args[3]
         self.raw = args[4]
         self.counts = np.asarray(args[6], dtype=np.double)
+        self.sequences = args[7]
         return _Periods(args[0], args[1], args[2],
-                        args[5], args[7])
+                        args[5])
 
     def save(self, period, file):
         period.save_nxs2(file, self.requested,
-                         self.raw, self.counts)
+                         self.raw, self.counts,
+                         self.sequences)
 
     def setUp(self):
         self.filename = '_test_periods.nxs'
@@ -62,6 +65,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
         self.assertArrays(self.period._dict['requested'], [500])
         self.assertArrays(self.period._dict['raw'], [1000])
         self.assertArrays(self.period._dict['total_counts'], [1.2e-5])
+        self.assertArrays(self.period._dict['sequences'], [500])
 
     def test_periods_object_stores_correct_info_multiperiod(self):
         """
@@ -72,6 +76,7 @@ class PeriodsTest(PeriodsTestTemplate, TestHelper):
         self.assertArrays(self.period._dict['requested'], [500, 400])
         self.assertArrays(self.period._dict['raw'], [1000, 500])
         self.assertArrays(self.period._dict['total_counts'], [1.2e-5, 4.5e-5])
+        self.assertArrays(self.period._dict['sequences'], [500, 400])
 
 
 class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
@@ -82,8 +87,7 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
         cache = EventsCache(date, np.asarray(args[4], dtype=np.int32))
         events = EventsPeriods(cache,
                                args[0], args[1],
-                               args[2], args[5],
-                               args[7])
+                               args[2], args[5])
         cache.save(np.asarray([[[2, 3], [5, 2]]], dtype=np.int32),
                    np.asarray([3.2, 5.6], dtype=np.double),
                    np.asarray([0], dtype=np.int32),
@@ -99,8 +103,7 @@ class EventsPeriodsTest(PeriodsTestTemplate, TestHelper):
         cache = EventsCache(date, np.asarray(args[4], dtype=np.int32))
         events = EventsPeriods(cache,
                                args[0], args[1],
-                               args[2], args[5],
-                               args[7])
+                               args[2], args[5])
         cache.save(np.asarray([[[2, 3], [5, 2]],
                                [[20, 21], [1, 3]]], dtype=np.int32),
                    np.asarray([3.2, 5.6], dtype=np.double),
