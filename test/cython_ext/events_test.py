@@ -31,7 +31,7 @@ class EventsTest(TestHelper):
         self.assertEqual(self._events.get_N_events, 6)
 
     def test_get_total_frames(self):
-        self.assertEqual(self._events.get_total_frames, 3)
+        self.assertArrays(np.asarray(self._events.get_total_frames), [3])
 
     def test_histogram(self):
         """
@@ -42,6 +42,7 @@ class EventsTest(TestHelper):
         """
         mat, bins = self._events.histogram()
         self.assertArrays(bins, np.arange(0, 32.784, 0.016))
+        self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
 
     def test_custom_histogram(self):
@@ -53,6 +54,7 @@ class EventsTest(TestHelper):
         """
         mat, bins = self._events.histogram(0., 7., 1.)
         self.assertArrays(bins, np.arange(0., 8., 1.))
+        self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
         self.assertArrays(mat[0][0], [0, 1, 0, 1, 0, 1, 0])
         self.assertArrays(mat[0][1], [0, 0, 1, 0, 1, 0, 1])
@@ -67,6 +69,7 @@ class EventsTest(TestHelper):
         c_mat, c_bins = cache.get_histograms()
         self.assertArrays(bins, c_bins)
         # cache adds a list for periods, need to remove it
+        self.assertEqual(len(mat), len(c_mat))
         self.assertEqual(len(mat[0]), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
         self.assertEqual(cache.resolution, 0.2)
@@ -160,6 +163,7 @@ class EventsTest(TestHelper):
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
+        self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
         self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
         self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
@@ -174,6 +178,7 @@ class EventsTest(TestHelper):
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         mat, bins = self._events.histogram(0., 7., 1., cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
+        self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
         self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
         self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
