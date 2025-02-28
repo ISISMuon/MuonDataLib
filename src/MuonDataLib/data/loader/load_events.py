@@ -51,8 +51,7 @@ def load_events(file_name, N):
                             1,
                             'label test',
                             p_type,
-                            [0],
-                            [1])
+                            [0])
 
     detector1 = Det1(cache,
                      0.016,

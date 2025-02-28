@@ -10,7 +10,6 @@ class LoadEventDataTest(TestHelper):
 
     def assertLongArrays(self, result, indicies, expected_len, ref):
         self.assertEqual(len(result), expected_len)
-
         self.assertArrays(result[indicies], ref)
 
     def test__load_data(self):
@@ -30,6 +29,32 @@ class LoadEventDataTest(TestHelper):
         self.assertLongArrays(amps, [1, 2, 3, 2122, 4000], 4060,
                               [10., 10., 10., 10., 10.0])
         self.assertArrays(start_t, [0, 2e7, 4e7, 6e7, 8e7, 1e8])
+        self.assertArrays(periods, [0, 0, 0, 0, 0, 0])
+
+    def test__load_data_multiperiod(self):
+        """
+        """
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        IDs, start_j, times, amps, start_t, periods = _load_data(file)
+
+        indices = [1, 2, 3, 50, 52, 79]
+
+        self.assertLongArrays(periods, indices, 88,
+                              [0, 0, 0, 1, 1, 1])
+
+        self.assertLongArrays(IDs, indices, 64147,
+                              [56, 56, 56, 60, 60, 32])
+        self.assertLongArrays(start_j, indices, 88,
+                              [718, 1472, 2219, 36036, 37525, 57445])
+        self.assertLongArrays(times, indices, 64147,
+                              [454., 592., 657., 1810., 3329., 3900.])
+        self.assertLongArrays(amps, indices, 64147,
+                              [2102., 2225., 2149., 2324., 2280., 2377.])
+        self.assertLongArrays(start_t/1.e9, indices, 88,
+                              [1.014, 1.054, 1.074, 2.254, 2.294, 2.974])
 
     @mock.patch('MuonDataLib.cython_ext.load_events._load_data')
     @mock.patch('MuonDataLib.cython_ext.load_events.Events')

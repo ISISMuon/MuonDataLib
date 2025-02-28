@@ -165,7 +165,6 @@ class MuonEventData(MuonData):
         :param resolution: the resolution for the histogram
         """
         hist, _ = self.histogram(resolution)
-        self._dict['periods'].set_number(len(hist))
         super().save_histograms(file_name)
 
     def clear_filters(self):
