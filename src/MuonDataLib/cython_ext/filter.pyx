@@ -129,12 +129,6 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
         for j in range(_final_end[k] - start + 1):
             rm_frames[periods[start + j]] += 1
 
-    """
-    The plus one in the sum of removed frames to account for both the start and end being
-    included. Consider the case of a frame starting and ending within the same index (i.e.
-    1 to 1), then 1 frame should be removed but 1 - 1 = 0. Hence, the number of removed
-    frames would be inaccurate.
-    """
     return _final_start[:N], _final_end[:N], rm_frames
 
 
