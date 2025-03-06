@@ -10,7 +10,7 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [project]
-name = 'MuonDataLib'
+name = 'muondatalib'
 
 version = "0.9.1b3"
 requires-python = ">=3.7.1"
