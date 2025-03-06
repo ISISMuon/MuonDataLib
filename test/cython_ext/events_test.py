@@ -212,6 +212,12 @@ class EventsTest(TestHelper):
                                               3000., 4000.,
                                               5000., 6000.])
 
+    def test_get_filtered_data_no_data(self):
+        self._events.add_filter('test', 0, 1e9)
+
+        with self.assertRaises(ValueError):
+            _ = self._events._get_filtered_data(1.e-9*self._frame_time)
+
     def test_start_and_end_times_filter_in_middle(self):
         frame_times = np.arange(1, 20, dtype=np.double)
         f_start = np.asarray([4, 16], dtype=np.int32)
