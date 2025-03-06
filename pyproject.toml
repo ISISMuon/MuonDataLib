@@ -12,7 +12,7 @@ where = ["src"]
 [project]
 name = 'muondatalib'
 
-version = "0.9.2b0"
+version = "0.9.2b1"
 requires-python = ">=3.7.1"
 dependencies = ['numpy', 'h5py', 'plotly', 'cython']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
