@@ -36,6 +36,25 @@ class _Detector_1(HDF5):
         """
         return int(self._dict['resolution']*1e6)
 
+    def get_bin(self, value, offset=1):
+        """
+        A method to get the bin value from a time stamp.
+        This is used for first and last good bin.
+        It is also used for t0 bin. 
+        :param value: the time stamp
+        :param offset: if to use the next or previous bin, if the 
+        time stamp is in the middle of the bin
+        :returns: the bin value for the time stamp,
+        such that it is complete good bin
+        """
+        # convert resolution to micro seconds
+        res = self.resolution/1e6 
+        exact = value/res
+        bin_value = int(value/res)
+        if abs(exact - bin_value) > 1e-6:
+            bin_value += offset
+        return bin_value
+
     def save_nxs2(self, file,
                   raw_time,
                   counts,
@@ -75,14 +94,16 @@ class _Detector_1(HDF5):
                             dtype='S45')
         counts.attrs.create('long_name', self._dict['inst'].encode(),
                             dtype=stype(self._dict['inst']))
-        counts.attrs.create('t0_bin', self._dict['time_zero'], dtype=INT32)
+        
+        t0_bin = self.get_bin(self._dict['time_zero'])
+        counts.attrs.create('t0_bin', t0_bin, dtype=INT32)
 
-        first_bin = int(self._dict['first_good']/self._dict['resolution'])
+        first_bin = self.get_bin(self._dict['first_good'])
         counts.attrs.create('first_good_bin',
                             first_bin,
                             dtype=INT32)
 
-        last_bin = int(self._dict['last_good']/self._dict['resolution'])
+        last_bin = self.get_bin(self._dict['last_good'], offset=-1)
         counts.attrs.create('last_good_bin',
                             last_bin,
                             dtype=INT32)
@@ -190,7 +211,7 @@ def read_detector1_from_histogram(file):
     inst = tmp.attrs['long_name'].decode()
     first_good = tmp.attrs['first_good_bin'] * resolution
     last_good = tmp.attrs['last_good_bin'] * resolution
-    t0 = tmp.attrs['t0_bin']
+    t0 = tmp.attrs['t0_bin'] * resolution
     counts = tmp[:]
 
     # not used...

@@ -56,7 +56,7 @@ def load_events(file_name, N):
                      0.016,
                      np.arange(1, N + 1, dtype=np.int32),
                      'HIFI test',
-                     3,
+                     3*0.016,
                      9*0.016,
                      2018*0.016)
 
