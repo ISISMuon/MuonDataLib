@@ -164,7 +164,7 @@ class MuonEventData(MuonData):
         :param file_name: the name of the file to save to
         :param resolution: the resolution for the histogram
         """
-        self.histogram(resolution)
+        hist, _ = self.histogram(resolution)
         super().save_histograms(file_name)
 
     def clear_filters(self):

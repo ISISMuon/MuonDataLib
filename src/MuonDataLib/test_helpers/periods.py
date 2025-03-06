@@ -16,11 +16,11 @@ class PeriodsTestTemplate(object):
     -------------------------------------------------
     """
     def create_single_period_data(self):
-        return 1, 'period 1', [1], [500], [1000], [1], [1.2e-5], [2]
+        return 1, 'period 1', [1], [500], [1000], [0], [1.2e-5], [500]
 
     def create_multiperiod_data(self):
-        return (2, 'period 1; period 2', [1, 2], [500, 400],
-                [1000, 500], [1, 0], [1.2e-5, 4.5e-5], [42, 42])
+        return (2, 'period 1;period 2', [1, 2], [500, 400],
+                [1000, 500], [0, 0], [1.2e-5, 4.5e-5], [500, 400])
 
     def save(self, periods, file):
         raise NotImplementedError()
@@ -37,8 +37,7 @@ class PeriodsTestTemplate(object):
         self.assertEqual(period._dict['number'], 1)
         self.assertEqual(period._dict['labels'], 'period 1')
         self.assertArrays(period._dict['type'], [1])
-        self.assertArrays(period._dict['output'], [1])
-        self.assertArrays(period._dict['sequences'], [2])
+        self.assertArrays(period._dict['output'], [0])
 
         self.period = period
 
@@ -64,8 +63,8 @@ class PeriodsTestTemplate(object):
             self.assertArrays(group['type'], [1])
             self.assertArrays(group['frames_requested'], [500])
             self.assertArrays(group['raw_frames'], [1000])
-            self.assertArrays(group['output'], [1])
-            self.assertArrays(group['sequences'], [2])
+            self.assertArrays(group['output'], [0])
+            self.assertArrays(group['sequences'], [500])
             self.assertArrays(group['total_counts'], [12.e-6])
 
         os.remove(self.filename)
@@ -91,8 +90,8 @@ class PeriodsTestTemplate(object):
         self.assertArrays(load_period._dict['type'], [1])
         self.assertArrays(load_period._dict['requested'], [500])
         self.assertArrays(load_period._dict['raw'], [1000])
-        self.assertArrays(load_period._dict['output'], [1])
-        self.assertArrays(load_period._dict['sequences'], [2])
+        self.assertArrays(load_period._dict['output'], [0])
+        self.assertArrays(load_period._dict['sequences'], [500])
         self.assertArrays(load_period._dict['total_counts'], [12.e-6])
 
         os.remove(self.filename)
@@ -104,10 +103,9 @@ class PeriodsTestTemplate(object):
         period = self.create_multiperiod_data()
 
         self.assertEqual(period._dict['number'], 2)
-        self.assertEqual(period._dict['labels'], 'period 1; period 2')
+        self.assertEqual(period._dict['labels'], 'period 1;period 2')
         self.assertArrays(period._dict['type'], [1, 2])
-        self.assertArrays(period._dict['output'], [1, 0])
-        self.assertArrays(period._dict['sequences'], [42, 42])
+        self.assertArrays(period._dict['output'], [0, 0])
 
         self.period = period
 
@@ -129,12 +127,12 @@ class PeriodsTestTemplate(object):
             self.assertEqual(group.attrs['NX_class'], 'NXperiod')
 
             self.assertEqual(group['number'][0], 2)
-            self.assertEqual(group['labels'][0].decode(), 'period 1; period 2')
+            self.assertEqual(group['labels'][0].decode(), 'period 1;period 2')
             self.assertArrays(group['type'], [1, 2])
             self.assertArrays(group['frames_requested'], [500, 400])
             self.assertArrays(group['raw_frames'], [1000, 500])
-            self.assertArrays(group['output'], [1, 0])
-            self.assertArrays(group['sequences'], [42, 42])
+            self.assertArrays(group['output'], [0, 0])
+            self.assertArrays(group['sequences'], [500, 400])
             self.assertArrays(group['total_counts'], [12.e-6, 45.e-6])
 
         os.remove(self.filename)
@@ -156,12 +154,12 @@ class PeriodsTestTemplate(object):
             load_period = read_periods_from_histogram(file)
 
         self.assertEqual(load_period._dict['number'], 2)
-        self.assertEqual(load_period._dict['labels'], 'period 1; period 2')
+        self.assertEqual(load_period._dict['labels'], 'period 1;period 2')
         self.assertArrays(load_period._dict['type'], [1, 2])
         self.assertArrays(load_period._dict['requested'], [500, 400])
         self.assertArrays(load_period._dict['raw'], [1000, 500])
-        self.assertArrays(load_period._dict['output'], [1, 0])
-        self.assertArrays(load_period._dict['sequences'], [42, 42])
+        self.assertArrays(load_period._dict['output'], [0, 0])
+        self.assertArrays(load_period._dict['sequences'], [500, 400])
         self.assertArrays(load_period._dict['total_counts'], [12.e-6, 45.e-6])
 
         os.remove(self.filename)
