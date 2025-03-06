@@ -40,15 +40,15 @@ class _Detector_1(HDF5):
         """
         A method to get the bin value from a time stamp.
         This is used for first and last good bin.
-        It is also used for t0 bin. 
+        It is also used for t0 bin.
         :param value: the time stamp
-        :param offset: if to use the next or previous bin, if the 
+        :param offset: if to use the next or previous bin, if the
         time stamp is in the middle of the bin
         :returns: the bin value for the time stamp,
         such that it is complete good bin
         """
         # convert resolution to micro seconds
-        res = self.resolution/1e6 
+        res = self.resolution/1e6
         exact = value/res
         bin_value = int(value/res)
         if abs(exact - bin_value) > 1e-6:
@@ -94,7 +94,7 @@ class _Detector_1(HDF5):
                             dtype='S45')
         counts.attrs.create('long_name', self._dict['inst'].encode(),
                             dtype=stype(self._dict['inst']))
-        
+
         t0_bin = self.get_bin(self._dict['time_zero'])
         counts.attrs.create('t0_bin', t0_bin, dtype=INT32)
 
