@@ -33,12 +33,12 @@ jobs:
         shell: bash -l {0}
         run: |
           python tools/create_conda_yml.py ${{ matrix.python_version }}
+          cat MuonDataLib-dev
 
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version: ${{ matrix.python_version }}
           environment-file: MuonDataLib.yml
 
       - name: check install
