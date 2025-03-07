@@ -33,6 +33,8 @@ jobs:
         shell: bash -l {0}
         run: |
           python tools/create_conda_yml.py ${{ matrix.python_version }}
+          pwd
+          ls
           cat MuonDataLib-dev
 
       - name: Setup Conda
