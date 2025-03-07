@@ -38,7 +38,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
-          python-version ${{ matrix.python_version }}
+          python-version: ${{ matrix.python_version }}
           environment-file: MuonDataLib.yml
 
       - name: check install
