@@ -35,7 +35,7 @@ jobs:
           python tools/create_conda_yml.py ${{ matrix.python_version }}
           pwd
           ls
-          cat MuonDataLib-dev
+          cat MuonDataLib.yml
 
       - name: Setup Conda
         uses: conda-incubator/setup-miniconda@v3
