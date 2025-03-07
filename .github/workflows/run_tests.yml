@@ -47,7 +47,6 @@ jobs:
         shell: bash -el {0}
         run:
              conda info
-             conda info --envs
 
       - name: check install 2
         shell: pwsh
@@ -59,6 +58,7 @@ jobs:
         run:  |
             conda activate test
             python -m pip install .
+            python -V
 
       - name: run tests
         timeout-minutes: 10
