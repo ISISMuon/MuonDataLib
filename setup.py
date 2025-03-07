@@ -4,7 +4,6 @@ import numpy
 
 version = "0.9.2b1"
 
-
 PACKAGE_NAME = 'MuonDataLib'
 
 
