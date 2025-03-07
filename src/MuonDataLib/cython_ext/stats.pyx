@@ -10,13 +10,15 @@ cpdef make_histogram(
         double[:] times,
         cnp.int32_t[:] spec,
         int N_spec,
+        int[:] periods,
         double min_time=0,
         double max_time=30.,
         double width=0.5,
         double conversion=1.e-3):
     """
     This method creates histograms from a list of data.
-    It produces a matrix of histograms for multiple spectra.
+    It produces a matrix of histograms for multiple periods
+    and spectra.
     Strictly speaking these are not histograms as they
     are not normalised to bin width.
     This is the language used by the users and the
@@ -24,6 +26,7 @@ cpdef make_histogram(
     :param times: the times for the data
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
+    :param periods: a list of the periods each event belongs to
     :param min_time: the first bin edge
     :param max_time: the last bin edge
     :param width: the bin width
@@ -32,21 +35,21 @@ cpdef make_histogram(
     number of events in the histogram
     """
 
-    cdef Py_ssize_t det, k, j_bin
+    cdef Py_ssize_t det, k, j_bin, p
     cdef int N = 0
     cdef double time
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
 
-    cdef cnp.ndarray[int, ndim=2] result = np.zeros((N_spec, len(bins)-1), dtype=np.int32)
-    cdef int[:, :] mat = result
-
+    cdef cnp.ndarray[int, ndim=3] result = np.zeros((np.max(periods)+1, N_spec, len(bins)-1), dtype=np.int32)
+    cdef int[:, :, :] mat = result
     for k in range(len(times)):
         det = spec[k]
         time = times[k] * conversion
         if time <= max_time and time >= min_time:
+            p = periods[k]
             j_bin = int((time - min_time) // width)
-            mat[det, j_bin] += 1
+            mat[p, det, j_bin] += 1
             N += 1
     return result, bins, N
 

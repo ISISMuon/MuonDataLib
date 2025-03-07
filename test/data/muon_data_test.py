@@ -688,7 +688,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         """
         events = mock.MagicMock()
         events.report_filters = mock.Mock(return_value={})
+        events.histogram = mock.Mock(return_value=([1, 1], [2]))
         cache = mock.MagicMock()
+        cache.empty = mock.MagicMock(return_value=True)
         sample = fake_nxs_part()
         raw_data = fake_nxs_part()
         source = fake_nxs_part()
