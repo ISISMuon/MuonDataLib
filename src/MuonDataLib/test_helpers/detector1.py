@@ -26,9 +26,15 @@ class Det1TestTemplate(object):
             for j in range(4):
                 tmp = (((j + 1) * np.ones(len(x))))
                 counts[p].append([int(x) for x in tmp])
-
+        """
+        the plus one one last good is so that the
+        correct result is 42. The last good is the
+        last complete bin before the value. Since
+        42*0.016 gives the start of a bin edge,
+        we move it along to the next one.
+        """
         return (0.016, x, [4, 5, 6, 7], counts, 'python',
-                3*0.016, 4*0.016, 42*0.016)
+                3*0.016, 4*0.016, (42 + 1)*0.016)
 
     def create_multiperiod_data(self):
         x = [1., 2., 3.]
@@ -40,7 +46,8 @@ class Det1TestTemplate(object):
                 tmp = (((p + 1) * np.ones(len(x))))
                 counts[p].append([int(x) for x in tmp])
 
-        return 0.016, x, [4, 5], counts, 'python', 3*0.016, 4*0.016, 42*0.016
+        return (0.016, x, [4, 5], counts, 'python', 3*0.016,
+                4*0.016, (42 + 1)*0.016)
 
     def save(self, det, file):
         raise NotImplementedError()
@@ -59,7 +66,7 @@ class Det1TestTemplate(object):
         self.assertEqual(det._dict['inst'], 'python')
         self.assertAlmostEqual(det._dict['time_zero'], 3*0.016, 3)
         self.assertAlmostEqual(det._dict['first_good'], 4*0.016)
-        self.assertAlmostEqual(det._dict['last_good'], 42*0.016)
+        self.assertAlmostEqual(det._dict['last_good'], (42 + 1)*0.016)
 
         self.det = det
 
@@ -145,7 +152,7 @@ class Det1TestTemplate(object):
         self.assertEqual(load_det._dict['inst'], 'python')
         self.assertEqual(load_det._dict['time_zero'], 0.048)
         self.assertEqual(load_det._dict['first_good'], 4*0.016)
-        self.assertEqual(load_det._dict['last_good'], 42*0.016)
+        self.assertEqual(load_det._dict['last_good'], (42 + 1)*0.016)
         self.assertArrays(load_det._dict['raw_time'], [1, 2, 3])
         self.assertArrays(load_det._dict['counts'], [
                                                           [[1, 1, 1],
@@ -169,7 +176,7 @@ class Det1TestTemplate(object):
         self.assertEqual(det._dict['inst'], 'python')
         self.assertAlmostEqual(det._dict['time_zero'], 3*0.016, 3)
         self.assertAlmostEqual(det._dict['first_good'], 4*0.016, 3)
-        self.assertAlmostEqual(det._dict['last_good'], 42*0.016, 3)
+        self.assertAlmostEqual(det._dict['last_good'], (42 + 1)*0.016, 3)
 
         self.det = det
 
@@ -251,9 +258,9 @@ class Det1TestTemplate(object):
         self.assertEqual(load_det._dict['resolution'], 0.016)
         self.assertArrays(load_det._dict['spectrum_index'], [4, 5])
         self.assertEqual(load_det._dict['inst'], 'python')
-        self.assertEqual(load_det._dict['time_zero'], 3*0.016)
-        self.assertEqual(load_det._dict['first_good'], 4*0.016)
-        self.assertEqual(load_det._dict['last_good'], 42*0.016)
+        self.assertAlmostEqual(load_det._dict['time_zero'], 3*0.016, 4)
+        self.assertAlmostEqual(load_det._dict['first_good'], 4*0.016, 4)
+        self.assertAlmostEqual(load_det._dict['last_good'], (42 + 1)*0.016, 4)
         self.assertArrays(load_det._dict['raw_time'], [1., 2., 3.])
         self.assertArrays(load_det._dict['counts'], [
                                                      [[1, 1, 1], [1, 1, 1]],

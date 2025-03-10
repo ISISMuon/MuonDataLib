@@ -36,14 +36,18 @@ class _Detector_1(HDF5):
         """
         return int(self._dict['resolution']*1e6)
 
-    def get_bin(self, value, offset=1):
+    def get_bin(self, value, offset=1,
+                offset_bin_start=0):
         """
         A method to get the bin value from a time stamp.
-        This is used for first and last good bin.
+        This can apply offsets for when the time stamp
+        is part way into the bin or at the start of a bin.
         It is also used for t0 bin.
         :param value: the time stamp
         :param offset: if to use the next or previous bin, if the
         time stamp is in the middle of the bin
+        :param offset_bin_start: the offset to use if the time
+        stamp is on the left hand bin edge
         :returns: the bin value for the time stamp,
         such that it is complete good bin
         """
@@ -53,7 +57,50 @@ class _Detector_1(HDF5):
         bin_value = int(value/res)
         if abs(exact - bin_value) > 1e-6:
             bin_value += offset
+        else:
+            bin_value += offset_bin_start
         return bin_value
+
+    def get_time_zero_bin(self, value):
+        """
+        Gets the bin for the time zero.
+        This just returns the bin that contains
+        the time zero time stamp.
+        :param value: the time stamp for time zero
+        :returns: the bin for time zero
+        """
+        return self.get_bin(value,
+                            offset=0,
+                            offset_bin_start=0)
+
+    def get_first_good_bin(self, value):
+        """
+        Gets the bin for first good.
+        The first good bin is the first complete
+        bin after the time stamp (value).
+        :param value: the time stamp for first
+        good.
+        :returns: the first good bin
+        """
+        return self.get_bin(value,
+                            offset=1,
+                            offset_bin_start=0)
+
+    def get_last_good_bin(self, value):
+        """
+        Gets the bin for last good.
+        The last good bin is the last complete
+        bin before the time stamp (value).
+        Hence, if the time stamp is on the left
+        hand bin edge, the previous bin is the last
+        good bin.
+        :param value: the time stamp for last
+        good.
+        :returns: the last good bin
+        """
+        return self.get_bin(value,
+                            offset=-1,
+                            offset_bin_start=-1)
 
     def save_nxs2(self, file,
                   raw_time,
@@ -95,15 +142,15 @@ class _Detector_1(HDF5):
         counts.attrs.create('long_name', self._dict['inst'].encode(),
                             dtype=stype(self._dict['inst']))
 
-        t0_bin = self.get_bin(self._dict['time_zero'])
+        t0_bin = self.get_time_zero_bin(self._dict['time_zero'])
         counts.attrs.create('t0_bin', t0_bin, dtype=INT32)
 
-        first_bin = self.get_bin(self._dict['first_good'])
+        first_bin = self.get_first_good_bin(self._dict['first_good'])
         counts.attrs.create('first_good_bin',
                             first_bin,
                             dtype=INT32)
 
-        last_bin = self.get_bin(self._dict['last_good'], offset=-1)
+        last_bin = self.get_last_good_bin(self._dict['last_good'])
         counts.attrs.create('last_good_bin',
                             last_bin,
                             dtype=INT32)
@@ -210,7 +257,11 @@ def read_detector1_from_histogram(file):
     tmp = tmp['counts']
     inst = tmp.attrs['long_name'].decode()
     first_good = tmp.attrs['first_good_bin'] * resolution
-    last_good = tmp.attrs['last_good_bin'] * resolution
+    """
+    Need to add 1 to the last good, so that the
+    correct bin is a complete bin of good data.
+    """
+    last_good = (tmp.attrs['last_good_bin'] + 1) * resolution
     t0 = tmp.attrs['t0_bin'] * resolution
     counts = tmp[:]
 

@@ -130,13 +130,13 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         counts = np.asarray(args[3], dtype=np.int32)
         date = datetime.datetime(2024, 12, 11, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
- 
+
         # change the time stamps so they stay in the same bin
         conversion = 0.01/0.016
 
         events = EventsDetector_1(cache, args[0],
                                   args[2], args[4],
-                                  conversion * args[5], 
+                                  conversion * args[5],
                                   conversion * args[6],
                                   conversion * args[7])
         cache.save(counts, bins,
@@ -222,6 +222,36 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         self.assertEqual(len(counts[0][0]), 3)
         self.assertEqual(len(counts[0]), 2)
         self.assertEqual(len(counts), 3)
+
+    def test_fist_good_middle_of_bin(self):
+        det = self.create_multiperiod_data_custom_resolution()
+        result = det.get_first_good_bin(0.042)
+        self.assertEqual(result, 5)
+
+    def test_fist_good_start_of_bin(self):
+        det = self.create_multiperiod_data258G_custom_resolution()
+        result = det.get_first_good_bin(0.04)
+        self.assertEqual(result, 4)
+
+    def test_last_good_middle_of_bin(self):
+        det = self.create_multiperiod_data_custom_resolution()
+        result = det.get_last_good_bin(0.042)
+        self.assertEqual(result, 3)
+
+    def test_last_good_start_of_bin(self):
+        det = self.create_multiperiod_data_custom_resolution()
+        result = det.get_last_good_bin(0.04)
+        self.assertEqual(result, 3)
+
+    def test_t0_middle_of_bin(self):
+        det = self.create_multiperiod_data_custom_resolution()
+        result = det.get_time_zero_bin(0.042)
+        self.assertEqual(result, 4)
+
+    def test_t0_start_of_bin(self):
+        det = self.create_multiperiod_data_custom_resolution()
+        result = det.get_time_zero_bin(0.04)
+        self.assertEqual(result, 4)
 
 
 if __name__ == '__main__':
