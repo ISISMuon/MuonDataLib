@@ -14,7 +14,8 @@ def _load_data(file_name):
         This should make it easier to swap out later.
         :param file_name: the name of the file to load.
         :return: IDs, first index for frame, time stamps,
-        amplitudes, time at the start of the frame
+        amplitudes, time at the start of the frame,
+        list of the period each frame belongs to
         """
 
         with h5py.File(file_name, 'r') as file:
@@ -30,6 +31,7 @@ def _load_data(file_name):
             M = tmp['event_index'].len()
             start_j = np.zeros(M, dtype=np.int32)
             start_t = np.zeros(M, dtype=np.double)
+            periods = np.zeros(M, dtype=np.int32)
 
             tmp['event_id'].read_direct(IDs)
             tmp['event_time_offset'].read_direct(times)
@@ -37,7 +39,9 @@ def _load_data(file_name):
             tmp['event_index'].read_direct(start_j)
             tmp['event_time_zero'].read_direct(start_t)
 
-        return IDs, start_j, times, amps, start_t
+            if 'period_number' in tmp.keys():
+                tmp['period_number'].read_direct(periods)
+        return IDs, start_j, times, amps, start_t, periods
 
 def load_data(file_name, N_det):
         """
@@ -47,8 +51,8 @@ def load_data(file_name, N_det):
         :return: the time to run this method, the total number of events
         """
         start = time.time()
-        IDs, frames, times, amps, frame_times = _load_data(file_name)
-        events = Events(IDs, times, frames, frame_times, N_det)
+        IDs, frames, times, amps, frame_times, periods = _load_data(file_name)
+        events = Events(IDs, times, frames, frame_times, N_det, periods)
         return time.time() - start, events
 
 

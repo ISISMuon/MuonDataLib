@@ -3,6 +3,7 @@ from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
+                                           good_periods,
                                            good_values_ints,
                                            good_values_double)
 import numpy as np
@@ -132,6 +133,7 @@ cdef class Events:
     Class for storing event information
     """
     cdef public int [:] IDs
+    cdef public int [:] periods
     cdef public double[:] times
     cdef readonly int N_spec
     cdef public int[:] start_index_list
@@ -146,7 +148,9 @@ cdef class Events:
                  cnp.ndarray[double] times,
                  cnp.ndarray[int] start_i,
                  cnp.ndarray[double] frame_start,
-                 int N_det):
+                 int N_det,
+                 cnp.ndarray[int] periods,
+                 ):
         """
         Creates an event object.
         This knows everything needed for the events to create a histogram.
@@ -155,6 +159,7 @@ cdef class Events:
         :param start_i: the first event index for each frame
         :param frame_start: the start time for the frames
         :param N_det: the number of detectors
+        :param periods: a vector of the periods for each frame
         """
         self.IDs = IDs
         self.N_spec = N_det
@@ -164,6 +169,7 @@ cdef class Events:
         self.frame_start_time = frame_start
         self.filter_start = {}
         self.filter_end = {}
+        self.periods = periods
 
     def get_start_times(self):
         """
@@ -289,7 +295,11 @@ cdef class Events:
 
     @property
     def get_total_frames(self):
-        return len(self.start_index_list)
+        """
+        :return: The original number of frames in each period
+        """
+        _, frames = np.unique(self.periods, return_counts=True)
+        return np.asarray(frames, dtype=np.int32)
 
     def _get_filtered_data(self, frame_times):
         """
@@ -298,11 +308,12 @@ cdef class Events:
         the number of removed frames and the indices for the filters.
         :param frame_times: the times for the start of each frame (in seconds).
         The number of removed frames. The list of filtered detector IDs and
-        event time stamps.
+        event time stamps. The list of periods for the kept events
         """
 
         cdef int[:] IDs, f_i_start, f_i_end
-        cdef int rm_frames = 0
+        cdef int[:] periods
+        cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef double[:] times, f_start, f_end
 
         if len(self.filter_start.keys())>0:
@@ -316,7 +327,7 @@ cdef class Events:
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
-            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -330,8 +341,9 @@ cdef class Events:
             times = self.times
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
-
-        return f_i_start, f_i_end, rm_frames, IDs, times
+        # get the periods for each event
+        periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
+        return f_i_start, f_i_end, rm_frames, IDs, times, periods
 
     def histogram(self,
                   double min_time=0.,
@@ -347,28 +359,29 @@ cdef class Events:
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-        cdef int[:] IDs, f_i_start, f_i_end
-        cdef int rm_frames = 0
+        cdef int[:] IDs, f_i_start, f_i_end, periods
+        cdef int[:] rm_frames
         cdef double[:] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        f_i_start, f_i_end, rm_frames, IDs, times = self._get_filtered_data(frame_times)
+        f_i_start, f_i_end, rm_frames, IDs, times, periods = self._get_filtered_data(frame_times)
 
-        hist, bins, N = make_histogram(times,
-                                       IDs,
-                                       self.N_spec,
-                                       min_time,
-                                       max_time,
-                                       width)
+        hist, bins, N = make_histogram(times=times,
+                                       spec=IDs,
+                                       N_spec=self.N_spec,
+                                       periods=periods,
+                                       min_time=min_time,
+                                       max_time=max_time,
+                                       width=width)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
                                                               f_i_start,
                                                               f_i_end)
-            cache.save(np.asarray([hist]), bins,
-                       np.asarray([rm_frames], dtype=np.int32),
-                       veto_frames=np.zeros(1, dtype=np.int32),
+            cache.save(hist, bins,
+                       rm_frames,
+                       veto_frames=np.zeros(len(rm_frames), dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,
                        resolution=width,

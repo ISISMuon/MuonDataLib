@@ -33,23 +33,32 @@ jobs:
         shell: bash -l {0}
         run: |
           python tools/create_conda_yml.py ${{ matrix.python_version }}
+          pwd
+          ls
+          cat MuonDataLib-dev.yml
 
-      - name: Setup Mambaforge
-        uses: mamba-org/setup-micromamba@v2
+      - name: Setup Conda
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          environment-file: MuonDataLib.yml
+          auto-update-conda: true
+          environment-file: MuonDataLib-dev.yml
 
       - name: check install
-        shell: bash -l {0}
-        run:  |
-             mamba env list
-             python --version; conda list ; pip list
+        shell: bash -el {0}
+        run:
+             conda info
+
+      - name: check install 2
+        shell: pwsh
+        run:
+             conda list
 
       - name: compile
         shell: bash -l {0}
         run:  |
-            conda activate MuonDataLib-dev
+            conda activate test
             python -m pip install .
+            python -V
 
       - name: run tests
         timeout-minutes: 10
