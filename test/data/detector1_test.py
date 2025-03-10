@@ -229,7 +229,7 @@ class EventsDetector1Test(Det1TestTemplate, TestHelper):
         self.assertEqual(result, 5)
 
     def test_fist_good_start_of_bin(self):
-        det = self.create_multiperiod_data258G_custom_resolution()
+        det = self.create_multiperiod_data_custom_resolution()
         result = det.get_first_good_bin(0.04)
         self.assertEqual(result, 4)
 
