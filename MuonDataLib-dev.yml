@@ -9,3 +9,9 @@ dependencies:
   - plotly
   - pytest
   - pre-commit >=2.15
+  - sphinx
+  - jupyter-book
+  - nbsphinx
+  - pip:
+    - readthedocs-sphinx-ext
+

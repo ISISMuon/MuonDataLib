@@ -51,7 +51,7 @@ def create_default(version):
     """
     default_yml = {}
 
-    pip_dict = {}
+    pip_dict = {'readthedocs-sphinx-ext': ''}
 
     default_yml['name'] = 'MuonDataLib-dev'
     default_yml['channels'] = 'conda-forge'
@@ -60,6 +60,9 @@ def create_default(version):
                                    'plotly': '',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',
+                                   'sphinx': '',
+                                   'jupyter-book': ''
+                                   'nbsphinx': ''
                                    'pip': pip_dict}
     return default_yml
 
