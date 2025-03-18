@@ -53,5 +53,5 @@ class Figure(object):
         """
         bin_centres = (bins[:-1] + bins[1:])/2.
         for det in det_list:
-            self.plot(bin_centres, hists[period-1][det],
+            self.plot(bin_centres, hist[period-1][det],
                       label + f'Detector {det}')
