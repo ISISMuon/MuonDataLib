@@ -326,9 +326,7 @@ cdef class Events:
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
-
             f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
-
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -342,7 +340,6 @@ cdef class Events:
             times = self.times
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
-
         # get the periods for each event
         periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
         return f_i_start, f_i_end, rm_frames, IDs, times, periods
@@ -361,7 +358,6 @@ cdef class Events:
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-
         cdef int[:] IDs, f_i_start, f_i_end, periods
         cdef int[:] rm_frames
         cdef double[:] times
@@ -382,7 +378,6 @@ cdef class Events:
             first_time, last_time = self._start_and_end_times(frame_times,
                                                               f_i_start,
                                                               f_i_end)
-
             cache.save(hist, bins,
                        rm_frames,
                        veto_frames=np.zeros(len(rm_frames), dtype=np.int32),

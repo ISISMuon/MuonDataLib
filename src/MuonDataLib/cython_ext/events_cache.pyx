@@ -28,7 +28,6 @@ cdef class EventsCache:
     cdef readonly double resolution
     cdef readonly int N_events
 
-
     def __init__(self, dt.datetime start_time, int[:] event_frames):
         """
         Create an empty cache
@@ -130,9 +129,8 @@ cdef class EventsCache:
 
     @property
     def get_good_frames(self):
-
         """
-        :return: the number of raw frames
+        :return: the number of good frames
         """
         self.frame_check()
         return np.asarray(self.N_event_frames) - self._discarded_good_frames

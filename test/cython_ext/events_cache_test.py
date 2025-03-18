@@ -106,7 +106,6 @@ class EventsCacheTest(TestHelper):
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
                         1, 120, 1., 1e6)
-
         self.assertAlmostEqual(self.cache.get_count_duration, 1.75, 3)
 
     def test_get_start_time_zero_no_offseet(self):
@@ -129,7 +128,6 @@ class EventsCacheTest(TestHelper):
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
                         132, 220, 1., 1e6)
-
         expect = convert_date_for_NXS(datetime.datetime(2024, 11,
                                                         21, 8, 1, 12))
         self.assertEqual(convert_date_for_NXS(self.cache.get_start_time),
@@ -143,7 +141,6 @@ class EventsCacheTest(TestHelper):
                         np.asarray([20], dtype=np.int32),
                         np.asarray([10], dtype=np.int32),
                         0, 220, 1., 1e6)
-
         expect = convert_date_for_NXS(datetime.datetime(2024, 11,
                                                         21, 8, 2, 40))
         self.assertEqual(convert_date_for_NXS(self.cache.get_end_time),

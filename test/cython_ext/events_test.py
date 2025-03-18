@@ -69,7 +69,6 @@ class EventsTest(TestHelper):
         c_mat, c_bins = cache.get_histograms()
         self.assertArrays(bins, c_bins)
         # cache adds a list for periods, need to remove it
-
         self.assertEqual(len(mat), len(c_mat))
         self.assertEqual(len(mat[0]), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
@@ -212,7 +211,6 @@ class EventsTest(TestHelper):
         self.assertArrays(np.asarray(times), [1000., 2000.,
                                               3000., 4000.,
                                               5000., 6000.])
-
 
     def test_get_filtered_data_no_data(self):
         self._events.add_filter('test', 0, 1e9)
