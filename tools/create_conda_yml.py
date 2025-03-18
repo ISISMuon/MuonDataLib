@@ -61,8 +61,8 @@ def create_default(version):
                                    'pytest': '',
                                    'pre-commit': '>=2.15',
                                    'sphinx': '',
-                                   'jupyter-book': ''
-                                   'nbsphinx': ''
+                                   'jupyter-book': '',`
+                                   'nbsphinx': '',
                                    'pip': pip_dict}
     return default_yml
 
