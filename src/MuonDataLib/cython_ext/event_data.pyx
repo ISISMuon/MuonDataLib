@@ -1,10 +1,12 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.cython_ext.stats import make_histogram
-from MuonDataLib.cython_ext.filter import (get_indices,
+from MuonDataLib.cython_ext.filter import (
+                                           get_indices,
                                            rm_overlaps,
+                                           good_periods,
                                            good_values_ints,
                                            good_values_double)
 import numpy as np
-import json
 import time
 cimport numpy as cnp
 import cython
@@ -14,15 +16,128 @@ cnp.import_array()
 cdef double ns_to_s = 1.e-9
 
 
+"""
+These need to be classes to pass function argument
+in Cython
+The below are not tested directly, in the interest
+of run time speed (the function classes are
+not exposed to Python).
+
+Need to be in the
+same file as they used in order to use type defs.
+Need to use
+https://docs.cython.org/en/latest/src/userguide/sharing_declarations.html
+to split into multiple files (not got time)
+"""
+cdef class cf:
+    """
+    Simple class for comparing values
+    """
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        raise NotImplementedError()
+
+cdef class cf_band(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is within a band of accepted values
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method
+        :param less: the comparion method
+        """
+        return (keep_data(min_filter, status, y, greater) and
+                keep_data(max_filter, status, y, less))
+
+cdef class cf_max(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is below a max accepted value
+        :param min_filter: the min accepted y value - not used
+        :param max_filter: the max accepted y value
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method - not used
+        :param less: the comparion method
+        """
+        return keep_data(max_filter, status, y, less)
+
+cdef class cf_min(cf):
+    cdef cf(self, min_filter, max_filter, status, y, greater, less):
+        """
+        For checking if a data point is below an accepted value
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value - not used
+        :param status: if the data is being removed
+        :param y: the y value being considered
+        :param greater: the comparison method
+        :param less: the comparion method - not used
+        """
+        return keep_data(min_filter, status, y, greater)
+
+
+cdef class Func:
+    """
+    compares a pair of values
+    Need this as sometimes the comparison are flipped
+    when doing the checks. So want a unified interface
+    """
+    cdef compare(self, double threshold, double y):
+        raise NotImplementedError()
+
+cdef class cf_less(Func):
+    cdef compare(self, double threshold, double y):
+        """
+        Is y < threshold
+        :param threshold: the threshold value
+        :param y: the y value
+        :return: a bool of is y < threshold
+        """
+        return y < threshold
+
+cdef class cf_greater(Func):
+    cdef compare(self, double threshold, double y):
+        """
+        Is y > threshold
+        :param threshold: the threshold value
+        :param y: the y value
+        :return: a bool of is y > threshold
+        """
+        return y > threshold
+
+cdef remove_data(double threshold, status, double y, Func cf):
+    """
+    Checks if the data should be removed
+    :param threshold: the threshold value
+    :param status: it data is currently being removed
+    :param y: the y value being considered
+    :param cf: the comparison function to use
+    :return: a bool of if the y data point is to be removed
+    """
+    return threshold != NONE and not status and cf.compare(threshold, y)
+
+cdef keep_data(double threshold, status, double y, Func cf):
+    """
+    Checks if the data should be kept
+    :param threshold: the threshold value
+    :param status: it data is currently being removed
+    :param y: the y value being considered
+    :param cf: the comparison function to use
+    :return: a bool of if the y data point is to be kept
+    """
+    return threshold != NONE and status and cf.compare(threshold, y)
+
 cdef class Events:
     """
     Class for storing event information
     """
     cdef public int [:] IDs
+    cdef public int [:] periods
     cdef public double[:] times
     cdef readonly int N_spec
-    cdef readonly int[:] start_index_list
-    cdef readonly int[:] end_index_list
+    cdef public int[:] start_index_list
+    cdef public int[:] end_index_list
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
@@ -33,7 +148,9 @@ cdef class Events:
                  cnp.ndarray[double] times,
                  cnp.ndarray[int] start_i,
                  cnp.ndarray[double] frame_start,
-                 int N_det):
+                 int N_det,
+                 cnp.ndarray[int] periods,
+                 ):
         """
         Creates an event object.
         This knows everything needed for the events to create a histogram.
@@ -42,6 +159,7 @@ cdef class Events:
         :param start_i: the first event index for each frame
         :param frame_start: the start time for the frames
         :param N_det: the number of detectors
+        :param periods: a vector of the periods for each frame
         """
         self.IDs = IDs
         self.N_spec = N_det
@@ -51,6 +169,7 @@ cdef class Events:
         self.frame_start_time = frame_start
         self.filter_start = {}
         self.filter_end = {}
+        self.periods = periods
 
     def get_start_times(self):
         """
@@ -65,6 +184,73 @@ cdef class Events:
         :returns: the filter dicts
         """
         return self.filter_start, self.filter_end
+
+    @cython.boundscheck(False)  # Deactivate bounds checking
+    @cython.wraparound(False)   # Deactivate negative indexing.
+    cpdef apply_log_filter(self, str name, double[:] x, double[:] y, double min_filter, double max_filter):
+        """
+        A method for extracting the filters from the logs.
+        :param name: the name of the log to filter against
+        :param x: the x values for the log
+        :param y: the y values for the log
+        :param min_filter: the min accepted y value
+        :param max_filter: the max accepted y value
+        """
+
+        cdef cf compare
+        if min_filter == NONE and max_filter == NONE:
+            return [], [], [], []
+        elif min_filter == NONE:
+            compare = cf_max()
+        elif max_filter == NONE:
+            compare = cf_min()
+        else:
+            compare = cf_band()
+        status = False
+
+        cdef Py_ssize_t j, N
+        N = 0
+        cdef cnp.ndarray[int] start = np.zeros(len(x), dtype=np.int32)
+        cdef cnp.ndarray[int] stop = np.zeros(len(x), dtype=np.int32)
+
+        if (min_filter is not NONE and y[0] < min_filter or
+            max_filter is not NONE and y[0] > max_filter):
+            status = True
+            start[0] = 0
+
+        cdef cf_less less = cf_less()
+        cdef cf_greater greater = cf_greater()
+
+        for j in range(1, len(y)):
+            if (remove_data(min_filter, status, y[j], less) or
+                remove_data(max_filter, status, y[j], greater)):
+                status = True
+                # since it crosses before the current value
+                start[N] = j-1
+            elif compare.cf(min_filter, max_filter, status, y[j], greater, less):
+                status = False
+                stop[N] = j
+                N += 1
+
+        # if its on, turn it off
+        if status:
+            stop[N] = len(y) - 1
+            N += 1
+
+        if start[0] == 0:
+            """
+            This does cause a warning, but makes sure that the
+            first event is excluded.
+            """
+            self.add_filter(f'{name}_0', 0,
+                            x[stop[0]]/ns_to_s)
+        else:
+            self.add_filter(f'{name}_0', x[start[0]]/ns_to_s,
+                            x[stop[0]]/ns_to_s)
+
+        for j in range(1, N):
+            self.add_filter(f'{name}_{j}', x[start[j]]/ns_to_s,
+                            x[stop[j]]/ns_to_s)
 
     def add_filter(self, str name, double start, double end):
         """
@@ -107,30 +293,13 @@ cdef class Events:
             data[key] = (self.filter_start[key], self.filter_end[key])
         return data
 
-    def load_filters(self, str file_name):
-        """
-        A method to filters from a json file.
-        This will apply all of the filters from the file.
-        :param file_name: the name of the json file
-        """
-        with open(file_name, 'r') as file:
-            data = json.load(file)
-
-        for key in data.keys():
-            self.add_filter(key, *data[key])
-
-    def save_filters(self, str file_name):
-        """
-        A method to save the current filters to a file.
-        :param file_name: the name of the json file to save to.
-        """
-        data = self.report_filters()
-        with open(file_name, 'w') as file:
-            json.dump(data, file, ensure_ascii=False, sort_keys=True, indent=4)
-
     @property
     def get_total_frames(self):
-        return len(self.start_index_list)
+        """
+        :return: The original number of frames in each period
+        """
+        _, frames = np.unique(self.periods, return_counts=True)
+        return np.asarray(frames, dtype=np.int32)
 
     def _get_filtered_data(self, frame_times):
         """
@@ -139,11 +308,11 @@ cdef class Events:
         the number of removed frames and the indices for the filters.
         :param frame_times: the times for the start of each frame (in seconds).
         The number of removed frames. The list of filtered detector IDs and
-        event time stamps.
+        event time stamps. The list of periods for the kept events
         """
-
         cdef int[:] IDs, f_i_start, f_i_end
-        cdef int rm_frames = 0
+        cdef int[:] periods
+        cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef double[:] times, f_start, f_end
 
         if len(self.filter_start.keys())>0:
@@ -157,10 +326,16 @@ cdef class Events:
                                              ns_to_s*np.asarray(f_end),
                                              'frame start time',
                                              'seconds')
-            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end)
+
+            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
+
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+
+            if len(times) == 0:
+                raise ValueError("The current filter selection results in zero data "
+                                 "for the histograms. Aborting histogram generation.")
         else:
             # no filters
             IDs = self.IDs
@@ -168,7 +343,9 @@ cdef class Events:
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
 
-        return f_i_start, f_i_end, rm_frames, IDs, times
+        # get the periods for each event
+        periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
+        return f_i_start, f_i_end, rm_frames, IDs, times, periods
 
     def histogram(self,
                   double min_time=0.,
@@ -184,30 +361,35 @@ cdef class Events:
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-        cdef int[:] IDs, f_i_start, f_i_end
-        cdef int rm_frames = 0
+
+        cdef int[:] IDs, f_i_start, f_i_end, periods
+        cdef int[:] rm_frames
         cdef double[:] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        f_i_start, f_i_end, rm_frames, IDs, times = self._get_filtered_data(frame_times)
+        f_i_start, f_i_end, rm_frames, IDs, times, periods = self._get_filtered_data(frame_times)
 
-        hist, bins = make_histogram(times,
-                                    IDs,
-                                    self.N_spec,
-                                    min_time,
-                                    max_time,
-                                    width)
+        hist, bins, N = make_histogram(times=times,
+                                       spec=IDs,
+                                       N_spec=self.N_spec,
+                                       periods=periods,
+                                       min_time=min_time,
+                                       max_time=max_time,
+                                       width=width)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
                                                               f_i_start,
                                                               f_i_end)
-            cache.save(np.asarray([hist]), bins,
-                       np.asarray([rm_frames], dtype=np.int32),
-                       veto_frames=np.zeros(1, dtype=np.int32),
+
+            cache.save(hist, bins,
+                       rm_frames,
+                       veto_frames=np.zeros(len(rm_frames), dtype=np.int32),
                        first_time=first_time,
-                       last_time=last_time)
+                       last_time=last_time,
+                       resolution=width,
+                       N_events=N)
 
         return hist, bins
 

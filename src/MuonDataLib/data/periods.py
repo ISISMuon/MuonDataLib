@@ -7,23 +7,21 @@ class _Periods(HDF5):
     A base class to store the period informtaion for muon data
     """
     def __init__(self, number, labels, p_type,
-                 output, sequences):
+                 output):
         """
         A class to store the period data needed for a muon nexus v2 file
         :param number: the number of periods
         :param labels: a string of the period labels
         :param p_type: an int array representing the type of period
         :param output: an int array of the outputs
-        :param sequences: an int array of the sequences
         """
         super().__init__()
         self._dict['number'] = number
         self._dict['labels'] = labels
         self._dict['type'] = p_type
         self._dict['output'] = output
-        self._dict['sequences'] = sequences
 
-    def save_nxs2(self, file, requested, raw, counts):
+    def save_nxs2(self, file, requested, raw, counts, sequences):
         """
         A method to save the periods information as a muon
         nexus v2 file
@@ -31,13 +29,14 @@ class _Periods(HDF5):
         :param requested: the number of requested frames
         :param raw: the number of raw frames
         :param counts: a float array of the total counts
+        :param sequences: an int array of the sequences
         """
         tmp = file.require_group('raw_data_1')
         tmp = tmp.require_group('periods')
 
         tmp.attrs['NX_class'] = 'NXperiod'
         self.save_int('number', self._dict['number'], tmp)
-        self.save_int_array('sequences', self._dict['sequences'], tmp)
+        self.save_int_array('sequences', sequences, tmp)
         self.save_str('labels', self._dict['labels'], tmp)
         self.save_int_array('type', self._dict['type'], tmp)
         self.save_int_array('frames_requested', requested, tmp)
@@ -63,10 +62,11 @@ class Periods(_Periods):
         :param counts: a float array of the total counts
         :param sequences: an int array of the sequences
         """
-        super().__init__(number, labels, p_type, output, sequences)
+        super().__init__(number, labels, p_type, output)
         self._dict['requested'] = requested
         self._dict['raw'] = raw
         self._dict['total_counts'] = counts
+        self._dict['sequences'] = sequences
 
     def save_nxs2(self, file):
         """
@@ -77,25 +77,35 @@ class Periods(_Periods):
         super().save_nxs2(file,
                           self._dict['requested'],
                           self._dict['raw'],
-                          self._dict['total_counts'])
+                          self._dict['total_counts'],
+                          self._dict['sequences'])
 
 
 class EventsPeriods(_Periods):
     """
     A class to store the period informtaion for muon data
     """
-    def __init__(self, cache, number, labels, p_type,
-                 output, sequences):
+    def __init__(self, cache, _number, _labels, p_type,
+                 _output):
         """
         A class to store the period data needed for a muon nexus v2 file
+        Most of the values are currently overwritten as they are not
+        present in the event file
         :param cache: the events cache
         :param number: the number of periods
         :param labels: a string of the period labels
         :param p_type: an int array representing the type of period
         :param output: an int array of the outputs
-        :param sequences: an int array of the sequences
         """
-        super().__init__(number, labels, p_type, output, sequences)
+        N = len(p_type)
+
+        label = ''
+        for k in range(N):
+            label += f'period {k + 1};'
+        label = label[:-1]
+        output = np.zeros(N, dtype=np.int32)
+
+        super().__init__(N, label, p_type, output)
         self._cache = cache
 
     def save_nxs2(self, file):
@@ -113,10 +123,12 @@ class EventsPeriods(_Periods):
             # store MeV
             counts[k] = float(np.sum(hist[k]))/1.e6
 
+        good = np.asarray(self._cache.get_good_frames)
         super().save_nxs2(file,
-                          np.asarray(self._cache.get_good_frames),
+                          good,
                           np.asarray(self._cache.get_raw_frames),
-                          counts)
+                          counts,
+                          good)
 
 
 def read_periods_from_histogram(file):

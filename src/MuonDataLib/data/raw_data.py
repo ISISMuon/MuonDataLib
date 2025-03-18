@@ -225,7 +225,7 @@ def read_raw_data_from_events(file):
         exp_ID = 'raw ID: test'
 
     return ((tmp["IDF_version"][()],
-             tmp['definition'][()].decode(),
+             'pulsedTD',
              name[0],
              title,
              notes,
