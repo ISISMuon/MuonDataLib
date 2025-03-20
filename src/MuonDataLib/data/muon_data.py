@@ -64,6 +64,11 @@ class MuonEventData(MuonData):
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
+    def _clear(self):
+        self._cache.clear()
+        self._events.clear_filters()
+        self._events.report_filters()
+
     def _filter_remove_times(self):
         """
         A method for getting getting time filter values
@@ -137,6 +142,7 @@ class MuonEventData(MuonData):
         self._filter_remove_times()
         self._filter_keep_times()
         self._filter_logs()
+        print(self._events.report_filters())
 
     def histogram(self, resolution=0.016):
         """
@@ -150,9 +156,13 @@ class MuonEventData(MuonData):
         :return: the histograms and bins
         """
         is_cache_empty = self._cache.empty()
+
         if is_cache_empty:
+            print("hi")
             self._filters()
+
         if is_cache_empty or self._cache.get_resolution() != resolution:
+            print("make new hist")
             return self._events.histogram(width=resolution,
                                           cache=self._cache)
         return self._cache.get_histograms()
@@ -171,11 +181,10 @@ class MuonEventData(MuonData):
         """
         A method to remove all of the filters
         """
-        self._cache.clear()
+        self._clear()
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
         self._keep_times = {}
-        self._events.clear_filters()
 
     def add_sample_log(self, name, x_data, y_data):
         """
@@ -184,7 +193,7 @@ class MuonEventData(MuonData):
         :param x_data: the x values (assumed to be time in seconds)
         :param y_data: the y values
         """
-        self._cache.clear()
+        self._clear()
         self._dict['logs'].add_sample_log(name, x_data, y_data)
 
     def get_sample_log(self, name):
@@ -200,7 +209,7 @@ class MuonEventData(MuonData):
         :param log_name: the name of the log
         :param max_value: the value to remove data if its above it
         """
-        self._cache.clear()
+        self._clear()
         self._dict['logs'].add_filter(log_name, NONE, max_value)
 
     def keep_data_sample_log_above(self, log_name, min_value):
@@ -209,7 +218,7 @@ class MuonEventData(MuonData):
         :param log_name: the name of the log
         :param max_value: the value to remove data if its below it
         """
-        self._cache.clear()
+        self._clear()
         self._dict['logs'].add_filter(log_name, min_value, NONE)
 
     def keep_data_sample_log_between(self, log_name, min_value, max_value):
@@ -219,12 +228,12 @@ class MuonEventData(MuonData):
         :param min_value: the kept data will be above this
         :param max_value: the kept data will be below this
         """
-        self._cache.clear()
+        self._clear()
 
         if max_value <= min_value:
             raise RuntimeError("The max filter value is smaller "
                                "than the min value")
-        self._cache.clear()
+        self._clear()
         self._dict['logs'].add_filter(log_name, min_value, max_value)
 
     def only_keep_data_time_between(self, name, start, end):
@@ -238,7 +247,7 @@ class MuonEventData(MuonData):
             error = (f'the start time {start} is after '
                      f'the end time {end}')
             raise RuntimeError(error)
-        self._cache.clear()
+        self._clear()
         self._keep_times[name] = [start, end]
 
     def remove_data_time_between(self, name, start, end):
@@ -251,7 +260,7 @@ class MuonEventData(MuonData):
             raise RuntimeError(f'The name {name} already exists')
         if start > end:
             raise RuntimeError('The start time is after the end time')
-        self._cache.clear()
+        self._clear()
         self._time_filter[name] = (start, end)
 
     def delete_sample_log_filter(self, name):
@@ -261,7 +270,8 @@ class MuonEventData(MuonData):
         :param name: the name of the sample log
         to remove the filter from
         """
-        self._cache.clear()
+        print("delete")
+        self._clear()
         self._dict['logs'].clear_filter(name)
 
     def delete_only_keep_data_time_between(self, name):
@@ -271,7 +281,7 @@ class MuonEventData(MuonData):
         """
         if name not in self._keep_times.keys():
             raise RuntimeError(f'The name {name} is not present')
-        self._cache.clear()
+        self._clear()
         del self._keep_times[name]
 
     def delete_remove_data_time_between(self, name):
@@ -280,7 +290,7 @@ class MuonEventData(MuonData):
         of data to discard events from
         :param name: the name of the filter to remove
         """
-        self._cache.clear()
+        self._clear()
         del self._time_filter[name]
 
     def get_frame_start_times(self):
@@ -324,8 +334,7 @@ class MuonEventData(MuonData):
         This will apply all of the filters from the file.
         :param file_name: the name of the json file
         """
-        self._cache.clear()
-        self._events.clear_filters()
+        self._clear()
         with open(file_name, 'r') as file:
             data = json.load(file)
         tmp = data['time_filters']
