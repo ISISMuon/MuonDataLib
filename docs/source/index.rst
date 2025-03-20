@@ -15,7 +15,7 @@ Contents
 
    Introduction <intro>
    Developer docs <dev/index>
-   Examples <examples/index>
+   Tutorials and Examples <examples/index>
 
 Indices and tables
 ==================
