@@ -270,13 +270,7 @@ class MuonEventData(MuonData):
         :param name: the name of the sample log
         to remove the filter from
         """
-<<<<<<< HEAD
-        print("delete")
         self._clear()
-=======
-        self._cache.clear()
-        self._events.clear_filters()
->>>>>>> 8a2837c1321b2673100e1ef400413e0c81d93de0
         self._dict['logs'].clear_filter(name)
 
     def delete_only_keep_data_time_between(self, name):
@@ -286,12 +280,7 @@ class MuonEventData(MuonData):
         """
         if name not in self._keep_times.keys():
             raise RuntimeError(f'The name {name} is not present')
-<<<<<<< HEAD
         self._clear()
-=======
-        self._cache.clear()
-        self._events.clear_filters()
->>>>>>> 8a2837c1321b2673100e1ef400413e0c81d93de0
         del self._keep_times[name]
 
     def delete_remove_data_time_between(self, name):
@@ -300,12 +289,7 @@ class MuonEventData(MuonData):
         of data to discard events from
         :param name: the name of the filter to remove
         """
-<<<<<<< HEAD
         self._clear()
-=======
-        self._cache.clear()
-        self._events.clear_filters()
->>>>>>> 8a2837c1321b2673100e1ef400413e0c81d93de0
         del self._time_filter[name]
 
     def get_frame_start_times(self):
