@@ -142,7 +142,6 @@ class MuonEventData(MuonData):
         self._filter_remove_times()
         self._filter_keep_times()
         self._filter_logs()
-        print(self._events.report_filters())
 
     def histogram(self, resolution=0.016):
         """
@@ -158,11 +157,9 @@ class MuonEventData(MuonData):
         is_cache_empty = self._cache.empty()
 
         if is_cache_empty:
-            print("hi")
             self._filters()
 
         if is_cache_empty or self._cache.get_resolution() != resolution:
-            print("make new hist")
             return self._events.histogram(width=resolution,
                                           cache=self._cache)
         return self._cache.get_histograms()
