@@ -55,3 +55,14 @@ class Figure(object):
         for det in det_list:
             self.plot(bin_centres, hist[period-1][det],
                       label + f'Detector {det}')
+
+    def plot_from_sample_log(self,
+                             log):
+        """
+        Plots the current and original sample log data
+        :param log: the sample log to plot
+        """
+        x0, y0 = log.get_original_values()
+        self.plot(x0, y0, 'original data')
+        x_filter, y_filter = log.get_values()
+        self.plot(x_filter, y_filter, 'filtered values')
