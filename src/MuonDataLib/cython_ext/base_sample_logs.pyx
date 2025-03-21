@@ -174,7 +174,7 @@ cdef class BaseSampleLogs:
         :param times: A list of the pairs (as a list) of the
         times to remove from the data.
         """
-        cdef double[:] x
+        cdef double[:] x, y
         cdef str name
         for name in self._look_up.keys():
             dtype = self._look_up[name]
@@ -182,7 +182,6 @@ cdef class BaseSampleLogs:
                 x, y = self._int_dict[name].get_original_values()
             elif dtype == 'float':
                 x, y = self._float_dict[name].get_original_values()
-
                 self._float_dict[name].set_filter_values(*apply_filter(x,
                                                                        y,
                                                                        times))

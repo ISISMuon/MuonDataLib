@@ -843,6 +843,183 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         result = data.report_filters()
         self.expected_report(result)
 
+    """
+    These tests are to check that the event filters
+    are cleared correctly - indirectly test the _clear
+    method.
+    """
+    def test_clear_add_sample_log(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        data.remove_data_time_between('first', 1, 1.2)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add a sample log
+        x = np.arange(0.0, 1.0, 0.001, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_keep_data_sample_log_below(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        data.remove_data_time_between('first', 1, 1.2)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add filter
+        data.keep_data_sample_log_below('Temp', 2.3)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_keep_data_sample_log_above(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        data.remove_data_time_between('first', 1, 1.2)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add filter
+        data.keep_data_sample_log_above('Temp', 1.3)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_keep_data_sample_log_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        data.remove_data_time_between('first', 1, 1.2)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add filter
+        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_keep_data_time_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add filter
+        data.only_keep_data_time_between('one', 1.3, 2.6)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_remove_data_time_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # add filter
+        data.remove_data_time_between('one', 1.3, 2.6)
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_delete_sample_log_filter(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # remove filter
+        data.delete_sample_log_filter('Temp')
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_delete_only_keep_data_time_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # this adds 2 event filters one either side
+        data.only_keep_data_time_between('first', 1, 1.2)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 2)
+
+        # remove filter
+        data.delete_only_keep_data_time_between('first')
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
+    def test_clear_delete_remove_data_time_between(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp', x,
+                            2*x)
+        # this adds 2 event filters one either side
+        data.remove_data_time_between('first', 1, 1.2)
+        # update event filters
+        data.histogram()
+        self.assertEqual(len(data._events.report_filters()), 1)
+
+        # remove filter
+        data.delete_remove_data_time_between('first')
+        # check the event filters are now empty
+        self.assertEqual(len(data._events.report_filters()), 0)
+
 
 if __name__ == '__main__':
     unittest.main()

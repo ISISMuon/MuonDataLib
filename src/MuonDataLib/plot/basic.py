@@ -15,6 +15,7 @@ class Figure(object):
         :param x_label: the x label for the plot.
         :param y_label: the y label for the plot.
         """
+
         self._fig = go.Figure()
         self._fig.update_layout(title=title,
                                 xaxis_title=x_label,
