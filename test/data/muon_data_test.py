@@ -861,7 +861,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         # add a sample log
         x = np.arange(0.0, 1.0, 0.001, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
@@ -874,14 +874,14 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         data.remove_data_time_between('first', 1, 1.2)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
 
         # add filter
-        data.keep_data_sample_log_below('Temp', 2.3)
+        data.keep_data_sample_log_below('Temp2', 2.3)
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
 
@@ -893,14 +893,14 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         data.remove_data_time_between('first', 1, 1.2)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
 
         # add filter
-        data.keep_data_sample_log_above('Temp', 1.3)
+        data.keep_data_sample_log_above('Temp2', 1.3)
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
 
@@ -912,14 +912,14 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
         data.remove_data_time_between('first', 1, 1.2)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
 
         # add filter
-        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        data.keep_data_sample_log_between('Temp2', 1.3, 2.6)
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
 
@@ -930,9 +930,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
-        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        data.keep_data_sample_log_between('Temp2', 1.3, 2.6)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
@@ -949,9 +949,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
-        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        data.keep_data_sample_log_between('Temp2', 1.3, 2.6)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
@@ -968,15 +968,15 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
-        data.keep_data_sample_log_between('Temp', 1.3, 2.6)
+        data.keep_data_sample_log_between('Temp2', 1.3, 2.6)
         # update event filters
         data.histogram()
         self.assertEqual(len(data._events.report_filters()), 1)
 
         # remove filter
-        data.delete_sample_log_filter('Temp')
+        data.delete_sample_log_filter('Temp2')
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
 
@@ -987,7 +987,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # this adds 2 event filters one either side
         data.only_keep_data_time_between('first', 1, 1.2)
@@ -1007,7 +1007,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
         x = np.arange(1, 3.0, 0.1, dtype=np.double)
-        data.add_sample_log('Temp', x,
+        data.add_sample_log('Temp2', x,
                             2*x)
         # this adds 2 event filters one either side
         data.remove_data_time_between('first', 1, 1.2)
