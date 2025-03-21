@@ -20,3 +20,4 @@ Contents
    tutorials/tutorial_2.ipynb
    tutorials/tutorial_3.ipynb
    tutorials/tutorial_4.ipynb
+   tutorials/tutorial_5.ipynb
