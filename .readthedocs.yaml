@@ -3,11 +3,11 @@ version: 2
 build:
   os: 'ubuntu-20.04'
   tools:
-    python: 'mambaforge-4.10'
+    python: 'mambaforge-22.9'
 
 
 conda:
-  environment: MuonDataLib.yml
+  environment: MuonDataLib-dev.yml
 
 
 python:
@@ -17,7 +17,9 @@ python:
 
 
 sphinx:
+  configuration: docs/source/conf.py
   fail_on_warning: False
 
 formats:
   - pdf
+  - epub
