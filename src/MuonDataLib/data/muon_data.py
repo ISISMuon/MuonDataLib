@@ -65,9 +65,15 @@ class MuonEventData(MuonData):
         self._dict['logs'] = SampleLogs()
 
     def _clear(self):
+        """
+        A method to make sure that the filters are removed.
+        This is a little heavy handed, but we recalculate
+        all of the filters anyway. So it makes no difference
+        to the compute time. However, it does make sure that
+        the filters behave as expected.
+        """
         self._cache.clear()
         self._events.clear_filters()
-        self._events.report_filters()
 
     def _filter_remove_times(self):
         """
@@ -225,8 +231,6 @@ class MuonEventData(MuonData):
         :param min_value: the kept data will be above this
         :param max_value: the kept data will be below this
         """
-        self._clear()
-
         if max_value <= min_value:
             raise RuntimeError("The max filter value is smaller "
                                "than the min value")

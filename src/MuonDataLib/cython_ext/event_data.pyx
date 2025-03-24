@@ -310,6 +310,7 @@ cdef class Events:
         The number of removed frames. The list of filtered detector IDs and
         event time stamps. The list of periods for the kept events
         """
+
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int[:] periods
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
