@@ -64,6 +64,7 @@ def create_default(version):
                                    'jupyter-book': '',
                                    'nbsphinx': '',
                                    'dash': '',
+                                   'dash_bootstrap_components': '',
                                    'pip': pip_dict}
     return default_yml
 
