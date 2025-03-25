@@ -13,7 +13,7 @@ dependencies:
   - jupyter-book
   - nbsphinx
   - dash
-  - dash_bootstrap_components
   - pip:
     - readthedocs-sphinx-ext
+    - dash_bootstrap_components
 

@@ -51,7 +51,9 @@ def create_default(version):
     """
     default_yml = {}
 
-    pip_dict = {'readthedocs-sphinx-ext': ''}
+    pip_dict = {'readthedocs-sphinx-ext': '',
+                'dash_bootstrap_components': '',
+                }
 
     default_yml['name'] = 'MuonDataLib-dev'
     default_yml['channels'] = 'conda-forge'
@@ -64,7 +66,6 @@ def create_default(version):
                                    'jupyter-book': '',
                                    'nbsphinx': '',
                                    'dash': '',
-                                   'dash_bootstrap_components': '',
                                    'pip': pip_dict}
     return default_yml
 
