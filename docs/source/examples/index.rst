@@ -23,4 +23,3 @@ Contents
    tutorials/tutorial_5.ipynb
    tutorials/tutorial_6.ipynb
    tutorials/example_manychunks.ipynb
-   tutorials/API.ipynb
