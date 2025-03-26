@@ -13,6 +13,35 @@ import h5py
 import numpy as np
 
 
+def load_log_data(log, key, data):
+    """
+    A method to loop over the sample logs and save them.
+    This exists to check that the sample log data is a
+    vector of doubles. Otherwise the rest of the algorithms
+    will fail at present.
+    :param log: the file object, pointing at the specific sample log data
+    param key: the name of the specific sample log
+    :param data: the muon data object
+    """
+    x = log['value_log']['time'][:]
+    if isinstance(x[0], np.float32):
+        y = log['value_log']['value'][:]
+        data.add_sample_log(key,
+                            np.asarray(x, dtype=np.double),
+                            np.asarray(y, dtype=np.double))
+
+
+def load_logs(log, data):
+    """
+    A method to loop over the sample logs and save them
+    :param log: the file object, pointing at the sample log data
+    :param data: the muon data object
+    """
+    for key in log.keys():
+        tmp = log[key]
+        load_log_data(tmp, key, data)
+
+
 def load_events(file_name, N):
     """
     Load muon event nxs file (ISIS)
@@ -23,49 +52,57 @@ def load_events(file_name, N):
     with h5py.File(file_name, 'r') as file:
         raw_args, start_time = read_raw_data_from_events(file)
         tmp = file.require_group('raw_data_1')
-        tmp = tmp.require_group('periods')
-        p_type = tmp['type'][:]
-    _, events = load_data(file_name, N)
-    cache = EventsCache(start_time,
-                        events.get_total_frames)
+        p_group = tmp.require_group('periods')
+        p_type = p_group['type'][:]
 
-    raw_data = EventsRawData(cache,
-                             *raw_args)
+        # store data in objects
+        _, events = load_data(file_name, N)
+        cache = EventsCache(start_time,
+                            events.get_total_frames)
 
-    sample = Sample('sample ID: test',
-                    1.1,
-                    2.2,
-                    3.3,
-                    4.4,
-                    5.5,
-                    'sample name: test')
+        raw_data = EventsRawData(cache,
+                                 *raw_args)
 
-    source = Source('ISIS',
-                    'Probe',
-                    'Pulsed')
+        sample = Sample('sample ID: test',
+                        1.1,
+                        2.2,
+                        3.3,
+                        4.4,
+                        5.5,
+                        'sample name: test')
 
-    user = User('user name: RAL',
-                'affiliation: test')
+        source = Source('ISIS',
+                        'Probe',
+                        'Pulsed')
 
-    periods = EventsPeriods(cache,
-                            1,
-                            'label test',
-                            p_type,
-                            [0])
+        user = User('user name: RAL',
+                    'affiliation: test')
 
-    detector1 = Det1(cache,
-                     0.016,
-                     np.arange(1, N + 1, dtype=np.int32),
-                     'HIFI test',
-                     0.0,
-                     0.0,
-                     32.0)
+        periods = EventsPeriods(cache,
+                                1,
+                                'label test',
+                                p_type,
+                                [0])
 
-    return MuonEventData(events,
-                         cache,
-                         sample=sample,
-                         raw_data=raw_data,
-                         source=source,
-                         user=user,
-                         periods=periods,
-                         detector1=detector1)
+        detector1 = Det1(cache,
+                         0.016,
+                         np.arange(1, N + 1, dtype=np.int32),
+                         'HIFI test',
+                         0.0,
+                         0.0,
+                         32.0)
+
+        data = MuonEventData(events,
+                             cache,
+                             sample=sample,
+                             raw_data=raw_data,
+                             source=source,
+                             user=user,
+                             periods=periods,
+                             detector1=detector1)
+
+        if 'selog' in tmp.keys():
+            log = tmp['selog']
+            load_logs(log, data)
+
+    return data
