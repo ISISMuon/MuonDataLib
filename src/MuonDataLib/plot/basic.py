@@ -15,19 +15,19 @@ class Figure(object):
         :param x_label: the x label for the plot.
         :param y_label: the y label for the plot.
         """
+
         self._fig = go.Figure()
         self._fig.update_layout(title=title,
                                 xaxis_title=x_label,
                                 yaxis_title=y_label)
 
-    def plot(self, bin_edges, y_values, label):
+    def plot(self, bin_centres, y_values, label):
         """
         Adds data to the plot as point data.
-        :param bin_edges: the bin edges
+        :param bin_centres: the bin centres
         :param y_values: the y values for the histogram
         :param label:  the label for the line
         """
-        bin_centres = (bin_edges[:-1] + bin_edges[1:])/2.
         self._fig.add_trace(go.Scatter(x=bin_centres,
                                        y=y_values,
                                        mode='lines+markers',
@@ -39,18 +39,31 @@ class Figure(object):
         """
         self._fig.show()
 
-    def plot_from_instrument(self,
-                             inst,
-                             det_list,
-                             label,
-                             period=0):
+    def plot_from_histogram(self,
+                            bins,
+                            hist,
+                            det_list,
+                            label='',
+                            period=1):
         """
         Plots the data from an instrument
-        :param inst: the instrument object to plot.
+        :param bins: the histogram bins.
+        :param hist: the histogram matrix
         :param det_list: list of the detectors to plot
-        :param period: the period to plot
+        :param period: the period to plot (start at 1)
         """
-        hists, edges = inst.get_histograms()
+        bin_centres = (bins[:-1] + bins[1:])/2.
         for det in det_list:
-            self.plot(edges, hists[period][det],
+            self.plot(bin_centres, hist[period-1][det],
                       label + f'Detector {det}')
+
+    def plot_from_sample_log(self,
+                             log):
+        """
+        Plots the current and original sample log data
+        :param log: the sample log to plot
+        """
+        x0, y0 = log.get_original_values()
+        self.plot(x0, y0, 'original data')
+        x_filter, y_filter = log.get_values()
+        self.plot(x_filter, y_filter, 'filtered values')
