@@ -11,12 +11,11 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :titlesonly:
 
    Introduction <intro>
    Developer docs <dev/index>
-   loaders
-   api
+   Tutorials and Examples <examples/index>
 
 Indices and tables
 ==================
