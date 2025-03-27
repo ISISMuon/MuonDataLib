@@ -67,11 +67,11 @@ def help_app():
             a = ''
             for key in _text:
                 a += key.get_MD() + '''\n'''
-            return a.strip("'")
+            return a
         a = ''
         for key in _text:
             a += get_text(key, region)
-        return a.strip("'")
+        return a
 
     @callback(
         Output("modal", "is_open"),
