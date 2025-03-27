@@ -4,13 +4,13 @@ from dash import Dash, Input, Output, callback, dcc, html, State
 import dash_bootstrap_components as dbc
 
 
-def Help():
+def help_app():
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
     app.layout = dbc.Container(
         [
             html.H4(
-                "DMuonDataLib API doc",
+                "MuonDataLib API doc",
                 style={"textAlign": "center"},
                 className="mb-3",
             ),
@@ -44,16 +44,8 @@ def Help():
                 className="mb-5",
             ),
             dcc.Markdown('''
-                #### Dash and Markdown
-
-                Dash supports [Markdown](http://commonmark.org/help).
-
-                Markdown is a simple way to write and format text.
-                It includes a syntax for things like **bold text**
-                and *italics*,
-                [links](http://commonmark.org/help), inline `code`
-                snippets, lists,
-                quotes, and more.
+                #### Dummy text
+                production baby: Melody Lim
             ''', id='text'),
             html.Div(id="tabs-content"),
         ],
@@ -91,4 +83,4 @@ def Help():
             return not is_open
         return is_open
 
-    app.run()
+    return app

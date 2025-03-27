@@ -11,13 +11,9 @@ class Doc(object):
 
     def get_MD(self):
         text = f'''
-                # {self.module}.{self.name}
-
-                ### Module: {self.module}
+                # `{self.module}`.{self.name}
 
                 {self.description}
-
-
                 '''
         return text
 
@@ -28,7 +24,7 @@ _text = [Doc('MuonData',
              "An object that stores the relevant information "
              "for muon data (as definied by NeXus version 2)"),
          Doc('save_histograms',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'histograms', 'NeXus'],
              "Method for saving a MuonData object to a "
              "NeXus v2 histogram file "
@@ -37,7 +33,7 @@ _text = [Doc('MuonData',
              "If just the resolution has changed it will "
              "not alter the filtered values."),
          Doc('histogram',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'histograms'],
              "A method for constructing a histogram from a MuonData object. "
              "This method is helpful for checking results. "
@@ -46,28 +42,28 @@ _text = [Doc('MuonData',
              "If just the resolution has changed it will "
              "not alter the filtered values."),
          Doc('clear_filters',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'filter', 'time', 'sample log'],
              "A method to remove all of the filters from the "
              "MuonData object."),
          Doc('add_sample_log',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log'],
              "A method to manually add a sample log to a MuonData object."),
          Doc('get_sample_log',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log', 'LogData'],
              "A method to get a specific sample log (LogData object) "
              "from a MuonData object."),
          Doc('keep_data_sample_log_below',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log', 'filter', 'histograms'],
              "A method to remove all frames containing data "
              "with a value above some threshold value for a "
              "specific sample log, "
              "when creating a histogram from a MuonData object."),
          Doc('keep_data_sample_log_above',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log', 'filter', 'histograms'],
              "A method to remove all frames containing data "
              "with a value below some threshold value for a "
@@ -75,45 +71,45 @@ _text = [Doc('MuonData',
              "when creating a histogram from a MuonData object."
              ),
          Doc('keep_data_sample_log_between',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log', 'filter', 'histograms'],
              "A method to only keep frames containing data "
              "between a pair of values for a specific sample log, "
              "when creating a histogram from a MuonData object."
              ),
          Doc('only_keep_data_time_between',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'time', 'filter', 'histograms'],
              "A method that only keeps complete frames from "
              "the specified time range, "
              "when creating a histograms."),
          Doc('delete_only_keep_data_time_between',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'time', 'filter', 'histograms'],
              "A method that removes the filter for "
              "keeping data within a specific time range, "
              "when creating a histograms."
              ),
          Doc('remove_data_time_between',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'time', 'filter']),
          Doc('delete_remove_data_time_between',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'time', 'filter']),
          Doc('delete_sample_log_filter',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'sample log', 'filter']),
          Doc('get_frame_start_times',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'time']),
          Doc('report_filters',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'filter']),
          Doc('load_filters',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'filter']),
          Doc('save_filters',
-             'data.muon_data',
+             'data.muon_data.MuonData',
              ['MuonData', 'filter']),
 
          Doc('load_events',
@@ -124,16 +120,16 @@ _text = [Doc('MuonData',
              'plot.basic',
              ['plotting']),
          Doc('plot',
-             'plot.basic',
+             'plot.basic.Figure',
              ['plotting']),
          Doc('show',
-             'plot.basic',
+             'plot.basic.Figure',
              ['plotting']),
          Doc('plot_from_histogram',
-             'plot.basic',
+             'plot.basic.Figure',
              ['plotting', 'histograms']),
          Doc('plot_from_histogram',
-             'plot.basic',
+             'plot.basic.Figure',
              ['plotting', 'sample log', 'MuonData'])
          ]
 tags = []
