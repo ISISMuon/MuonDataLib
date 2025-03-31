@@ -187,20 +187,20 @@ _text = [Doc('MuonData',
                       'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
                       'hist, bins = data.histogram()']),
 
-          Doc('delete_sample_log_filter',
-              'data.muon_data.MuonData',
-              ['MuonData', 'sample log', 'filter'],
-              "A method to delete a filter that "
-              "acts upon sample logs from the "
-              "MuonData object.",
-              param={'name': 'The name of the sample log filter to remove. '
-                     'Histograms need to be created to upate the data.'},
-              example=['from MuonDataLib.data.loader.load_events '
-                       'import load_events',
-                       'data = load_events("HIFI00001.nxs", 64)',
-                       'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
-                       'data.delete_sample_log_filter("Temp")',
-                       'hist, bins = data.histogram()']),
+         Doc('delete_sample_log_filter',
+             'data.muon_data.MuonData',
+             ['MuonData', 'sample log', 'filter'],
+             "A method to delete a filter that "
+             "acts upon sample logs from the "
+             "MuonData object.",
+             param={'name': 'The name of the sample log filter to remove. '
+                    'Histograms need to be created to upate the data.'},
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
+                      'data = load_events("HIFI00001.nxs", 64)',
+                      'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
+                      'data.delete_sample_log_filter("Temp")',
+                      'hist, bins = data.histogram()']),
 
          Doc('only_keep_data_time_between',
              'data.muon_data.MuonData',
@@ -260,7 +260,7 @@ _text = [Doc('MuonData',
              "removes data between two user "
              "defined times.",
              param={'name': "The name of the time filter to remove "
-                     "when generating histograms"},
+                    "when generating histograms"},
              example=['from MuonDataLib.data.loader.load_events '
                       'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
