@@ -56,7 +56,8 @@ _text = [Doc('MuonData',
               "periods": "The period data (as defined by NeXus group).",
               "detector1": "The detector 1 data (as defined by NeXus group)."},
              returns="MuonData object.",
-             example=['from MuonDataLib.data.muon_data import MuonData',
+             example=['from MuonDataLib.data.muon_data '
+                      'import MuonData',
                       'sample. raw, src, period, det = get_data()',
                       'muon = MuonData(sample, raw, src, period, det)']),
 
@@ -74,7 +75,8 @@ _text = [Doc('MuonData',
              optional_param={'resolution': ["The resolution (bin width), "
                              "in microseconds, to use in the histograms.",
                              "0.016 microseconds"]},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       'data.save_histograms("HIFI00001_all.nxs", resolution=0.01)']),
 
@@ -90,8 +92,10 @@ _text = [Doc('MuonData',
              optional_param={'resolution': ["The resolution (bin width), "
                              "in microseconds, to use in the histograms.",
                              "0.016 microseconds"]},
-             returns="A matrix of histograms (period, spectrum number, bin) and bin edges.",
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             returns="A matrix of histograms (period, "
+                     "spectrum number, bin) and bin edges.",
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       'hist, bins = data.histogram(resolution=0.01)']),
 
@@ -100,7 +104,8 @@ _text = [Doc('MuonData',
              ['MuonData', 'filter', 'time', 'sample log'],
              "A method to remove all of the filters from the "
              "MuonData object.",
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       '# Add a filter',
                       'data.only_keep_data_time_between(1.0, 10.)',
@@ -114,7 +119,8 @@ _text = [Doc('MuonData',
              {'name': 'The name of the sample log.',
               'x_data': 'The x values for the sample log (time in seconds).',
               'y_data': 'The y values for the sample log'},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'import numpy as np',
                       'data = load_events("HIFI00001.nxs"), 64',
                       'x_data, y_data = np.load("Temp.txt")',
@@ -127,11 +133,13 @@ _text = [Doc('MuonData',
              "with a value above some threshold value for a "
              "specific sample log, "
              "when creating a histogram from a MuonData object.",
-             param={'log_name': "The name of the sample log to apply the fitler to.",
+             param={'log_name': "The name of the sample log to apply '
+                    'the fitler to.",
                     'max_value': "The maximum log value that will be kept "
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log."},
-            example=['from MuonDataLib.data.loader.load_events import load_events',
+            example=['from MuonDataLib.data.loader.load_events '
+                     'import load_events',
                      'data = load_events("HIFI00001.nxs", 64)',
                      'data.keep_data_sample_log_below("Temp", 5)',
                      'hist, bins = data.histogram()']),
@@ -147,7 +155,8 @@ _text = [Doc('MuonData',
                     'min_value': "The minimum log value that will be kept "
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log."},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       'data.keep_data_sample_log_above("Temp", 1.5)',
                       'hist, bins = data.histogram()']),
@@ -166,7 +175,8 @@ _text = [Doc('MuonData',
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log."},
 
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs, 64")',
                       'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
                       'hist, bins = data.histogram()']),
@@ -179,7 +189,8 @@ _text = [Doc('MuonData',
              "MuonData object.",
              param={'name': 'The name of the sample log filter to remove. '
                     'Histograms need to be created to upate the data.'},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
                       'data.delete_sample_log_filter("Temp")',
@@ -196,9 +207,11 @@ _text = [Doc('MuonData',
                     'The filter is applied when creating a histogram.',
                     'end': 'The end time in seconds for the filter.'
                     'The filter is applied when creating a histogram.'},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
-                      'data.only_keep_data_time_between("Beam on", 5.8, 200.1)',
+                      'data.only_keep_data_time_between("Beam on", '
+                      '5.8, 200.1)',
                       'hist, bins = data.histogram()']),
 
          Doc('delete_only_keep_data_time_between',
@@ -208,9 +221,11 @@ _text = [Doc('MuonData',
              "keeping data within a specific time range, "
              "when creating a histograms.",
              param={'name': 'The name of the time filter to remove.'},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
-                      'data.only_keep_data_time_between("Beam on", 5.8, 200.1)',
+                      'data.only_keep_data_time_between("Beam on", '
+                      '5.8, 200.1)',
                       'data.delte_only_keep_data_time_between(Beam on")']),
 
          Doc('remove_data_time_between',
@@ -222,11 +237,14 @@ _text = [Doc('MuonData',
              "If the filter only occupies part of the frame, "
              "the whole frame is discarded from the histogram genetation.",
              param={'name': 'A unique name to identify the filter.',
-                    'start': 'The time to start removing data from, in seconds.',
+                    'start': 'The time to start removing data from, '
+                    'in seconds.',
                     'end': "The last time to remove data from, in seconds."},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
-                      'data.remove_data_time_between("Beam off", 11.3, 34.6)']),
+                      'data.remove_data_time_between("Beam off", '
+                      '11.3, 34.6)']),
 
          Doc('delete_remove_data_time_between',
              'data.muon_data.MuonData',
@@ -237,7 +255,8 @@ _text = [Doc('MuonData',
              "defined times.",
              param={'name': "The name of the time filter to remove "
                      "when generating histograms"},
-             example=['from MuonDataLib.data.loader.load_events import load_events',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
                       'data.remove_data_time_between("Beam off", 11.3, 34.6)',
                       'data.delete_remove_data_time_between("Beam off")']),
@@ -248,10 +267,11 @@ _text = [Doc('MuonData',
              "A method to get the list of frame "
              "start times in seconds from a "
              "MuonData object.",
-            returns='A list of the frame start times in seconds. ',
-            example=['from MuonDataLib.data.loader.load_events import load_events',
-                     'data = load_events("HIFI00001.nxs", 64)',
-                     'start_times = data.get_frame_start_times()']),
+             returns='A list of the frame start times in seconds. ',
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
+                      'data = load_events("HIFI00001.nxs", 64)',
+                      'start_times = data.get_frame_start_times()']),
 
          Doc('report_filters',
              'data.muon_data.MuonData',
@@ -271,8 +291,8 @@ _text = [Doc('MuonData',
              ['MuonData', 'filter'],
              "A method to read and add filters "
              "to a MuonData object from a JSON file.",
-             param={'file_name': "The name of the file, that '
-                    'contains the filters "
+             param={'file_name': 'The name of the file, that '
+                    'contains the filters '
                     "to be read and added to the MuonData object."},
              example=['from MuonDataLib.data.loader.load_events '
                       'import load_events',
