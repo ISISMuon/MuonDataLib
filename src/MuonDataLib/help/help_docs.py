@@ -29,7 +29,8 @@ class Doc(object):
             tmp = '''\n''' + space + '''**Optional Parameters:** \n'''
             for info in self.optional_param.keys():
                 msg = self.optional_param[info]
-                tmp += space + f'''- `{info}`: {msg[0]} *Default value:* `{msg[1]}`.\n '''
+                value = f'''- `{info}`: {msg[0]} *Default value:* `{msg[1]}`'''
+                tmp += space + value + '''.\n '''
             text += tmp
 
         if self.returns != '':
@@ -73,12 +74,14 @@ _text = [Doc('MuonData',
              {'file_name': "The name of the file to save the "
                            "NeXus v2 histogram file to."},
              optional_param={'resolution': ["The resolution (bin width), "
-                             "in microseconds, to use in the histograms.",
-                             "0.016 microseconds"]},
+                                            "in microseconds, to use "
+                                            "in the histograms.",
+                                            "0.016 microseconds"]},
              example=['from MuonDataLib.data.loader.load_events '
                       'import load_events',
                       'data = load_events("HIFI00001.nxs", 64)',
-                      'data.save_histograms("HIFI00001_all.nxs", resolution=0.01)']),
+                      'data.save_histograms("HIFI00001_all.nxs",'
+                      ' resolution=0.01)']),
 
          Doc('histogram',
              'data.muon_data.MuonData',
@@ -90,8 +93,9 @@ _text = [Doc('MuonData',
              "If just the resolution has changed it will "
              "not alter the filtered values.",
              optional_param={'resolution': ["The resolution (bin width), "
-                             "in microseconds, to use in the histograms.",
-                             "0.016 microseconds"]},
+                                            "in microseconds, to use "
+                                            "in the histograms.",
+                                            "0.016 microseconds"]},
              returns="A matrix of histograms (period, "
                      "spectrum number, bin) and bin edges.",
              example=['from MuonDataLib.data.loader.load_events '
@@ -133,16 +137,16 @@ _text = [Doc('MuonData',
              "with a value above some threshold value for a "
              "specific sample log, "
              "when creating a histogram from a MuonData object.",
-             param={'log_name': "The name of the sample log to apply '
-                    'the fitler to.",
+             param={'log_name': "The name of the sample log to apply "
+                    "the fitler to.",
                     'max_value': "The maximum log value that will be kept "
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log."},
-            example=['from MuonDataLib.data.loader.load_events '
-                     'import load_events',
-                     'data = load_events("HIFI00001.nxs", 64)',
-                     'data.keep_data_sample_log_below("Temp", 5)',
-                     'hist, bins = data.histogram()']),
+             example=['from MuonDataLib.data.loader.load_events '
+                      'import load_events',
+                      'data = load_events("HIFI00001.nxs", 64)',
+                      'data.keep_data_sample_log_below("Temp", 5)',
+                      'hist, bins = data.histogram()']),
 
          Doc('keep_data_sample_log_above',
              'data.muon_data.MuonData',
@@ -151,7 +155,8 @@ _text = [Doc('MuonData',
              "with a value below some threshold value for a "
              "specific sample log, "
              "when creating a histogram from a MuonData object.",
-             param={'log_name': "The name of the sample log to apply the fitler to.",
+             param={'log_name': "The name of the sample log "
+                    "to apply the fitler to.",
                     'min_value': "The minimum log value that will be kept "
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log."},
@@ -167,7 +172,8 @@ _text = [Doc('MuonData',
              "A method to only keep frames containing data "
              "between a pair of values for a specific sample log, "
              "when creating a histogram from a MuonData object.",
-             param={'log_name': "The name of the sample log to apply the fitler to.",
+             param={'log_name': "The name of the sample log to "
+                    "apply the fitler to.",
                     'min_value': "The minimum log value that will be kept "
                     "after the filter is applied. In the same units as the "
                     "y values for the sample log.",
@@ -182,19 +188,19 @@ _text = [Doc('MuonData',
                       'hist, bins = data.histogram()']),
 
           Doc('delete_sample_log_filter',
-             'data.muon_data.MuonData',
-             ['MuonData', 'sample log', 'filter'],
-             "A method to delete a filter that "
-             "acts upon sample logs from the "
-             "MuonData object.",
-             param={'name': 'The name of the sample log filter to remove. '
-                    'Histograms need to be created to upate the data.'},
-             example=['from MuonDataLib.data.loader.load_events '
-                      'import load_events',
-                      'data = load_events("HIFI00001.nxs", 64)',
-                      'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
-                      'data.delete_sample_log_filter("Temp")',
-                      'hist, bins = data.histogram()']),
+              'data.muon_data.MuonData',
+              ['MuonData', 'sample log', 'filter'],
+              "A method to delete a filter that "
+              "acts upon sample logs from the "
+              "MuonData object.",
+              param={'name': 'The name of the sample log filter to remove. '
+                     'Histograms need to be created to upate the data.'},
+              example=['from MuonDataLib.data.loader.load_events '
+                       'import load_events',
+                       'data = load_events("HIFI00001.nxs", 64)',
+                       'data.keep_data_sample_log_between("Temp", 1.5, 2.7)',
+                       'data.delete_sample_log_filter("Temp")',
+                       'hist, bins = data.histogram()']),
 
          Doc('only_keep_data_time_between',
              'data.muon_data.MuonData',
