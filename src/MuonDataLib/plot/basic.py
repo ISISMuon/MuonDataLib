@@ -57,12 +57,13 @@ class Figure(object):
             self.plot(bin_centres, hist[period-1][det],
                       label + f'Detector {det}')
 
-    def plot_from_sample_log(self,
-                             log):
+    def plot_sample_log(self, muon_data, log_name):
         """
         Plots the current and original sample log data
-        :param log: the sample log to plot
+        :param muon_data: the muon_data object with sample log
+        :param log_name: the name of the sample log to plot
         """
+        log = muon_data._get_sample_log(log_name)
         x0, y0 = log.get_original_values()
         self.plot(x0, y0, 'original data')
         x_filter, y_filter = log.get_values()

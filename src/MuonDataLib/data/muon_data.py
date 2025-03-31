@@ -199,7 +199,7 @@ class MuonEventData(MuonData):
         self._clear()
         self._dict['logs'].add_sample_log(name, x_data, y_data)
 
-    def get_sample_log(self, name):
+    def _get_sample_log(self, name):
         """
         :param name: the name of the sample log
         :return: the requested sample log object

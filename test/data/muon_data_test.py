@@ -111,11 +111,11 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(data._cache.empty(), True)
         # check only 2 sample logs
         self.assertEqual(len(data._dict['logs']._look_up.keys()), 2)
-        result = data.get_sample_log("Temp").get_values()
+        result = data._get_sample_log("Temp").get_values()
         self.assertArrays(result[0], np.asarray([1, 2]))
         self.assertArrays(result[1], np.asarray([3, 4]))
 
-        result = data.get_sample_log("B").get_values()
+        result = data._get_sample_log("B").get_values()
         self.assertArrays(result[0], np.asarray([11, 12]))
         self.assertArrays(result[1], np.asarray([13, 14]))
 
@@ -135,11 +135,11 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(data._cache.empty(), True)
         # check only 2 sample logs
         self.assertEqual(len(data._dict['logs']._look_up.keys()), 2)
-        result = data.get_sample_log("Temp").get_values()
+        result = data._get_sample_log("Temp").get_values()
         self.assertArrays(result[0], np.asarray([1, 2]))
         self.assertArrays(result[1], np.asarray([3, 4]))
 
-        result = data.get_sample_log("B").get_values()
+        result = data._get_sample_log("B").get_values()
         self.assertArrays(result[0], np.asarray([11, 12]))
         self.assertArrays(result[1], np.asarray([13, 14]))
 
