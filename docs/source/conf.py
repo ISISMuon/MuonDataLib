@@ -34,7 +34,7 @@ release = '0.1.0'
 
 extensions = ['sphinx.ext.autodoc',
               'nbsphinx',
-              'sphinx-rtd-theme',
+              'sphinx_rtd_theme',
               'sphinx.ext.autosummary']
 
 exclude_patterns = []
