@@ -25,7 +25,7 @@ class Doc(object):
         if len(self.param) > 0:
             tmp = space + '''**Required Parameters:** \n'''
             for info in self.param.keys():
-                tmp += space + f'''- `{info}`: {self.param[info]} \n '''
+                tmp += space + f'''- `{info}`: {self.param[info]} \n'''
             text += tmp
 
         if len(self.optional_param) > 0:
@@ -45,6 +45,7 @@ class Doc(object):
             for eg in self.example:
                 text += space + f'''{eg} \n'''
             text += space + """```"""
+        text += '''\n \n'''
         return text
 
 
