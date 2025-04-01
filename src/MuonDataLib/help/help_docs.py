@@ -33,7 +33,7 @@ class Doc(object):
             for info in self.optional_param.keys():
                 msg = self.optional_param[info]
                 value = f'''- `{info}`: {msg[0]} *Default value:* `{msg[1]}`'''
-                tmp += space + value + '''.\n '''
+                tmp += space + value + '''.\n'''
             text += tmp
 
         if self.returns != '':
