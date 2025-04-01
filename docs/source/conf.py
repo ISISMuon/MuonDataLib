@@ -6,7 +6,8 @@ import os
 
 file_name = os.path.join(os.path.dirname(__file__), 'API.rst')
 with open(file_name, 'w') as file:
-    file.write('''# Welcome to MuonDataLib API documentation''')
+    file.write('''Welcome to MuonDataLib API documentation \n''')
+    file.write('''---------------------------------------- \n''')
 
 for text in _text:
     text.write_MD(file_name)

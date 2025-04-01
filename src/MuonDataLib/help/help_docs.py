@@ -41,10 +41,9 @@ class Doc(object):
 
         if len(self.example) > 0:
             text += "\n" + space + """**Example:** \n"""
-            text += space + """``` python \n"""
+            text += space + """.. code:: python \n \n"""
             for eg in self.example:
-                text += space + f'''{eg} \n'''
-            text += space + """```"""
+                text += space + f'''    {eg} \n'''
         text += '''\n \n'''
         return text
 
@@ -342,8 +341,7 @@ _text = [Doc('MuonData',
              'plot.basic',
              ['plotting', 'Figure'],
              "An object to handle making Plotly plots.",
-             optional_param={'title': ["The title for the plot.",
-                                       ""],
+             optional_param={'title': ["The title for the plot.", "''"],
                              'x_label': ['The label for the x axis.',
                                          'time (micro seconds)'],
                              'y_label': ['The label for the y axis.',
