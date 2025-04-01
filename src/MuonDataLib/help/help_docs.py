@@ -17,12 +17,10 @@ class Doc(object):
             file.write(text)
 
     def get_MD(self):
-        text = f'''
-                # `{self.module}`.**{self.name}**
+        text = f'''# `{self.module}`.**{self.name}** \n'''
+        text += f'''{self.description} \n\n'''
 
-                {self.description} \n\n'''
-
-        space = '''                '''
+        space = ''
 
         if len(self.param) > 0:
             tmp = space + '''**Required Parameters:** \n'''
