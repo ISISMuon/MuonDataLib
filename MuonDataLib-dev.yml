@@ -16,5 +16,5 @@ dependencies:
   - pip:
     - readthedocs-sphinx-ext
     - dash_bootstrap_components
-    - sphink-rtd-theme
+    - sphinx-rtd-theme
 
