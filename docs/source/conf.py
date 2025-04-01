@@ -1,20 +1,3 @@
-from MuonDataLib.help.help_docs import _text
-import os
-import pathlib
-import sys
-
-
-# Write latest API doc
-
-
-file_name = os.path.join(os.path.dirname(__file__), 'API.MD')
-with open(file_name, 'w') as file:
-    file.write('''# Welcome to MuonDataLib API documentation''')
-
-for text in _text:
-    text.write_MD(file_name)
-
-
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -22,6 +5,10 @@ for text in _text:
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+
+import pathlib
+import sys
 
 
 sys.path.insert(0, pathlib.Path(__file__).parents[2].resolve().as_posix())
