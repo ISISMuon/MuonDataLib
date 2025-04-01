@@ -7,12 +7,11 @@ import os
 file_name = os.path.join(os.path.dirname(__file__), 'API.rst')
 with open(file_name, 'w') as file:
     file.write('''Welcome to MuonDataLib API documentation \n''')
-    file.write('''---------------------------------------- \n''')
+    file.write('''---------------------------------------- \n\n''')
 
 for text in _text:
-    text.write_MD(file_name)
+    text.write_text(file_name, text.get_rst())
 
-print('mpppppppppppppp', file_name)
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -35,13 +34,13 @@ release = '0.1.0'
 
 extensions = ['sphinx.ext.autodoc',
               'nbsphinx',
+              'sphinx-rtd-theme',
               'sphinx.ext.autosummary']
 
-templates_path = ['_templates']
 exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'classic'
+html_theme = 'sphinx_rtd_theme'
