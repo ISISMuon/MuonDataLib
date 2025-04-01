@@ -11,6 +11,11 @@ class Doc(object):
         self.returns = returns
         self.example = example
 
+    def write_MD(self, file_name):
+        text = self.get_MD()
+        with open(file_name, 'a') as file:
+            file.write(text)
+
     def get_MD(self):
         text = f'''
                 # `{self.module}`.**{self.name}**
