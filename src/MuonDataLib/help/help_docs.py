@@ -1,3 +1,10 @@
+HIST = 'histogram'
+NXS = 'NeXus'
+FILTER = 'filter'
+TIME = 'time'
+LOG = 'sample log'
+
+
 class Doc(object):
     def __init__(self, name, module, tags, description='',
                  param={}, optional_param={}, returns='',

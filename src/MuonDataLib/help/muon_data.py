@@ -3,10 +3,11 @@ from MuonDataLib.help.help_doc import (Doc,
                                        NXS,
                                        FILTER,
                                        TIME,
-                                       LOG,
+                                       LOG)
 
 
 MUONDATA = 'MuonData'
+
 
 def get_muon_data_docs():
 
@@ -20,7 +21,8 @@ def get_muon_data_docs():
                  "raw_data": "The raw data (as defined by NeXus group).",
                  "source": "The source data (as defined by NeXus group).",
                  "periods": "The period data (as defined by NeXus group).",
-                 "detector1": "The detector 1 data (as defined by NeXus group)."},
+                 "detector1": "The detector 1 data (as defined by "
+                 "NeXus group)."},
                 returns="MuonData object.",
                 example=['from MuonDataLib.data.muon_data '
                          'import MuonData',
@@ -51,7 +53,8 @@ def get_muon_data_docs():
             Doc('histogram',
                 'data.muon_data.MuonData',
                 [MUONDATA, HIST],
-                "A method for constructing a histogram from a MuonData object. "
+                "A method for constructing a histogram from a "
+                "MuonData object. "
                 "This method is helpful for checking results. "
                 "This will skip calculating the filters "
                 "if the cache is occupied. "
@@ -86,7 +89,8 @@ def get_muon_data_docs():
                 [MUONDATA, LOG],
                 "A method to manually add a sample log to a MuonData object.",
                 {'name': 'The name of the sample log.',
-                 'x_data': 'The x values for the sample log (time in seconds).',
+                 'x_data': 'The x values for the sample log (time in '
+                 'seconds).',
                  'y_data': 'The y values for the sample log'},
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
@@ -210,7 +214,8 @@ def get_muon_data_docs():
                 param={'name': 'A unique name to identify the filter.',
                        'start': 'The time to start removing data from, '
                        'in seconds.',
-                       'end': "The last time to remove data from, in seconds."},
+                       'end': "The last time to remove data from, in "
+                       "seconds."},
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
@@ -229,7 +234,8 @@ def get_muon_data_docs():
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
-                         'data.remove_data_time_between("Beam off", 11.3, 34.6)',
+                         'data.remove_data_time_between("Beam off", '
+                         '11.3, 34.6)',
                          'data.delete_remove_data_time_between("Beam off")']),
 
             Doc('get_frame_start_times',
