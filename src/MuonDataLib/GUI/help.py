@@ -6,6 +6,9 @@ from PySide6 import QtWidgets
 
 
 def launch_help():
+    """
+    A simple method to launch the help pages.
+    """
     app = QtWidgets.QApplication(sys.argv)
     mainWin = MainDashWindow(help_app())
     mainWin.show()
