@@ -1,16 +1,29 @@
+from MuonDataLib.help.muon_data import get_muon_data_docs
+from MuonDataLib.help.utils import get_utils_docs
+from MuonDataLib.help.figure import get_figure_docs
+from MuonDataLib.help.load_events import get_load_docs
+
 import pathlib
 import sys
-from MuonDataLib.help.help_docs import _text
 import os
 
+pages = {'MuonData': get_muon_data_docs(),
+         'utils': get_utils_docs(),
+         'Figure': get_figure_docs(),
+         'load_events': get_load_docs()}
 
-file_name = os.path.join(os.path.dirname(__file__), 'API.rst')
-with open(file_name, 'w') as file:
-    file.write('''Welcome to MuonDataLib API documentation \n''')
-    file.write('''---------------------------------------- \n\n''')
+for name in pages:
+    file_name = os.path.join(os.path.dirname(__file__), 'API', name + '.rst')
+    with open(file_name, 'w') as file:
+        title = f'MuonDataLib API documentation: {name} \n'
+        uline = ''
+        for _ in title:
+            uline += '='
+        file.write(title)
+        file.write(uline + '\n\n')
 
-for text in _text:
-    text.write_text(file_name, text.get_rst())
+    for text in pages[name]:
+        text.write_text(file_name, text.get_rst())
 
 
 # Configuration file for the Sphinx documentation builder.

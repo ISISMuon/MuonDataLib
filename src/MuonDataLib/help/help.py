@@ -1,86 +1,117 @@
-from MuonDataLib.help.help_docs import _text, tags
+from MuonDataLib.help.help_docs import tags
+from MuonDataLib.help.muon_data import get_muon_data_docs
+from MuonDataLib.help.utils import get_utils_docs
+from MuonDataLib.help.figure import get_figure_docs
+from MuonDataLib.help.load_events import get_load_docs
 
 from dash import Dash, Input, Output, callback, dcc, html, State
 import dash_bootstrap_components as dbc
 
 
-def help_app():
-    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+class help_app(Dash):
+    def __init__(self):
+        """
+        Creates a Dash app that can be used. This one is for
+        API help pages.
+        """
+        super().__init__(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    app.layout = dbc.Container(
-        [
-            html.H4(
-                "MuonDataLib API doc",
-                style={"textAlign": "center"},
-                className="mb-3",
-            ),
-            # ------------------------------------------------- #
-            # Modal
-            html.Div(
-                [
-                    dbc.Button("Open filters", id="open", n_clicks=0),
-                    dbc.Modal(
-                        [
-                            dbc.ModalHeader(dbc.ModalTitle("Filters")),
-                            dbc.ModalBody(
-                                [
-                                    # Filter within dbc Modal
-                                    html.Label("Tag"),
-                                    dcc.Dropdown(
-                                        id="dynamic_callback_dropdown_region",
-                                        options=[
-                                            {"label": x, "value": x}
-                                            for x in tags
-                                        ],
-                                        multi=True,
-                                    ),
-                                ]
-                            ),
-                        ],
-                        id="modal",
-                        is_open=False,
-                    ),
-                ],
-                className="mb-5",
-            ),
-            dcc.Markdown('''
-                #### Dummy text
-                production baby: Melody Lim
-            ''', id='text'),
-            html.Div(id="tabs-content"),
-        ],
-        fluid=True,
-    )
+        self.docs = (get_load_docs() + get_muon_data_docs() +
+                     get_utils_docs() + get_figure_docs())
 
-    def get_text(val, tags):
-        for t in tags:
-            if t not in val.tags:
+        self.layout = dbc.Container(
+            [
+                html.H4(
+                    "MuonDataLib API doc",
+                    style={"textAlign": "center"},
+                    className="mb-3",
+                ),
+                # ------------------------------------------------- #
+                html.Div(
+                    [
+                        dbc.Button("Open Filters", id="open", n_clicks=0),
+                        dbc.Modal(
+                            [
+                                dbc.ModalHeader(dbc.ModalTitle("Filters")),
+                                dbc.ModalBody(
+                                    [
+                                        # Filter within dbc Modal
+                                        html.Label("Tag"),
+                                        dcc.Dropdown(
+                                            id="filter_dropdown",
+                                            options=[
+                                                {"label": x, "value": x}
+                                                for x in tags
+                                            ],
+                                            multi=True,
+                                        ),
+                                    ]
+                                ),
+                            ],
+                            id="filter_pop_up",
+                            is_open=False,
+                        ),
+                    ],
+                    className="mb-5",
+                ),
+                dcc.Markdown('''
+                    #### Dummy text
+                    production baby: Melody Lim
+                ''', id='text'),
+                html.Div(id="tabs-content"),
+            ],
+            fluid=True,
+        )
+        self.set_callbacks()
+
+    def set_callbacks(self):
+        """
+        A method to setup all of the callbacks needed
+        by the GUI.
+        """
+        callback(Output("text", "children"),
+                 Input("filter_dropdown",
+                       "value"))(self.get_filtered_text)
+
+        callback(Output("filter_pop_up", "is_open"),
+                 Input("open", "n_clicks"),
+                 State("filter_pop_up", "is_open"))(self.pop_up)
+
+    def get_text(self, page, tags):
+        """
+        Method to check if the help doc (page)
+        contains the required tags.
+        This uses 'and' logic for multiple filters.
+        :param page: a Doc object
+        :param tags: a list of tags to filter on.
+        :returns: the string of the doc, if it
+        is tags contain those requested.
+        """
+        for key in tags:
+            if key not in page.tags:
                 return ''
-        return val.get_MD()
+        return page.get_MD()
 
-    @callback(
-        Output("text", "children"),
-        Input("dynamic_callback_dropdown_region", "value"),
-    )
-    def main_callback_logic(region):
-        if region is None:
-            a = ''
-            for key in _text:
-                a += key.get_MD() + '''\n'''
-            return a
-        a = ''
-        for key in _text:
-            a += get_text(key, region)
-        return a
+    def get_filtered_text(self, tags):
+        """
+        Method for getting the filtered text
+        from the list of tags.
+        :param tags: The tags to filter on
+        :returns: a string of the filtered doc
+        """
+        text = ''
+        if tags is None:
+            for page in self.docs:
+                text += page.get_MD() + '''\n'''
+        else:
+            for page in self.docs:
+                text += self.get_text(page, tags)
+        return text
 
-    @callback(
-        Output("modal", "is_open"),
-        Input("open", "n_clicks"),
-        State("modal", "is_open"),
-    )
-    def toggle_modal(n1, is_open):
+    def pop_up(self, n1, is_open):
+        """
+        Handles the state of the filter pop up
+        """
         if n1:
             return not is_open
         return is_open
-
-    return app

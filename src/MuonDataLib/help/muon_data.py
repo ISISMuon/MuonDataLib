@@ -1,19 +1,18 @@
-from MuonDataLib.help.help_doc import (Doc,
-                                       HIST,
-                                       NXS,
-                                       FILTER,
-                                       TIME,
-                                       LOG)
-
-
-MUONDATA = 'MuonData'
+from MuonDataLib.help.help_docs import (Doc,
+                                        HIST,
+                                        NXS,
+                                        FILTER,
+                                        TIME,
+                                        LOG,
+                                        LOAD,
+                                        MUONDATA)
 
 
 def get_muon_data_docs():
 
     return [Doc('MuonData',
                 'data.muon_data',
-                [MUONDATA],
+                [MUONDATA, LOAD],
                 "An object that stores the relevant information "
                 "for muon data (as definied by NeXus version 2)."
                 "This is automatically created by `load_events`.",
@@ -23,15 +22,11 @@ def get_muon_data_docs():
                  "periods": "The period data (as defined by NeXus group).",
                  "detector1": "The detector 1 data (as defined by "
                  "NeXus group)."},
-                returns="MuonData object.",
-                example=['from MuonDataLib.data.muon_data '
-                         'import MuonData',
-                         'sample. raw, src, period, det = get_data()',
-                         'muon = MuonData(sample, raw, src, period, det)']),
+                returns="MuonData object."),
 
             Doc('save_histograms',
                 'data.muon_data.MuonData',
-                [MUONDATA, HIST, NXS],
+                [MUONDATA, HIST, NXS, FILTER],
                 "Method for saving a MuonData object to a "
                 "NeXus v2 histogram file "
                 "This will skip calculating the filters "
@@ -47,12 +42,12 @@ def get_muon_data_docs():
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
-                         'data.save_histograms("HIFI00001_all.nxs",'
+                         'data.save_histograms("HIFI00001_all.nxs", '
                          ' resolution=0.01)']),
 
             Doc('histogram',
                 'data.muon_data.MuonData',
-                [MUONDATA, HIST],
+                [MUONDATA, HIST, FILTER],
                 "A method for constructing a histogram from a "
                 "MuonData object. "
                 "This method is helpful for checking results. "
@@ -71,19 +66,6 @@ def get_muon_data_docs():
                          'data = load_events("HIFI00001.nxs", 64)',
                          'hist, bins = data.histogram(resolution=0.01)']),
 
-            Doc('clear_filters',
-                'data.muon_data.MuonData',
-                [MUONDATA, FILTER, TIME, LOG],
-                "A method to remove all of the filters from the "
-                "MuonData object.",
-                example=['from MuonDataLib.data.loader.load_events '
-                         'import load_events',
-                         'data = load_events("HIFI00001.nxs", 64)',
-                         '# Add a filter',
-                         'data.only_keep_data_time_between(1.0, 10.)',
-                         '# Remove the filter',
-                         'data.clear_filters()']),
-
             Doc('add_sample_log',
                 'data.muon_data.MuonData',
                 [MUONDATA, LOG],
@@ -97,7 +79,8 @@ def get_muon_data_docs():
                          'import numpy as np',
                          'data = load_events("HIFI00001.nxs"), 64',
                          'x_data, y_data = np.load("Temp.txt")',
-                         'data.add_sample_log("Temp", x_data, y_data)']),
+                         'data.add_sample_log("sample_Temp", '
+                         'x_data, y_data)']),
 
             Doc('keep_data_sample_log_below',
                 'data.muon_data.MuonData',
@@ -105,7 +88,9 @@ def get_muon_data_docs():
                 "A method to remove all frames containing data "
                 "with a value above some threshold value for a "
                 "specific sample log, "
-                "when creating a histogram from a MuonData object.",
+                "when creating a histogram from a MuonData object. "
+                "The histogram will be created with only complete "
+                "frames of data.",
                 param={'log_name': "The name of the sample log to apply "
                        "the fitler to.",
                        'max_value': "The maximum log value that will be kept "
@@ -123,7 +108,9 @@ def get_muon_data_docs():
                 "A method to remove all frames containing data "
                 "with a value below some threshold value for a "
                 "specific sample log, "
-                "when creating a histogram from a MuonData object.",
+                "when creating a histogram from a MuonData object. "
+                "The histogram will be created with only complete "
+                "frames of data.",
                 param={'log_name': "The name of the sample log "
                        "to apply the fitler to.",
                        'min_value': "The minimum log value that will be kept "
@@ -140,7 +127,9 @@ def get_muon_data_docs():
                 [MUONDATA, LOG, FILTER, HIST],
                 "A method to only keep frames containing data "
                 "between a pair of values for a specific sample log, "
-                "when creating a histogram from a MuonData object.",
+                "when creating a histogram from a MuonData object. "
+                "The histogram will be created with only complete "
+                "frames of data.",
                 param={'log_name': "The name of the sample log to "
                        "apply the fitler to.",
                        'min_value': "The minimum log value that will be kept "
@@ -149,7 +138,6 @@ def get_muon_data_docs():
                        'max_value': "The maximum log value that will be kept "
                        "after the filter is applied. In the same units as the "
                        "y values for the sample log."},
-
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs, 64")',
@@ -158,12 +146,13 @@ def get_muon_data_docs():
 
             Doc('delete_sample_log_filter',
                 'data.muon_data.MuonData',
-                [MUONDATA, LOG, FILTER],
+                [MUONDATA, LOG, FILTER, HIST],
                 "A method to delete a filter that "
                 "acts upon sample logs from the "
                 "MuonData object.",
                 param={'name': 'The name of the sample log filter to remove. '
-                       'Histograms need to be created to upate the data.'},
+                       'Histograms need to be recalculated to upate the data.'
+                       },
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
@@ -176,7 +165,9 @@ def get_muon_data_docs():
                 [MUONDATA, TIME, FILTER, HIST],
                 "A method that only keeps complete frames from "
                 "the specified time range, "
-                "when creating histograms.",
+                "when creating histograms. "
+                "The histogram will be created with only complete "
+                "frames of data.",
                 param={'name': 'A unique name to identify the filter.',
                        'start': 'The start time, in seconds, for the filter. '
                        'The filter is applied when creating a histogram.',
@@ -238,17 +229,18 @@ def get_muon_data_docs():
                          '11.3, 34.6)',
                          'data.delete_remove_data_time_between("Beam off")']),
 
-            Doc('get_frame_start_times',
+            Doc('clear_filters',
                 'data.muon_data.MuonData',
-                [MUONDATA, TIME],
-                "A method to get the list of frame "
-                "start times in seconds from a "
+                [MUONDATA, FILTER, TIME, LOG],
+                "A method to remove all of the filters from the "
                 "MuonData object.",
-                returns='A list of the frame start times in seconds. ',
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
-                         'start_times = data.get_frame_start_times()']),
+                         '# Add a filter',
+                         'data.only_keep_data_time_between(1.0, 10.)',
+                         '# Remove the filter',
+                         'data.clear_filters()']),
 
             Doc('report_filters',
                 'data.muon_data.MuonData',
@@ -290,4 +282,16 @@ def get_muon_data_docs():
                          'data.only_keep_data_time_between("Beam on", '
                          '5.8, 200.1)',
                          'data.keep_sample_log_below("Temp", 5.2)',
-                         'data.save_filters("example_filters.json")'])]
+                         'data.save_filters("example_filters.json")']),
+
+            Doc('get_frame_start_times',
+                'data.muon_data.MuonData',
+                [MUONDATA, TIME],
+                "A method to get the list of frame "
+                "start times in seconds from a "
+                "MuonData object.",
+                returns='A list of the frame start times in seconds. ',
+                example=['from MuonDataLib.data.loader.load_events '
+                         'import load_events',
+                         'data = load_events("HIFI00001.nxs", 64)',
+                         'start_times = data.get_frame_start_times()'])]

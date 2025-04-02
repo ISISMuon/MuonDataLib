@@ -14,9 +14,9 @@ Contents
    :titlesonly:
 
    Introduction <intro>
-   API Documentation <API>
    Developer docs <dev/index>
    Tutorials and Examples <examples/index>
+   API Documentation <API/index>
 
 Indices and tables
 ==================
