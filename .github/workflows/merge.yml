@@ -55,7 +55,7 @@ jobs:
           # List of platforms to build on (incl. Python version)
           CIBW_BUILD: cp3{9,10,11,12,13}-manylinux_x86_64 cp3{9,10,11,12,13}-macosx_x86_64 cp3{9,10,11,12,13}-macosx_arm64 cp3{9,10,11,12,13}-win_amd64
           CIBW_BEFORE_BUILD: >
-             pip install numpy Cython pyside6
+             pip install numpy Cython PySide6
           # Install test dependencies and run tests
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: >
