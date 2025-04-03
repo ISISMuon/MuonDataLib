@@ -1,5 +1,4 @@
-from PyQt6.QtCore import QRunnable
-from PyQt6.QtCore import pyqtSlot as Slot
+from PySide6.QtCore import QRunnable, Slot
 import signal
 import os
 

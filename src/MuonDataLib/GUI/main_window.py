@@ -1,11 +1,10 @@
 from MuonDataLib.GUI.worker import Worker
-
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtCore import QUrl
-from PyQt6 import QtWidgets
-from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import QThreadPool
-from PyQt6.QtWidgets import QVBoxLayout
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtCore import QUrl
+from PySide6 import QtWidgets
+from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QThreadPool
+from PySide6.QtWidgets import QVBoxLayout
 
 
 class MainDashWindow(QtWidgets.QMainWindow):
