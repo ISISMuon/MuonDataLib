@@ -53,7 +53,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.5
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{9,10,11,12, 13}-manylinux_x86_64 cp3{9,10,11,12,13}-macosx_x86_64 cp3{9,10,11,12,13}-macosx_arm64 cp3{9,10,11,12,13}-win_amd64
+          CIBW_BUILD: cp3{9,10,11,12,13}-manylinux_x86_64 cp3{9,10,11,12,13}-macosx_x86_64 cp3{9,10,11,12,13}-macosx_arm64 cp3{9,10,11,12,13}-win_amd64
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
           # Install test dependencies and run tests
