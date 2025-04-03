@@ -17,5 +17,5 @@ dependencies:
     - readthedocs-sphinx-ext
     - dash_bootstrap_components
     - sphinx-rtd-theme
-    - Pyqt6
+    - PySide6
 

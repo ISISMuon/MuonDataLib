@@ -40,9 +40,9 @@ extensions = [
               ]
 setup(
     name=PACKAGE_NAME,
-    requires=['numpy', 'cython', 'pyqt6'],
-    setup_requires=['numpy', 'cython', 'pyqt6'],
-    install_requires=['numpy', 'cython', 'pyqt6'],
+    requires=['numpy', 'cython'],
+    setup_requires=['numpy', 'cython'],
+    install_requires=['numpy', 'cython'],
     packages=find_packages(where='src'),
     ext_modules=extensions,
     version=version,
