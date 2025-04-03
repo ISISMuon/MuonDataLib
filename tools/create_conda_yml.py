@@ -53,7 +53,7 @@ def create_default(version):
 
     pip_dict = {'readthedocs-sphinx-ext': '',
                 'dash_bootstrap_components': '',
-                'PySide6': '>=6.9.0',
+                'PySide6': '',
                 'sphinx-rtd-theme': '',
                 }
 
