@@ -13,9 +13,9 @@ dependencies:
   - jupyter-book
   - nbsphinx
   - dash
-  - PySide >=6.9.0
   - pip:
     - readthedocs-sphinx-ext
     - dash_bootstrap_components
     - sphinx-rtd-theme
+    - PySide >=6.9.0
 
