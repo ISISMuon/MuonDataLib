@@ -40,9 +40,9 @@ extensions = [
               ]
 setup(
     name=PACKAGE_NAME,
-    requires=['numpy', 'cython'],
-    setup_requires=['numpy', 'cython'],
-    install_requires=['numpy', 'cython'],
+    requires=['numpy', 'cython', 'pyside6'],
+    setup_requires=['numpy', 'cython', 'pyside6'],
+    install_requires=['numpy', 'cython', 'pyside6'],
     packages=find_packages(where='src'),
     ext_modules=extensions,
     version=version,
