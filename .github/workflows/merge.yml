@@ -1,12 +1,6 @@
 name: Build and upload to PyPI
 
 on:
-  push:
-    branches:
-    - 'main'
-  pull_request:
-    branches:
-      - 'main'
   pull_request_review:
     types: [submitted]
 permissions:
@@ -15,7 +9,7 @@ permissions:
 jobs:
   update_version:
     name: update version
-      #if: github.event.review.state == 'approved'
+    if: github.event.review.state == 'approved'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -53,7 +47,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.5
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{10,11,12}-manylinux_x86_64 cp3{10,11,12}-macosx_x86_64 cp3{10,11,12}-macosx_arm64 cp3{10,11,12}-win_amd64
+          CIBW_BUILD: cp3{9,10,11,12}-manylinux_x86_64 cp3{9,10,11,12}-macosx_x86_64 cp3{9,10,11,12}-macosx_arm64 cp3{9,10,11,12}-win_amd64
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
           # Install test dependencies and run tests
