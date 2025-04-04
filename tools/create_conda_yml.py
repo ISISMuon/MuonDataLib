@@ -54,7 +54,8 @@ def create_default(version):
     pip_dict = {'readthedocs-sphinx-ext': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
-                'pyside6': '',
+                'pyqt5': '',
+                'pyqtwebengine': '',
                 }
 
     default_yml['name'] = 'MuonDataLib-dev'
