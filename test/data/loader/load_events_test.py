@@ -41,7 +41,7 @@ class LoadEventsTest(TestHelper):
                             'data_files',
                             'HIFI00195790.nxs')
         data = load_events(file, 64)
-        log = data.get_sample_log('Temp')
+        log = data._get_sample_log('Temp')
         x, y = log.get_values()
         self.assertArrays(x, np.asarray([0, 1, 2, 3, 4], dtype=np.double))
         self.assertArrays(y, np.asarray([39, 36, 36, 37, 35], dtype=np.double))
