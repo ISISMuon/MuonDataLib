@@ -2,7 +2,7 @@ from MuonDataLib.GUI.main_window import MainDashWindow
 from MuonDataLib.help.help import help_app
 
 import sys
-from PySide6 import QtWidgets
+from PyQt5 import QtWidgets
 
 
 def launch_help():
