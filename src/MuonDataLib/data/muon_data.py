@@ -209,7 +209,7 @@ class MuonEventData(MuonData):
     def keep_data_amp_above(self, value):
         self._events.set_threshold('AMPS', value)
 
-    def delete_data_amp_above(name):
+    def delete_data_amp_above(self):
         self._events.set_threshold('AMPS', 0)
 
     def get_peak_stats(self, name):
