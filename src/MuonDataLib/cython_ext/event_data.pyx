@@ -128,6 +128,10 @@ cdef keep_data(double threshold, status, double y, Func cf):
     """
     return threshold != NONE and status and cf.compare(threshold, y)
 
+def stats(cnp.ndarray[double] data):
+    return np.min(data), np.mean(data), np.max(data)
+
+
 cdef class Events:
     """
     Class for storing event information
@@ -141,6 +145,8 @@ cdef class Events:
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
+    cdef readonly dict[str, double] peak_prop
+    cdef readonly dict[str, double] threshold
 
 
     def __init__(self,
@@ -150,6 +156,7 @@ cdef class Events:
                  cnp.ndarray[double] frame_start,
                  int N_det,
                  cnp.ndarray[int] periods,
+                 cnp.ndarray[double] amps,
                  ):
         """
         Creates an event object.
@@ -170,6 +177,20 @@ cdef class Events:
         self.filter_start = {}
         self.filter_end = {}
         self.periods = periods
+        self.peak_prop = {'AMPS': amps}
+        self.threshold = {'AMPS': 0.0}
+
+    @property
+    def peak_stats(self):
+        print("--- Starts for Peak Properties ---")
+        print("Property", "min", "mean", "max")
+        print('Amplitudes', stats(self.peak_prop['AMPS']))
+
+    def get_amps_stats(self):
+        return self.peak_prop['AMPS']
+
+    def set_amps_threshold(self, value):
+        self.threshold['AMPS'] = value
 
     def get_start_times(self):
         """
@@ -314,7 +335,7 @@ cdef class Events:
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int[:] periods
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-        cdef double[:] times, f_start, f_end
+        cdef double[:] times, f_start, f_end, amps
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -331,6 +352,7 @@ cdef class Events:
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+            amps = good_values_double(f_i_start, f_i_end, self.start_index_list, self.peak_prop['AMPS'])
 
             if len(times) == 0:
                 raise ValueError("The current filter selection results in zero data "
@@ -339,11 +361,12 @@ cdef class Events:
             # no filters
             IDs = self.IDs
             times = self.times
+            amps = self.peak_prop['AMPS']
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
         periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
-        return f_i_start, f_i_end, rm_frames, IDs, times, periods
+        return f_i_start, f_i_end, rm_frames, IDs, times, periods, amps
 
     def histogram(self,
                   double min_time=0.,
@@ -365,7 +388,9 @@ cdef class Events:
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        f_i_start, f_i_end, rm_frames, IDs, times, periods = self._get_filtered_data(frame_times)
+        f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
+
+        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['AMPS']), 1., 0.), dtype=np.int32)
 
         hist, bins, N = make_histogram(times=times,
                                        spec=IDs,
@@ -373,7 +398,8 @@ cdef class Events:
                                        periods=periods,
                                        min_time=min_time,
                                        max_time=max_time,
-                                       width=width)
+                                       width=width,
+                                       weight=weight)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,

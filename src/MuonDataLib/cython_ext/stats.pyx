@@ -11,6 +11,7 @@ cpdef make_histogram(
         cnp.int32_t[:] spec,
         int N_spec,
         int[:] periods,
+        int[:] weight,
         double min_time=0,
         double max_time=30.,
         double width=0.5,
@@ -49,7 +50,7 @@ cpdef make_histogram(
         if time <= max_time and time >= min_time:
             p = periods[k]
             j_bin = int((time - min_time) // width)
-            mat[p, det, j_bin] += 1
+            mat[p, det, j_bin] += 1*weight[k]
             N += 1
     return result, bins, N
 
