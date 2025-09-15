@@ -206,6 +206,15 @@ class MuonEventData(MuonData):
         """
         return self._dict['logs'].get_sample_log(name)
 
+    def keep_data_amp_above(self, value):
+        self._events.set_threshold('AMPS', value)
+
+    def delete_data_amp_above(name):
+        self._events.set_threshold('AMPS', 0)
+
+    def get_peak_stats(self, name):
+        return self._events.get_peak_stats(name)
+
     def keep_data_sample_log_below(self, log_name, max_value):
         """
         Sets a filter to remove data above a value

@@ -1,5 +1,5 @@
 from MuonDataLib.data.utils import NONE
-from MuonDataLib.cython_ext.stats import make_histogram
+from MuonDataLib.cython_ext.stats import make_histogram, get_stats
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
@@ -128,9 +128,6 @@ cdef keep_data(double threshold, status, double y, Func cf):
     """
     return threshold != NONE and status and cf.compare(threshold, y)
 
-def stats(cnp.ndarray[double] data):
-    return np.min(data), np.mean(data), np.max(data)
-
 
 cdef class Events:
     """
@@ -184,13 +181,13 @@ cdef class Events:
     def peak_stats(self):
         print("--- Starts for Peak Properties ---")
         print("Property", "min", "mean", "max")
-        print('Amplitudes', stats(self.peak_prop['AMPS']))
+        print('Amplitudes', get_stats(self.peak_prop['AMPS']))
 
-    def get_amps_stats(self):
-        return self.peak_prop['AMPS']
+    def get_peak_stats(self, str name):
+        return get_stats(self.peak_prop[name])
 
-    def set_amps_threshold(self, value):
-        self.threshold['AMPS'] = value
+    def set_threshold(self, str name, double value):
+        self.threshold[name] = value
 
     def get_start_times(self):
         """

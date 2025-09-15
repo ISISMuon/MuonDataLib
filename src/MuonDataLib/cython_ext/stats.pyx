@@ -54,3 +54,8 @@ cpdef make_histogram(
             N += 1
     return result, bins, N
 
+
+def get_stats(cnp.ndarray[double] data):
+    return np.min(data), np.mean(data), np.max(data)
+
+
