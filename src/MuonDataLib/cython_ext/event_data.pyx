@@ -175,13 +175,16 @@ cdef class Events:
         self.filter_end = {}
         self.periods = periods
         self.peak_prop = {'Amplitudes': amps}
-        self.threshold = {'Amplitudes': 0.0}
+        self.clear_peak_prop()
 
     @property
     def peak_stats(self):
         print("--- Starts for Peak Properties ---")
         print("Property", "min", "mean", "max")
         print('Amplitudes', get_stats(self.peak_prop['Amplitudes']))
+
+    def clear_peak_prop(self):
+        self.threshold = {"Amplitudes": 0.0}
 
     def get_peak_stats(self, str name):
         return get_stats(self.peak_prop[name])
