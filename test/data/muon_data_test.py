@@ -769,18 +769,22 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.keep_data_sample_log_between("Temp", 0.0044, .163)
         data.only_keep_data_time_between('first', .01, .02)
         data.only_keep_data_time_between('second', .05, .06)
+        
+        data.keep_data_peak_property_above('Amplitudes', 3.14)
 
         data.remove_data_time_between('one', 1, 2)
         data.remove_data_time_between('two', 5, 7)
 
     def expected_report(self, result):
         self.assertArrays(list(result.keys()),
-                          ['sample_log_filters',
+                          ['peak_property',
+                           'sample_log_filters',
                            'time_filters'])
 
         self.assertArrays(list(result['time_filters'].keys()),
                           ['keep_filters',
                            'remove_filters'])
+
         tmp = result['time_filters']['remove_filters']
         self.assertArrays(list(tmp.keys()), ['one', 'two'])
         self.assertArrays(tmp['one'], [1, 2])
@@ -794,6 +798,10 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         tmp = result['sample_log_filters']
         self.assertArrays(list(tmp.keys()), ['Temp'])
         self.assertArrays(tmp['Temp'], [0.0044, 0.163])
+
+        tmp = result['peak_property']
+        self.assertEqual(len(tmp.keys()), 1)
+        self.assertEqual(tmp['Amplitudes'], 3.14)
 
     def test_report_filters(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -821,7 +829,6 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         with open('muon_test.json') as file:
             result = json.load(file)
-
         self.expected_report(result)
         os.remove('muon_test.json')
 

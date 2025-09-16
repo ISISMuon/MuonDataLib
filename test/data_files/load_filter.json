@@ -1,4 +1,7 @@
 {
+    "peak_property": {
+	    "Amplitudes": 3.14
+    },
     "sample_log_filters": {
         "Temp": [
             0.0044,

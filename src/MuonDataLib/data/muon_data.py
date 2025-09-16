@@ -206,11 +206,11 @@ class MuonEventData(MuonData):
         """
         return self._dict['logs'].get_sample_log(name)
 
-    def keep_data_amp_above(self, value):
-        self._events.set_threshold('AMPS', value)
+    def keep_data_peak_property_above(self, name, value):
+        self._events.set_threshold(name, value)
 
-    def delete_data_amp_above(self):
-        self._events.set_threshold('AMPS', 0)
+    def delete_data_peak_property_above(self, name):
+        self._events.set_threshold(name, 0)
 
     def get_peak_stats(self, name):
         return self._events.get_peak_stats(name)
@@ -324,6 +324,10 @@ class MuonEventData(MuonData):
         :returns: the applied filters as a structured dict
         """
         data = {}
+ 
+        # peak filter
+        data['peak_property'] = {'Amplitudes': self._events.get_threshold('Amplitudes')}
+ 
         # add sample logs
         tmp = {}
         for name in self._dict['logs'].get_names():
@@ -357,6 +361,10 @@ class MuonEventData(MuonData):
         tmp = data['sample_log_filters']
         for name in tmp.keys():
             self._dict['logs'].add_filter(name, *tmp[name])
+
+        tmp = data['peak_property']
+        for name in tmp.keys():
+            self._events.set_threshold(name, tmp[name])
 
     def save_filters(self, file_name):
         """

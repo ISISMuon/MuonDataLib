@@ -174,20 +174,23 @@ cdef class Events:
         self.filter_start = {}
         self.filter_end = {}
         self.periods = periods
-        self.peak_prop = {'AMPS': amps}
-        self.threshold = {'AMPS': 0.0}
+        self.peak_prop = {'Amplitudes': amps}
+        self.threshold = {'Amplitudes': 0.0}
 
     @property
     def peak_stats(self):
         print("--- Starts for Peak Properties ---")
         print("Property", "min", "mean", "max")
-        print('Amplitudes', get_stats(self.peak_prop['AMPS']))
+        print('Amplitudes', get_stats(self.peak_prop['Amplitudes']))
 
     def get_peak_stats(self, str name):
         return get_stats(self.peak_prop[name])
 
     def set_threshold(self, str name, double value):
         self.threshold[name] = value
+
+    def get_threshold(self, str name):
+        return self.threshold[name]
 
     def get_start_times(self):
         """
@@ -349,7 +352,8 @@ cdef class Events:
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
-            amps = good_values_double(f_i_start, f_i_end, self.start_index_list, self.peak_prop['AMPS'])
+            amps = good_values_double(f_i_start, f_i_end, self.start_index_list,
+                                      self.peak_prop['Amplitudes'])
 
             if len(times) == 0:
                 raise ValueError("The current filter selection results in zero data "
@@ -358,7 +362,7 @@ cdef class Events:
             # no filters
             IDs = self.IDs
             times = self.times
-            amps = self.peak_prop['AMPS']
+            amps = self.peak_prop['Amplitudes']
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
@@ -369,7 +373,8 @@ cdef class Events:
                   double min_time=0.,
                   double max_time=32.768,
                   double width=0.016,
-                  cache=None):
+                  cache=None,
+                  ):
         """
         Create a matrix of histograms from the event data
         and apply any filters that might be present.
@@ -387,7 +392,8 @@ cdef class Events:
 
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
 
-        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['AMPS']), 1., 0.), dtype=np.int32)
+        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
+                                      dtype=np.int32)
 
         hist, bins, N = make_histogram(times=times,
                                        spec=IDs,
