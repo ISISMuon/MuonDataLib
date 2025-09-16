@@ -769,7 +769,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.keep_data_sample_log_between("Temp", 0.0044, .163)
         data.only_keep_data_time_between('first', .01, .02)
         data.only_keep_data_time_between('second', .05, .06)
-        
+
         data.keep_data_peak_property_above('Amplitudes', 3.14)
 
         data.remove_data_time_between('one', 1, 2)

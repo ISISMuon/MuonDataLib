@@ -324,10 +324,11 @@ class MuonEventData(MuonData):
         :returns: the applied filters as a structured dict
         """
         data = {}
- 
+
         # peak filter
-        data['peak_property'] = {'Amplitudes': self._events.get_threshold('Amplitudes')}
- 
+        data['peak_property'] = {'Amplitudes':
+                                 self._events.get_threshold('Amplitudes')}
+
         # add sample logs
         tmp = {}
         for name in self._dict['logs'].get_names():
