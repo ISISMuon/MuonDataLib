@@ -12,7 +12,7 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights, 
+        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
                                          0, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
