@@ -22,7 +22,8 @@ class MultiperiodEventsTest(TestHelper):
         self._frame_i = np.asarray([0, 2, 4, 6], dtype='int32')
         self._frame_time = np.asarray([0.0, 2.0, 4.0, 6.0], dtype=np.double)
         self._periods = np.asarray([0, 1, 0, 1], dtype=np.int32)
-        self._amps = np.asarray([1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7], dtype=np.double)
+        self._amps = np.asarray([1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7],
+                                dtype=np.double)
         self._events = Events(self._IDs,
                               self._time,
                               self._frame_i,
@@ -172,7 +173,8 @@ class MultiperiodEventsTest(TestHelper):
 
         self.assertArrays(rm, [0, 0])
         self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1, 0, 1])
-        self.assertArrays(np.asarray(amps), [1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7])
+        self.assertArrays(np.asarray(amps), [1.0, 1.1, 1.2, 1.3,
+                                             1.4, 1.5, 1.6, 1.7])
         self.assertArrays(np.asarray(times), [1000., 2000.,
                                               3000., 4000.,
                                               5000., 6000.,
