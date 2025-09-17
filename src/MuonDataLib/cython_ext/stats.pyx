@@ -28,6 +28,7 @@ cpdef make_histogram(
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
     :param periods: a list of the periods each event belongs to
+    :param weight: the weight to give each event in the histogram ( 0 or 1)
     :param min_time: the first bin edge
     :param max_time: the last bin edge
     :param width: the bin width
@@ -53,9 +54,3 @@ cpdef make_histogram(
             mat[p, det, j_bin] += 1*weight[k]
             N += 1
     return result, bins, N
-
-
-def get_stats(cnp.ndarray[double] data):
-    return np.min(data), np.mean(data), np.max(data)
-
-

@@ -211,9 +211,11 @@ class MuonEventData(MuonData):
         return self._events.get_peak_property_histogram(name)
 
     def keep_data_peak_property_above(self, name, value):
+        self._cache.clear()
         self._events.set_threshold(name, value)
 
     def delete_data_peak_property_above(self, name):
+        self._cache.clear()
         self._events.set_threshold(name, 0)
 
     def keep_data_sample_log_below(self, log_name, max_value):

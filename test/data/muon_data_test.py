@@ -103,9 +103,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             'data_files',
                             'HIFI0.nxs')
         data = load_events(file, 64)
+        self.assertEqual(data._cache.empty(), True)
 
         self.assertEqual(data._events.threshold['Amplitudes'], 0.0)
+        _ = data.histogram()
+        self.assertEqual(data._cache.empty(), False)
         data.keep_data_peak_property_above('Amplitudes', 1.2e34)
+        self.assertEqual(data._cache.empty(), True)
         self.assertEqual(data._events.threshold['Amplitudes'], 1.2e34)
 
     def test_get_peak_property_histogram(self):
@@ -126,9 +130,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
 
         data.keep_data_peak_property_above('Amplitudes', 1.2e34)
+        _ =  data.histogram()
         self.assertEqual(data._events.get_threshold('Amplitudes'), 1.2e34)
+        self.assertEqual(data._cache.empty(), False)
+
         data.delete_data_peak_property_above('Amplitudes')
         self.assertEqual(data._events.get_threshold('Amplitudes'), 0.0)
+        self.assertEqual(data._cache.empty(), True)
 
     def test_add_sample_log(self):
         file = os.path.join(os.path.dirname(__file__),

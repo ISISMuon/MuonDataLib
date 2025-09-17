@@ -164,6 +164,7 @@ cdef class Events:
         :param frame_start: the start time for the frames
         :param N_det: the number of detectors
         :param periods: a vector of the periods for each frame
+        :param amps: a vector of the amplitudes for each event
         """
         self.IDs = IDs
         self.N_spec = N_det
@@ -178,15 +179,40 @@ cdef class Events:
         self.clear_thresholds()
 
     def get_peak_property_histogram(self, str name):
+        """
+        A method to inspect the data (e.g. Ampltiudes),
+        which describes the properties of the event
+        peaks. 
+        :param name: the name of the property
+        :returns: the histogram of the requested property,
+        and the bin edges.
+        """
         return np.histogram(self.peak_prop[name])
 
     def clear_thresholds(self):
+        """
+        A method to reset all of the filters 
+        on the peak properties.
+        """
         self.threshold = {"Amplitudes": 0.0}
 
+
     def set_threshold(self, str name, double value):
+        """
+        A method to set the filter/threshold for 
+        a peak property. 
+        :param name: the name of the property
+        :param value: the value for the threshold/filter.
+        """
         self.threshold[name] = value
 
     def get_threshold(self, str name):
+        """
+        A method to get the value of the threshold/filter
+        for a peak property.
+        :param name: the name of the property
+        :returns: the value of the filter/threshold.
+        """
         return self.threshold[name]
 
     def get_start_times(self):
