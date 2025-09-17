@@ -210,8 +210,8 @@ class MuonEventData(MuonData):
 
     def get_peak_property_histogram(self, name):
         """
-        A method to get a histogram that shows the 
-        distribution for the values of a peak 
+        A method to get a histogram that shows the
+        distribution for the values of a peak
         property.
         :param name: the name of the peak property
         :returns: histogram values (counts), bins

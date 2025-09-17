@@ -130,7 +130,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data = load_events(file, 64)
 
         data.keep_data_peak_property_above('Amplitudes', 1.2e34)
-        _ =  data.histogram()
+        _ = data.histogram()
         self.assertEqual(data._events.get_threshold('Amplitudes'), 1.2e34)
         self.assertEqual(data._cache.empty(), False)
 
