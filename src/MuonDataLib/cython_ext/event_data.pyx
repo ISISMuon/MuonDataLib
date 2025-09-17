@@ -352,7 +352,8 @@ cdef class Events:
         the number of removed frames and the indices for the filters.
         :param frame_times: the times for the start of each frame (in seconds).
         The number of removed frames. The list of filtered detector IDs and
-        event time stamps. The list of periods for the kept events
+        event time stamps. The list of periods for the kept events and
+        the amplitudes of the kept events.
         """
 
         cdef int[:] IDs, f_i_start, f_i_end
@@ -400,7 +401,8 @@ cdef class Events:
                   ):
         """
         Create a matrix of histograms from the event data
-        and apply any filters that might be present.
+        and apply any filters that might be present (including
+        those from peak properties).
         :param min_time: the start time for the histogram
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram

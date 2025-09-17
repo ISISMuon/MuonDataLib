@@ -182,7 +182,8 @@ class MuonEventData(MuonData):
 
     def clear_filters(self):
         """
-        A method to remove all of the filters
+        A method to remove all of the filters (including
+        those for peak parameters)
         """
         self._clear()
         self._dict['logs'].clear_filters()
@@ -208,13 +209,30 @@ class MuonEventData(MuonData):
         return self._dict['logs'].get_sample_log(name)
 
     def get_peak_property_histogram(self, name):
+        """
+        A method to get a histogram that shows the 
+        distribution for the values of a peak 
+        property.
+        :param name: the name of the peak property
+        :returns: histogram values (counts), bins
+        """
         return self._events.get_peak_property_histogram(name)
 
     def keep_data_peak_property_above(self, name, value):
+        """
+        A method to add a filter on a peak property
+        (e.g. Amplitudes)
+        :param name: the name of the peak property
+        :param value: the value for the filter
+        """
         self._cache.clear()
         self._events.set_threshold(name, value)
 
     def delete_data_peak_property_above(self, name):
+        """
+        A method to remove a filter on a peak property.
+        :param name: the name of the peak property.
+        """
         self._cache.clear()
         self._events.set_threshold(name, 0)
 
