@@ -188,7 +188,7 @@ class MuonEventData(MuonData):
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
         self._keep_times = {}
-        self._events.clear_peak_prop()
+        self._events.clear_thresholds()
 
     def add_sample_log(self, name, x_data, y_data):
         """
@@ -207,14 +207,14 @@ class MuonEventData(MuonData):
         """
         return self._dict['logs'].get_sample_log(name)
 
+    def get_peak_property_histogram(self, name):
+        return self._events.get_peak_property_histogram(name)
+
     def keep_data_peak_property_above(self, name, value):
         self._events.set_threshold(name, value)
 
     def delete_data_peak_property_above(self, name):
         self._events.set_threshold(name, 0)
-
-    def get_peak_stats(self, name):
-        return self._events.get_peak_stats(name)
 
     def keep_data_sample_log_below(self, log_name, max_value):
         """

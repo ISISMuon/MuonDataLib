@@ -1,5 +1,5 @@
 from MuonDataLib.data.utils import NONE
-from MuonDataLib.cython_ext.stats import make_histogram, get_stats
+from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
@@ -175,19 +175,13 @@ cdef class Events:
         self.filter_end = {}
         self.periods = periods
         self.peak_prop = {'Amplitudes': amps}
-        self.clear_peak_prop()
+        self.clear_thresholds()
 
-    @property
-    def peak_stats(self):
-        print("--- Starts for Peak Properties ---")
-        print("Property", "min", "mean", "max")
-        print('Amplitudes', get_stats(self.peak_prop['Amplitudes']))
+    def get_peak_property_histogram(self, str name):
+        return np.histogram(self.peak_prop[name])
 
-    def clear_peak_prop(self):
+    def clear_thresholds(self):
         self.threshold = {"Amplitudes": 0.0}
-
-    def get_peak_stats(self, str name):
-        return get_stats(self.peak_prop[name])
 
     def set_threshold(self, str name, double value):
         self.threshold[name] = value

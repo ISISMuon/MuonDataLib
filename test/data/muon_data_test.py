@@ -467,6 +467,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         data.remove_data_time_between('one', 1, 2)
         data.remove_data_time_between('two', 5, 7)
+        data.keep_data_peak_property_above("Amplitudes", 31.1)
         self.fill_cache(data)
         data.clear_filters()
 
@@ -478,6 +479,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         self.assertEqual(data._keep_times, {})
         self.assertEqual(data._time_filter, {})
+
+        self.assertEqual(data._events.get_threshold('Amplitudes'), 0.0)
 
     def test_save_histogram_empty_cache(self):
         """

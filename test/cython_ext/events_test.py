@@ -35,25 +35,31 @@ class EventsTest(TestHelper):
     def test_get_total_frames(self):
         self.assertArrays(np.asarray(self._events.get_total_frames), [3])
 
+    def test_set_threshold(self):
+        self.assertEqual(self._events.threshold['Amplitudes'], 0.0)
+        self._events.set_threshold('Amplitudes', 1.2e34)
+        self.assertEqual(self._events.threshold['Amplitudes'], 1.2e34)
+
+    def test_get_threshold(self):
+        self.assertEqual(self._events.threshold['Amplitudes'], 0.0)
+        self._events.set_threshold('Amplitudes', 1.2e34)
+        self.assertEqual(self._events.get_threshold('Amplitudes'), 1.2e34)
+
+    def test_clear_thresholds(self):
+        self._events.set_threshold('Amplitudes', 1.2e34)
+        self.assertEqual(self._events.threshold['Amplitudes'], 1.2e34)
+
+        self._events.clear_thresholds()
+        for key in self._events.threshold.keys():
+            self.assertEqual(self._events.get_threshold(key), 0.0)
+
     def test_histogram(self):
-        """
-        We dont check the histograms themselves
-        as the stats_test.py covers them.
-        Here we are checking that the correct values
-        are passed to the histogram generation
-        """
         mat, bins = self._events.histogram()
         self.assertArrays(bins, np.arange(0, 32.784, 0.016))
         self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
 
     def test_custom_histogram(self):
-        """
-        We dont check the histograms themselves
-        as the stats_test.py covers them.
-        Here we are checking that the correct values
-        are passed to the histogram generation
-        """
         mat, bins = self._events.histogram(0., 7., 1.)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 1)
@@ -76,6 +82,15 @@ class EventsTest(TestHelper):
         self.assertEqual(cache.get_good_frames[0], 100)
         self.assertEqual(cache.resolution, 0.2)
         self.assertEqual(cache.get_N_events, 3)
+
+    def test_amplitude_filter_on_histogram(self):
+        self._events.set_threshold('Amplitudes', 1.1)
+        mat, bins = self._events.histogram(0., 7., 1.)
+        self.assertArrays(bins, np.arange(0., 8., 1.))
+        self.assertEqual(len(mat), 1)
+        self.assertEqual(len(mat[0]), 2)
+        self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
+        self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
