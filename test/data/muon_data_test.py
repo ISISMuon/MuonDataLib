@@ -97,6 +97,39 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(data._events, 'events')
         self.assertEqual(data._cache, 'cache')
 
+    def test_keep_data_peak_property_above(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+ 
+        self.assertEqual(data._events.threshold['Amplitudes'], 0.0)
+        data.keep_data_peak_property_above('Amplitudes', 1.2e34)
+        self.assertEqual(data._events.threshold['Amplitudes'], 1.2e34)
+
+    def test_get_peak_property_histogram(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+        hist, bins = data.get_peak_property_histogram("Amplitudes")
+        self.assertArrays(bins,np.arange(19.5, 20.55, step=.1))
+        self.assertArrays(hist, [0, 0, 0, 0, 0, 1100, 0, 0, 0, 0])
+
+    def test_delete_data_peak_property_above(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI0.nxs')
+        data = load_events(file, 64)
+ 
+        data.keep_data_peak_property_above('Amplitudes', 1.2e34)
+        self.assertEqual(data._events.get_threshold('Amplitudes'), 1.2e34)
+        data.delete_data_peak_property_above('Amplitudes')
+        self.assertEqual(data._events.get_threshold('Amplitudes'), 0.0)
+
     def test_add_sample_log(self):
         file = os.path.join(os.path.dirname(__file__),
                             '..',
