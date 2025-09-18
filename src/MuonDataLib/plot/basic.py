@@ -39,6 +39,19 @@ class Figure(object):
         """
         self._fig.show()
 
+    def plot_peak_property_histogram(self,
+                                     hist,
+                                     bins,
+                                     label=''):
+        """
+        Plots the histogram of a peak property
+        :param hist: the histogram
+        :param bins: the histogram bins.
+        """
+        bin_centres = (bins[:-1] + bins[1:])/2.
+        self.plot(bin_centres, hist,
+                  label)
+
     def plot_from_histogram(self,
                             bins,
                             hist,
