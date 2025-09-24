@@ -1,6 +1,7 @@
 from MuonDataLib.help.help_docs import (Doc,
                                         HIST,
                                         LOG,
+                                        PEAK,
                                         FIGURE,
                                         MUONDATA)
 
@@ -47,6 +48,26 @@ def get_figure_docs():
                          'x = np.arange(0, 10)',
                          'y = np.sin(2.1*x)',
                          'fig.plot(x, y, "sin(2.1 x)")',
+                         'fig.show()']),
+
+            Doc('plot_peak_property_histogram',
+                'plot.basic.Figure',
+                [FIGURE, HIST, MUONDATA, PEAK],
+                "A method to create a plot "
+                "of histogram data from a peak property.",
+                param={'hist': 'The histogram matrix (as from np.histogram) ',
+                       'bins': 'The bin edges for the histogram.'},
+                optional_param={'label': ['The base label to use '
+                                          'in the legend.', '""']},
+                example=['from MuonDataLib.plot.basic import Figure',
+                         'from MuonDataLib.data.loader.load_events '
+                         'import load_events',
+                         'data = load_events("HIFI00001.nxs", 64)',
+                         'hist, bins = data.get_peak_property_histogram'
+                         '("Amplitudes")',
+                         'fig = Figure("Example plot")',
+                         'fig.plot_peak_property_histogram(hist, bins'
+                         'label="HIFI00001")',
                          'fig.show()']),
 
             Doc('plot_from_histogram',

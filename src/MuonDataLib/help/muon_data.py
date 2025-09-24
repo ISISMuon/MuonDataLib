@@ -4,8 +4,12 @@ from MuonDataLib.help.help_docs import (Doc,
                                         FILTER,
                                         TIME,
                                         LOG,
+                                        PEAK,
                                         LOAD,
                                         MUONDATA)
+
+
+PEAK_OPT = "Current peak property options are: Amplitudes"
 
 
 def get_muon_data_docs():
@@ -65,6 +69,61 @@ def get_muon_data_docs():
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
                          'hist, bins = data.histogram(resolution=0.01)']),
+
+            Doc('get_peak_property_histogram',
+                'data.muon_data.MuonData',
+                [MUONDATA, HIST, NXS, FILTER, PEAK],
+                "Method for getting the histogram and bins for "
+                "a specific property (e.g. Amplitude) of the peak "
+                "used to generate the event in the NeXus v2 "
+                "histogram file. The results are never filtered.",
+                {'name': "The name of the peak propertry "
+                 "to be histogrammed. " + PEAK_OPT},
+                returns='A histogram of the distribution for the '
+                        'peak property and the bins',
+                example=['from MuonDataLib.data.loader.load_events '
+                         'import load_events',
+                         'data = load_events("HIFI00001.nxs", 64)',
+                         'hist, bins = data.get_peak_property_histogram'
+                         '("Amplitudes")']),
+
+            Doc('keep_data_peak_property_above',
+                'data.muon_data.MuonData',
+                [MUONDATA, HIST, FILTER, PEAK],
+                "Method for discriminating/filtering of the histogram "
+                "on a specific property (e.g. Amplitude) of the peak "
+                "used to generate the event in the NeXus v2 "
+                "histogram file. Only data with greater than the "
+                "user specified value will be kept.",
+                {'name': "The name of the peak propertry "
+                 "to be histogrammed. " + PEAK_OPT,
+                 'value': "Only events with values greater than this "
+                 "will be used in the histogram."},
+                example=['from MuonDataLib.data.loader.load_events '
+                         'import load_events',
+                         'data = load_events("HIFI00001.nxs", 64)',
+                         'data.keep_data_peak_property_above("Amplitudes",'
+                         ' 1.2)',
+                         'hist, bins = data.histogram()']),
+
+            Doc('delete_data_peak_property_above',
+                'data.muon_data.MuonData',
+                [MUONDATA, HIST, FILTER, PEAK],
+                "Method to remove the discriminating/filtering of "
+                "the histogram "
+                "on a specific property (e.g. Amplitude) of the peak "
+                "used to generate the event in the NeXus v2 "
+                "histogram file.",
+                {'name': "The name of the peak propertry "
+                 "to be removed from filtering. " + PEAK_OPT},
+                example=['from MuonDataLib.data.loader.load_events '
+                         'import load_events',
+                         'data = load_events("HIFI00001.nxs", 64)',
+                         'data.keep_data_peak_property_above("Amplitudes",'
+                         ' 1.2)',
+                         'data.delete_data_peak_property_above("Amplitudes", '
+                         '1.2)',
+                         'hist, bins = data.histogram()']),
 
             Doc('add_sample_log',
                 'data.muon_data.MuonData',
