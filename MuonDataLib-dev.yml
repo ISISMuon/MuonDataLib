@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python =3.11.*
   - numpy
-  - plotly
+  - plotly = 6.0.0
   - pytest
   - pre-commit >=2.15
   - sphinx
