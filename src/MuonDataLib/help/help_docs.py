@@ -7,7 +7,7 @@ LOG = 'sample log'
 MUONDATA = 'MuonData'
 FIGURE = 'Figure (plotting)'
 UTILS = 'utils'
-PEAK = 'Peak Property'
+PEAK = 'Peak Properties'
 
 
 tags = [MUONDATA, LOAD, FIGURE, UTILS,
