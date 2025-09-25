@@ -17,6 +17,6 @@ jobs:
       - uses: pixta-dev/repository-mirroring-action@v1
         with:
           target_repo_url:
-            git@github.com:AnthonyLim23/MuonDataLib_docs.git
+            https://github.com/AnthonyLim23/MuonDataLib_docs.git
           ssh_private_key:                              # <-- use 'secrets' to pass credential information.
             ${{ secrets.docs }}
