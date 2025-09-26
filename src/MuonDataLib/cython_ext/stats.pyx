@@ -11,7 +11,7 @@ cpdef make_histogram(
         cnp.int32_t[:] spec,
         int N_spec,
         int[:] periods,
-        #int[:] weight,
+        int[:] weight,
         double min_time=0,
         double max_time=30.,
         double width=0.5,
@@ -43,16 +43,16 @@ cpdef make_histogram(
 
     cdef cnp.ndarray[int, ndim=3] result = np.zeros((np.max(periods)+1, N_spec, len(bins)-1), dtype=np.int32)
     cdef int[:, :, :] mat = result
-    cdef int[:] hist = np.zeros(len(bins)-1)
-    cdef double[:] t = np.asarray(<cnp.int32_t> times)*conversion
-    _periods = np.asarray(<cnp.int32_t> periods)
-    _spec = np.asarray(<cnp.int32_t> spec)
-    #_weight =  np.asarray(<cnp.int32_t> weight)
+    #cdef int[:] hist = np.zeros(len(bins)-1, dtype=np.int32)
+    t = np.asarray(times, dtype=double)*conversion
+    _periods = np.asarray(periods, dtype=int)
+    _spec = np.asarray(spec, dtype=int)
+    _weight =  np.asarray(weight, dtype=int)
     for p in range(np.max(periods)+1):
-        w_p = np.where(_periods == p, 1, 0)#*_weight
+        w_p = np.where(_periods == p, 1, 0)*_weight
         for det in range(N_spec):
             w_d = np.where(_spec == det, 1, 0)
-            hist, _ = np.histogram(t, density=False, bins=bins, weights=w_d*w_p)
-            result[p, det, :] = hist[:]
+            np.histogram(t, density=False, bins=bins, weights=w_d*w_p)
+        #    result[p, det, :] = hist[:]
 
     return result, bins, np.sum(result)
