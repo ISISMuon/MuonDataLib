@@ -424,10 +424,11 @@ cdef class Events:
                                        spec=IDs,
                                        N_spec=self.N_spec,
                                        periods=periods,
+                                       weight=weight,
                                        min_time=min_time,
                                        max_time=max_time,
                                        width=width,
-                                       weight=weight)
+                                       conversion=1e-3)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
