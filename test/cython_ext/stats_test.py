@@ -34,7 +34,7 @@ class StatsTest(TestHelper):
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 1)
         self.assertArrays(result[0][0], [0, 2, 1, 1, 1])
-        self.assertEqual(N, 9)
+        self.assertEqual(N, 5)
 
     def test_make_histogram_1_spec_nonzero_start(self):
         times = np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)

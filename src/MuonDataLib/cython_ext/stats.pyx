@@ -39,6 +39,7 @@ cpdef make_histogram(
 
     cdef Py_ssize_t det, k, j_bin, p
     cdef int N = 0
+    cdef int w_k
     cdef double time
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
@@ -51,6 +52,7 @@ cpdef make_histogram(
         if time <= max_time and time >= min_time:
             p = periods[k]
             j_bin = int((time - min_time) // width)
-            mat[p, det, j_bin] += 1*weight[k]
-            N += 1
+            w_k = 1*weight[k]
+            mat[p, det, j_bin] += w_k
+            N += w_k
     return result, bins, N
