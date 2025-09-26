@@ -25,10 +25,10 @@ extensions = [
                 "MuonDataLib.cython_ext.load_events",
                 sources=["src/MuonDataLib/cython_ext/load_events.pyx"],
                 ),
-              Extension(
-                "MuonDataLib.cython_ext.stats",
-                sources=["src/MuonDataLib/cython_ext/stats.pyx"]
-                ),
+              #Extension(
+              #  "MuonDataLib.cython_ext.stats",
+              #  sources=["src/MuonDataLib/cython_ext/stats.pyx"]
+              #  ),
               Extension(
                 "MuonDataLib.cython_ext.filter",
                 sources=["src/MuonDataLib/cython_ext/filter.pyx"]

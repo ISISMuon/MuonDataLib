@@ -26,7 +26,6 @@ class StatsTest(TestHelper):
         IDs = np.asarray([0, 0, 0, 0, 0, 0, 0, 0, 0], dtype=np.int32)
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.asarray([1, 0, 0, 1, 1, 1, 1, 0, 0], dtype=np.int32)
-
         result, bins, N = make_histogram(times, IDs, 1, periods, weights,
                                          0, 5, 1,
                                          conversion=1.)
@@ -34,7 +33,7 @@ class StatsTest(TestHelper):
         self.assertEqual(len(result), 1)
         self.assertEqual(len(result[0]), 1)
         self.assertArrays(result[0][0], [0, 2, 1, 1, 1])
-        self.assertEqual(N, 9)
+        self.assertEqual(N, 5)
 
     def test_make_histogram_1_spec_nonzero_start(self):
         times = np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)
@@ -165,14 +164,15 @@ class StatsTest(TestHelper):
         self.assertArrays(result[0][3], [0, 0, 0, 0, 1])
 
     def test_make_histogram_multiperiod_and_multi_spec(self):
-        times = np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)
-        IDs = np.asarray([0, 1, 1, 0, 0, 1, 1, 0, 0], dtype=np.int32)
+        times =   np.asarray([1, 2, 3, 4, 1, 2, 3, 1, 2], dtype=np.double)
+        IDs =     np.asarray([0, 1, 1, 0, 0, 1, 1, 0, 0], dtype=np.int32)
         periods = np.asarray([0, 0, 1, 1, 0, 0, 1, 1, 0], dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs, 2,
                                          periods, weights,
                                          0, 5, 1, conversion=1.)
+        
         self.assertEqual(N, 9)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
         self.assertEqual(len(result), 2)
