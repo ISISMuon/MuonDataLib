@@ -22,4 +22,5 @@ Contents
    tutorials/tutorial_4.ipynb
    tutorials/tutorial_5.ipynb
    tutorials/tutorial_6.ipynb
+   tutorials/tutorial_7.ipynb
    tutorials/example_manychunks.ipynb

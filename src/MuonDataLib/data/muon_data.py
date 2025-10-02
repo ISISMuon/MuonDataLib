@@ -182,12 +182,14 @@ class MuonEventData(MuonData):
 
     def clear_filters(self):
         """
-        A method to remove all of the filters
+        A method to remove all of the filters (including
+        those for peak parameters)
         """
         self._clear()
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
         self._keep_times = {}
+        self._events.clear_thresholds()
 
     def add_sample_log(self, name, x_data, y_data):
         """
@@ -205,6 +207,34 @@ class MuonEventData(MuonData):
         :return: the requested sample log object
         """
         return self._dict['logs'].get_sample_log(name)
+
+    def get_peak_property_histogram(self, name):
+        """
+        A method to get a histogram that shows the
+        distribution for the values of a peak
+        property.
+        :param name: the name of the peak property
+        :returns: histogram values (counts), bins
+        """
+        return self._events.get_peak_property_histogram(name)
+
+    def keep_data_peak_property_above(self, name, value):
+        """
+        A method to add a filter on a peak property
+        (e.g. Amplitudes)
+        :param name: the name of the peak property
+        :param value: the value for the filter
+        """
+        self._cache.clear()
+        self._events.set_threshold(name, value)
+
+    def delete_data_peak_property_above(self, name):
+        """
+        A method to remove a filter on a peak property.
+        :param name: the name of the peak property.
+        """
+        self._cache.clear()
+        self._events.set_threshold(name, 0)
 
     def keep_data_sample_log_below(self, log_name, max_value):
         """
@@ -315,6 +345,11 @@ class MuonEventData(MuonData):
         :returns: the applied filters as a structured dict
         """
         data = {}
+
+        # peak filter
+        data['peak_property'] = {'Amplitudes':
+                                 self._events.get_threshold('Amplitudes')}
+
         # add sample logs
         tmp = {}
         for name in self._dict['logs'].get_names():
@@ -348,6 +383,10 @@ class MuonEventData(MuonData):
         tmp = data['sample_log_filters']
         for name in tmp.keys():
             self._dict['logs'].add_filter(name, *tmp[name])
+
+        tmp = data['peak_property']
+        for name in tmp.keys():
+            self._events.set_threshold(name, tmp[name])
 
     def save_filters(self, file_name):
         """

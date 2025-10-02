@@ -128,6 +128,7 @@ cdef keep_data(double threshold, status, double y, Func cf):
     """
     return threshold != NONE and status and cf.compare(threshold, y)
 
+
 cdef class Events:
     """
     Class for storing event information
@@ -141,6 +142,8 @@ cdef class Events:
     cdef readonly dict[str, double] filter_start
     cdef readonly dict[str, double] filter_end
     cdef readonly double[:] frame_start_time
+    cdef readonly dict[str, double] peak_prop
+    cdef readonly dict[str, double] threshold
 
 
     def __init__(self,
@@ -150,6 +153,7 @@ cdef class Events:
                  cnp.ndarray[double] frame_start,
                  int N_det,
                  cnp.ndarray[int] periods,
+                 cnp.ndarray[double] amps,
                  ):
         """
         Creates an event object.
@@ -160,6 +164,7 @@ cdef class Events:
         :param frame_start: the start time for the frames
         :param N_det: the number of detectors
         :param periods: a vector of the periods for each frame
+        :param amps: a vector of the amplitudes for each event
         """
         self.IDs = IDs
         self.N_spec = N_det
@@ -170,6 +175,45 @@ cdef class Events:
         self.filter_start = {}
         self.filter_end = {}
         self.periods = periods
+        self.peak_prop = {'Amplitudes': amps}
+        self.clear_thresholds()
+
+    def get_peak_property_histogram(self, str name):
+        """
+        A method to inspect the data (e.g. Ampltiudes),
+        which describes the properties of the event
+        peaks. 
+        :param name: the name of the property
+        :returns: the histogram of the requested property,
+        and the bin edges.
+        """
+        return np.histogram(self.peak_prop[name])
+
+    def clear_thresholds(self):
+        """
+        A method to reset all of the filters 
+        on the peak properties.
+        """
+        self.threshold = {"Amplitudes": 0.0}
+
+
+    def set_threshold(self, str name, double value):
+        """
+        A method to set the filter/threshold for 
+        a peak property. 
+        :param name: the name of the property
+        :param value: the value for the threshold/filter.
+        """
+        self.threshold[name] = value
+
+    def get_threshold(self, str name):
+        """
+        A method to get the value of the threshold/filter
+        for a peak property.
+        :param name: the name of the property
+        :returns: the value of the filter/threshold.
+        """
+        return self.threshold[name]
 
     def get_start_times(self):
         """
@@ -308,13 +352,14 @@ cdef class Events:
         the number of removed frames and the indices for the filters.
         :param frame_times: the times for the start of each frame (in seconds).
         The number of removed frames. The list of filtered detector IDs and
-        event time stamps. The list of periods for the kept events
+        event time stamps. The list of periods for the kept events and
+        the amplitudes of the kept events.
         """
 
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int[:] periods
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-        cdef double[:] times, f_start, f_end
+        cdef double[:] times, f_start, f_end, amps
 
         if len(self.filter_start.keys())>0:
             # sort the filter data
@@ -331,6 +376,8 @@ cdef class Events:
             # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
+            amps = good_values_double(f_i_start, f_i_end, self.start_index_list,
+                                      self.peak_prop['Amplitudes'])
 
             if len(times) == 0:
                 raise ValueError("The current filter selection results in zero data "
@@ -339,20 +386,23 @@ cdef class Events:
             # no filters
             IDs = self.IDs
             times = self.times
+            amps = self.peak_prop['Amplitudes']
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
         periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
-        return f_i_start, f_i_end, rm_frames, IDs, times, periods
+        return f_i_start, f_i_end, rm_frames, IDs, times, periods, amps
 
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,
                   double width=0.016,
-                  cache=None):
+                  cache=None,
+                  ):
         """
         Create a matrix of histograms from the event data
-        and apply any filters that might be present.
+        and apply any filters that might be present (including
+        those from peak properties).
         :param min_time: the start time for the histogram
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram
@@ -365,7 +415,10 @@ cdef class Events:
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        f_i_start, f_i_end, rm_frames, IDs, times, periods = self._get_filtered_data(frame_times)
+        f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
+
+        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
+                                      dtype=np.int32)
 
         hist, bins, N = make_histogram(times=times,
                                        spec=IDs,
@@ -373,7 +426,8 @@ cdef class Events:
                                        periods=periods,
                                        min_time=min_time,
                                        max_time=max_time,
-                                       width=width)
+                                       width=width,
+                                       weight=weight)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,

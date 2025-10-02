@@ -7,10 +7,11 @@ LOG = 'sample log'
 MUONDATA = 'MuonData'
 FIGURE = 'Figure (plotting)'
 UTILS = 'utils'
+PEAK = 'Peak Properties'
 
 
 tags = [MUONDATA, LOAD, FIGURE, UTILS,
-        HIST, FILTER, TIME, LOG, NXS]
+        HIST, FILTER, TIME, LOG, NXS, PEAK]
 
 
 class Doc(object):
