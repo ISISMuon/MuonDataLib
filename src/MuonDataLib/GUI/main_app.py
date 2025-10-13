@@ -51,7 +51,7 @@ class main_app(Dash):
                              overlay_style={"visibility": "visible",
                                             "opacity": .5,
                                             "backgroundColor": "white"},
-                             custom_spinner=html.H2(["Please wait",
+                             custom_spinner=html.H2(["Please wait ... ",
                                                      dbc.Spinner(color="danger"
                                                                  )],
                                                     id='spinner')
@@ -68,23 +68,14 @@ class main_app(Dash):
         by the GUI.
         """
         callback(Output('example_plot', 'figure'),
-                 Input('name', 'children'),
+                 Input('file_name', 'children'),
                  prevent_initial_call=True)(self.load_nxs)
 
-        # could do all of the btns as inputs and keep track of
-        # n_clicks to determine the msg
-        callback(Output('spinner', 'children'),
-                 Input('Load', 'n_clicks'),
-                 prevent_initial_call=True)(self.update)
-
-        callback(Output('name3', 'children'),
-                 Input('name2', 'children'),
+        callback(Output('save_exe_dummy', 'children'),
+                 Input('save_btn_dummy', 'children'),
                  prevent_initial_call=True)(self.save_data)
 
         return
-
-    def update(self, n_clicks):
-        return "Loading Muon Event Data. Please Wait"
 
     def save_data(self, name):
         dtype = name[0]

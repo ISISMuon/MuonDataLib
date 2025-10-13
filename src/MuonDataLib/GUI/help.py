@@ -1,4 +1,4 @@
-from MuonDataLib.GUI.main_window import MainDashWindow
+from MuonDataLib.GUI.utils.main_window import MainDashWindow
 from MuonDataLib.help.help import help_app
 
 import sys

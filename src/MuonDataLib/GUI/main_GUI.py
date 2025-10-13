@@ -17,7 +17,7 @@ def launch_GUI():
 
     # open file browser on load
     callback(
-             Output('name', 'children'),
+             Output('file_name', 'children'),
              Input('Load', 'n_clicks'),
              prevent_initial_call=True)(mainWin.open)
 
@@ -28,7 +28,7 @@ def launch_GUI():
 
     # open file browser on save (nxs)
     callback(
-             Output('name2', 'children'),
+             Output('save_btn_dummy', 'children'),
              [Input('Save', 'n_clicks'),
               Input('save_filters', 'n_clicks')],
              prevent_initial_call=True)(mainWin.save)
