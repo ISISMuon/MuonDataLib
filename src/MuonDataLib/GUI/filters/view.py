@@ -7,6 +7,7 @@ class FilterView(ViewTemplate):
     def generate(self):
         return html.Div([
             html.H3("Title: testing", id='title_test'),
+            html.P("", id='title_test_body'),
             ])
 
     def set_callbacks(self, presenter):

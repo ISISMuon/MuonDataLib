@@ -38,6 +38,12 @@ class main_app(Dash):
                     "MuonDataGUI",
                     style={"textAlign": "center"},
                     className="mb-3"),
+                dbc.Alert([html.H4("Warning", className='alert-heading'),
+                           html.P("Error", id='error_msg')],
+                          id='error',
+                          dismissable=True,
+                          fade=False,
+                          is_open=False),
                 # ------------------------------------------------- #
                 dcc.Loading([self.load.layout,
                              dbc.Row([
@@ -67,25 +73,52 @@ class main_app(Dash):
         A method to setup all of the callbacks needed
         by the GUI.
         """
+        callback(Output('error', 'is_open'),
+                 Input('error_msg', 'children'),
+                 prevent_initial_call=True)(self.warning)
+
+        #callback([Output('title_test_body', 'figure'),
+        #          Output('error_msg', 'children')],
+        #         Input('title_test', 'children'),
+        #         prevent_initial_call=True)(self.load_filter)
+
+
+        #callback([Output('example_plot', 'figure'),
+        #          Output('error_msg', 'children')],
         callback(Output('example_plot', 'figure'),
                  Input('file_name', 'children'),
                  prevent_initial_call=True)(self.load_nxs)
 
-        callback(Output('save_exe_dummy', 'children'),
+        callback([Output('save_exe_dummy', 'children'),
+                  Output('error_msg', 'children')],
                  Input('save_btn_dummy', 'children'),
                  prevent_initial_call=True)(self.save_data)
 
         return
 
+    #def load_filter(self, name):
+    #    return self.load.load_filters(name)
+
+    def warning(self, text):
+        if text == '':
+            return False
+        return True
+
+
     def save_data(self, name):
+        if 'None' in name:
+            return '', ''
         dtype = name[0]
         file = name[1:]
-        print("saving to ", file)
-        if dtype == "n":
-            self._data.save_histograms(file)
-        elif dtype == 'j':
-            self._data.save_filters(file)
-        return file
+        try:
+            print("saving to ", file)
+            if dtype == "n":
+                self._data.save_histograms(file)
+            elif dtype == 'j':
+                self._data.save_filters(file)
+            return file, ''
+        except Exception as err:
+            return '', f'error: {err}'
 
     def gen_fake_data(self):
         frame_start_times = self._data.get_frame_start_times()
@@ -100,7 +133,13 @@ class main_app(Dash):
                                          osc, seed=1)
 
     def load_nxs(self, name):
-        self._data = load_events(name[len(CURRENT):], 64)
+        if 'None' in name:
+            return self.plot.plot([], [])#, ''
+        try:
+            self._data = load_events(name[len(CURRENT):], 64)
+        except Exception as err:
+            self._data = None
+            return self.plot.plot([], [])#, f'error: {err}'
 
         # extra stuff for testing, can delete this later
         x, y = self.gen_fake_data()
@@ -113,4 +152,4 @@ class main_app(Dash):
         log = self._data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot.plot(x, y)
+        return self.plot.plot(x, y)#, ''
