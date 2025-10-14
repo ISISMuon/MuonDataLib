@@ -16,7 +16,8 @@ class LoadBarView(ViewTemplate):
                    color='primary', className='me-md-2'),
             dbc.Button('Load filters', id='load_filters', color='primary',
                        n_clicks=0, className='me-md-2'),
-            html.Div(id='file_name', children=CURRENT),
+            html.Div(id='file_name', children=CURRENT, className='me-md-2'),
+
             dbc.Button('Settings', id='settings', color='primary',
                        n_clicks=0, className='me-md-2'),
             dbc.Modal(
