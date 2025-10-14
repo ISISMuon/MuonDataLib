@@ -8,8 +8,8 @@ from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.data.utils import create_data_from_function
 from MuonDataLib.data.loader.load_events import load_events
 import numpy as np
-
-from dash import Dash, Input, Output, callback, dcc, html
+import dash
+from dash import Dash, Input, Output, State, callback, dcc, html
 import dash_bootstrap_components as dbc
 
 
@@ -43,6 +43,7 @@ class main_app(Dash):
                           id='error',
                           dismissable=True,
                           fade=False,
+                          color='danger',
                           is_open=False),
                 # ------------------------------------------------- #
                 dcc.Loading([self.load.layout,
@@ -85,16 +86,28 @@ class main_app(Dash):
 
         #callback([Output('example_plot', 'figure'),
         #          Output('error_msg', 'children')],
-        callback(Output('example_plot', 'figure'),
+        callback([Output('example_plot', 'figure'),
+                  Output('error_msg', 'children')],
                  Input('file_name', 'children'),
+                 State('debug', 'on'),
                  prevent_initial_call=True)(self.load_nxs)
 
-        callback([Output('save_exe_dummy', 'children'),
-                  Output('error_msg', 'children')],
+        callback(dash.dependencies.Input('debug', 'on'),
+                 prevent_initial_call=True)(self.debug)
+
+        callback(Output('save_exe_dummy', 'children'),
+         #         Output('error_msg', 'children')],
                  Input('save_btn_dummy', 'children'),
                  prevent_initial_call=True)(self.save_data)
 
         return
+
+    def debug(self, state):
+        tmp = 'off'
+        if state:
+            tmp = 'on'
+
+        print("debug mode " + tmp)
 
     #def load_filter(self, name):
     #    return self.load.load_filters(name)
@@ -107,7 +120,7 @@ class main_app(Dash):
 
     def save_data(self, name):
         if 'None' in name:
-            return '', ''
+            return ''#, ''
         dtype = name[0]
         file = name[1:]
         try:
@@ -116,9 +129,9 @@ class main_app(Dash):
                 self._data.save_histograms(file)
             elif dtype == 'j':
                 self._data.save_filters(file)
-            return file, ''
+            return file#, ''
         except Exception as err:
-            return '', f'error: {err}'
+            return ''#, f'error: {err}'
 
     def gen_fake_data(self):
         frame_start_times = self._data.get_frame_start_times()
@@ -132,16 +145,19 @@ class main_app(Dash):
                                          [3, 6.1, 0.91],
                                          osc, seed=1)
 
-    def load_nxs(self, name):
+    def load_nxs(self, name, debug_state):
         if 'None' in name:
-            return self.plot.plot([], [])#, ''
+            return self.plot.plot([], [], [], []), ''
         try:
+            if debug_state:
+                raise RuntimeError("Loading error")
+
+            self._data = None
             self._data = load_events(name[len(CURRENT):], 64)
         except Exception as err:
             self._data = None
-            return self.plot.plot([], [])#, f'error: {err}'
+            return self.plot.plot([], [], [], []), f'An error occurred {err}'
 
-        # extra stuff for testing, can delete this later
         x, y = self.gen_fake_data()
         self._data.add_sample_log("Test", x, y)
         # add a filter to test the save method
@@ -151,5 +167,4 @@ class main_app(Dash):
         # load the big data set we have made
         log = self._data._get_sample_log("Test")
         a, b = log.get_values()
-
-        return self.plot.plot(x, y)#, ''
+        return self.plot.plot(a, b, x, y), ''
