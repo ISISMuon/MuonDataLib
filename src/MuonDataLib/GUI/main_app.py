@@ -78,22 +78,23 @@ class main_app(Dash):
                  Input('error_msg', 'children'),
                  prevent_initial_call=True)(self.warning)
 
-        #callback([Output('title_test_body', 'figure'),
-        #          Output('error_msg', 'children')],
-        #         Input('title_test', 'children'),
-        #         prevent_initial_call=True)(self.load_filter)
+        callback([Output('title_test_body', 'children'),
+                  Output('error_msg', 'children', allow_duplicate=True)],
+                 Input('title_test', 'children'),
+                 State('debug', 'on'),
+                 prevent_initial_call=True)(self.load_filter)
 
 
         #callback([Output('example_plot', 'figure'),
         #          Output('error_msg', 'children')],
         callback([Output('example_plot', 'figure'),
-                  Output('error_msg', 'children')],
+                  Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
                  State('debug', 'on'),
                  prevent_initial_call=True)(self.load_nxs)
 
-        callback(dash.dependencies.Input('debug', 'on'),
-                 prevent_initial_call=True)(self.debug)
+        #callback(dash.dependencies.Input('debug', 'on'),
+        #         prevent_initial_call=True)(self.debug)
 
         callback(Output('save_exe_dummy', 'children'),
          #         Output('error_msg', 'children')],
@@ -109,9 +110,16 @@ class main_app(Dash):
 
         print("debug mode " + tmp)
 
-    #def load_filter(self, name):
-    #    return self.load.load_filters(name)
-
+    def load_filter(self, name, debug):
+        text = ''
+        try:
+            if debug:
+                raise RuntimeError("Filter error")
+            text = self.load.load_filters(name[len(CURRENT):])
+            return text, ''
+        except Exception as err:
+            return '', f'Load filter error: {err}'
+        
     def warning(self, text):
         if text == '':
             return False
@@ -131,7 +139,7 @@ class main_app(Dash):
                 self._data.save_filters(file)
             return file#, ''
         except Exception as err:
-            return ''#, f'error: {err}'
+            return '' #, f'error: {err}'
 
     def gen_fake_data(self):
         frame_start_times = self._data.get_frame_start_times()
@@ -152,8 +160,8 @@ class main_app(Dash):
             if debug_state:
                 raise RuntimeError("Loading error")
 
-            self._data = None
             self._data = load_events(name[len(CURRENT):], 64)
+            self.load._data = self._data
         except Exception as err:
             self._data = None
             return self.plot.plot([], [], [], []), f'An error occurred {err}'

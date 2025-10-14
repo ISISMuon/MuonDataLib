@@ -24,7 +24,9 @@ class LoadBarView(ViewTemplate):
                 dbc.ModalHeader(dbc.ModalTitle("Settings")),
                 dbc.ModalFooter(
                     dbc.Row([
-                    daq.BooleanSwitch(on=False, id='debug', label='Debug'),
+                    daq.PowerButton(on=False, id='debug', label='Debug',
+                                    color='#FF5E5E',
+                                    persistence_type='session'),
                     ])
                 ),
             ],
@@ -43,11 +45,10 @@ class LoadBarView(ViewTemplate):
         callback(
              Output('settings_pop_up', 'is_open'),
              Input('settings', 'n_clicks'),
-             prevent_initial_call=True)(self.m)
+             prevent_initial_call=True)(self.open_settings)
 
 
         return
 
-    def m(self, state):
-        #self.debug = state
+    def open_settings(self, state):
         return True

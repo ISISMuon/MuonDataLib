@@ -1,6 +1,7 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.load_bar.view import LoadBarView
 from MuonDataLib.data.loader.load_events import load_events
+import json
 
 
 class LoadBarPresenter(PresenterTemplate):
@@ -11,11 +12,14 @@ class LoadBarPresenter(PresenterTemplate):
         self._load_filter_press = 0
 
     def load_filters(self, name):
-        try:
-            self._data.load_filters(name)
-            return name + '\n' + self._data.report_filters(), ''
-        except Exception as err:
-            return '', err
+        self._data.load_filters(name)
+        tmp = self._data.report_filters()
+        result = ''
+        for k in tmp.keys():
+            a = tmp[k]
+            for f in a.keys():
+                result += f'{k}.{f}: {a[f]} \n'
+        return result
 
     def load_nxs(self, name):
         self._data = load_events(name, 64)
