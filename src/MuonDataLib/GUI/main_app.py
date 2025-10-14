@@ -38,7 +38,7 @@ class main_app(Dash):
                     "MuonDataGUI",
                     style={"textAlign": "center"},
                     className="mb-3"),
-                dbc.Alert([html.H4("Warning", className='alert-heading'),
+                dbc.Alert([html.H4("ERROR MESSAGE", className='alert-heading'),
                            html.P("Error", id='error_msg')],
                           id='error',
                           dismissable=True,
@@ -85,20 +85,19 @@ class main_app(Dash):
                  prevent_initial_call=True)(self.load_filter)
 
 
-        #callback([Output('example_plot', 'figure'),
-        #          Output('error_msg', 'children')],
         callback([Output('example_plot', 'figure'),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
                  State('debug', 'on'),
                  prevent_initial_call=True)(self.load_nxs)
 
-        #callback(dash.dependencies.Input('debug', 'on'),
-        #         prevent_initial_call=True)(self.debug)
+        callback(dash.dependencies.Input('debug', 'on'),
+                 prevent_initial_call=True)(self.debug)
 
-        callback(Output('save_exe_dummy', 'children'),
-         #         Output('error_msg', 'children')],
+        callback([Output('save_exe_dummy', 'children'),
+                  Output('error_msg', 'children', allow_duplicate=True)],
                  Input('save_btn_dummy', 'children'),
+                 State('debug', 'on'),
                  prevent_initial_call=True)(self.save_data)
 
         return
@@ -126,20 +125,23 @@ class main_app(Dash):
         return True
 
 
-    def save_data(self, name):
+    def save_data(self, name, debug):
         if 'None' in name:
             return ''#, ''
         dtype = name[0]
         file = name[1:]
         try:
+            if debug:
+                raise RuntimeError("Saving error")
+
             print("saving to ", file)
             if dtype == "n":
                 self._data.save_histograms(file)
             elif dtype == 'j':
                 self._data.save_filters(file)
-            return file#, ''
+            return file, ''
         except Exception as err:
-            return '' #, f'error: {err}'
+            return '', f'Saving Error: {err}'
 
     def gen_fake_data(self):
         frame_start_times = self._data.get_frame_start_times()
