@@ -23,9 +23,9 @@ def load_log_data(log, key, data):
     param key: the name of the specific sample log
     :param data: the muon data object
     """
-    x = log['time'][:]
+    x = log['value_log']['time'][:]
     if isinstance(x[0], np.float32):
-        y = log['value'][:]
+        y = log['value_log']['value'][:]
         data.add_sample_log(key,
                             np.asarray(x, dtype=np.double),
                             np.asarray(y, dtype=np.double))
