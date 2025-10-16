@@ -51,11 +51,14 @@ def create_default(version):
     """
     default_yml = {}
 
+    # dash_daq is on condor, but it doesnt install correctly on
+    # readthedocs, so using pip instead.
     pip_dict = {'readthedocs-sphinx-ext': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
                 'pyqt5': '',
                 'pyqtwebengine': '',
+                'dash_daq': '',
                 }
 
     default_yml['name'] = 'MuonDataLib-dev'
@@ -69,7 +72,6 @@ def create_default(version):
                                    'jupyter-book': '',
                                    'nbsphinx': '',
                                    'dash': '',
-                                   'dash_daq': '',
                                    'pip': pip_dict}
     return default_yml
 
