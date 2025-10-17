@@ -35,11 +35,12 @@ class PlotAreaPresenter(PresenterTemplate):
         y_labels = ["Field (filtered)", "Temp (unfiltered)"]
 
         # create the subplots with a shared x axis.
-        fig = make_subplots(rows=self.n_rows, cols=self.n_cols,
+        fig = make_subplots(rows=self.n_rows,
+                            cols=self.n_cols,
                             x_title='time',
-                                  shared_xaxes=True,
-                                  vertical_spacing=0.02,
-                                  start_cell='top-left')
+                            shared_xaxes=True,
+                            vertical_spacing=0.02,
+                            start_cell='top-left')
 
         self._height = 900
         fig.update_layout(height=self._height)

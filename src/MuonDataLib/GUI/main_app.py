@@ -72,12 +72,12 @@ class main_app(Dash):
                                      className="g-0", align='center'),
                              self.save.layout,
                              ],
-                             overlay_style={"visibility": "visible",
-                                            "opacity": .5,
-                                            "backgroundColor": "white"},
-                             custom_spinner=html.H2(["Please wait ... ",
-                                                     dbc.Spinner(color="danger"
-                                                                 )],
+                            overlay_style={"visibility": "visible",
+                                           "opacity": .5,
+                                           "backgroundColor": "white"},
+                            custom_spinner=html.H2(["Please wait ... ",
+                                                    dbc.Spinner(color="danger")
+                                                    ],
                                                     id='spinner')
                             ),
 

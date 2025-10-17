@@ -1,4 +1,5 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
+from dash import dcc, html
 
 
 class PlotAreaView(ViewTemplate):
@@ -12,9 +13,8 @@ class PlotAreaView(ViewTemplate):
         :returns: the layout for the view.
         """
         return html.Div([
-                        html.Div([dcc.Graph(id='example_plot')
-                                  ],
-                                 style={'width': '100%',
-                                        'display': 'inline-block',
-                                         'padding': '0 20'}),
-                        ])
+            html.Div(dcc.Graph(id='example_plot'),
+                     style={'width': '100%',
+                            'display': 'inline-block',
+                            'padding': '0 20'}),
+                     ])
