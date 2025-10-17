@@ -78,7 +78,7 @@ class main_app(Dash):
                             custom_spinner=html.H2(["Please wait ... ",
                                                     dbc.Spinner(color="danger")
                                                     ],
-                                                    id='spinner')
+                                                   id='spinner')
                             ),
 
                 ],
