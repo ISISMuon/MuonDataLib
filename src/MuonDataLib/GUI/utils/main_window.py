@@ -11,6 +11,8 @@ from time import sleep
 
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
+from dash import Input, Output, callback, ctx
+
 
 class MainDashWindow(QMainWindow):
     """
@@ -34,7 +36,23 @@ class MainDashWindow(QMainWindow):
         self.open_file_signal.connect(self.open_file_slot)
         self.save_file_signal.connect(self.save_file_slot)
         self.file = None
-        self.nxs = 0
+
+        callback(
+                 Output('file_name', 'children'),
+                 Input('Load', 'n_clicks'),
+                 prevent_initial_call=True)(self.open)
+
+        callback(
+                 Output('title_test', 'children'),
+                 Input('load_filters', 'n_clicks'),
+                 prevent_initial_call=True)(self.open_json)
+
+        # open file browser on save (nxs)
+        callback(
+                 Output('save_btn_dummy', 'children'),
+                 [Input('Save', 'n_clicks'),
+                  Input('save_filters', 'n_clicks')],
+                 prevent_initial_call=True)(self.save)
 
     def closeEvent(self, event):
         """
@@ -108,13 +126,13 @@ class MainDashWindow(QMainWindow):
     def save(self, n_nxs, n_json):
         dtype = ''
         self.file = None
-        if n_nxs == self.nxs:
+        btn_pressed = ctx.triggered_id
+        if btn_pressed == 'save_filters':
             self.save_file_signal.emit('json (*.json)')
             dtype = 'j'
-        else:
+        elif btn_pressed == 'Save':
             self.save_file_signal.emit('nxs (*.nxs)')
             dtype = 'n'
-        self.nxs = n_nxs
         """
         This is not nice, but we need to
         delay returning from this function
