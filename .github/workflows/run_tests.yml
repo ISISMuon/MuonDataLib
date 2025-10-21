@@ -60,13 +60,6 @@ jobs:
             python -m pip install .
             python -V
 
-      - name: Disable mandb
-        if: ${{ matrix.os  == 'ubuntu-latest' }}
-        run: |
-          # Disable mandb
-          echo "set man-db/auto-update false" | sudo debconf-communicate
-          sudo dpkg-reconfigure man-db
-
       - uses: pyvista/setup-headless-display-action@v3
         if: ${{ matrix.os  == 'ubuntu-latest' }}
         with:
