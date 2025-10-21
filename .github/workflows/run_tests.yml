@@ -77,3 +77,9 @@ jobs:
         shell: bash -l {0}
         run:  |
              python -m pytest
+      - task: PublishPipelineArtifact@1
+        displayName: Upload screenshots
+        inputs:
+          targetPath: /tmp/dash_artifacts
+          artifactName: screenshots
+        condition: succeededOrFailed()
