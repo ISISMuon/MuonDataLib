@@ -71,7 +71,8 @@ def create_default(version):
                                    'sphinx': '',
                                    'jupyter-book': '',
                                    'nbsphinx': '',
-                                   'dash': '',
+                                   'dash[testing]': '',
+                                   'selenium': '',
                                    'pip': pip_dict}
     return default_yml
 

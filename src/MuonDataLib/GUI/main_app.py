@@ -7,31 +7,21 @@ from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 
 from MuonDataLib.data.utils import create_data_from_function
 from MuonDataLib.data.loader.load_events import load_events
-import numpy as np
 import dash
 from dash import Dash, Input, Output, State, callback, dcc, html
 import dash_bootstrap_components as dbc
 
 
-def osc(x, amp, omega, phi):
-    """
-    This creates some data to represent
-    sample logs within the GUI.
-
-    It will be removed.
-
-    """
-    return amp*np.sin(x*omega + phi)
-
-
-class main_app(Dash):
+class MainAPPView(Dash):
     """
     Creates the main dash app for event filtering.
+    This does mix the presenter and the view.
+    However, it is because this needs to be a
+    'Dash' like object.
     """
     def __init__(self):
         """
-        Creates a Dash app that can be used. This one is for
-        the main GUI.
+        Creates the view for the Dash app that can be used.
         """
         super().__init__(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 

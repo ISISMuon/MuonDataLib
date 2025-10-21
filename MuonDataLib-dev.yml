@@ -12,7 +12,8 @@ dependencies:
   - sphinx
   - jupyter-book
   - nbsphinx
-  - dash
+  - dash[testing]
+  - selenium
   - pip:
     - readthedocs-sphinx-ext
     - dash_bootstrap_components
