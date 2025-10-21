@@ -82,5 +82,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          targetPath: /tmp/dash_artifacts
-          artifactName: screenshots
+          path: /tmp/dash_artifacts/*
+          name: screenshots
