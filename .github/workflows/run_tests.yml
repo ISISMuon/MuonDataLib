@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload screenshots
         if: always()
-        uses: PublishPipelineArtifact@1
+        uses: actions/upload-artifact@v4
         with:
           targetPath: /tmp/dash_artifacts
           artifactName: screenshots
