@@ -12,10 +12,10 @@ dependencies:
   - sphinx
   - jupyter-book
   - nbsphinx
-  - dash[testing]
   - selenium
   - pip:
     - readthedocs-sphinx-ext
+    - dash[testing]
     - dash_bootstrap_components
     - sphinx-rtd-theme
     - pyqt5

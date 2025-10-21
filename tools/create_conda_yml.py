@@ -54,6 +54,7 @@ def create_default(version):
     # dash_daq is on condor, but it doesnt install correctly on
     # readthedocs, so using pip instead.
     pip_dict = {'readthedocs-sphinx-ext': '',
+                'dash[testing]': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
                 'pyqt5': '',
@@ -71,7 +72,6 @@ def create_default(version):
                                    'sphinx': '',
                                    'jupyter-book': '',
                                    'nbsphinx': '',
-                                   'dash[testing]': '',
                                    'selenium': '',
                                    'pip': pip_dict}
     return default_yml
