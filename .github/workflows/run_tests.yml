@@ -59,9 +59,20 @@ jobs:
             conda activate test
             python -m pip install .
             python -V
-      - name: Setup Fluxbox and Xvfb
 
-        if: inputs.os == 'ubuntu'
+      - name: Disable mandb
+        if: ${{ matrix.os  == 'ubuntu-latest' }}
+        run: |
+          # Disable mandb
+          echo "set man-db/auto-update false" | sudo debconf-communicate
+          sudo dpkg-reconfigure man-db
+
+      - uses: pyvista/setup-headless-display-action@v3
+        if: ${{ matrix.os  == 'ubuntu-latest' }}
+        with:
+          qt: true
+
+        if: inputs.os == 'ubuntu-latest'
         run: |
           sudo apt-get -y install fluxbox
           Xvfb :99 &
