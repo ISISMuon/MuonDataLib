@@ -78,9 +78,9 @@ jobs:
         run:  |
              python -m pytest
 
-      - name: PublishPipelineArtifact@1
+      - name: Upload screenshots
         if: succeededOrFailed()
-        displayName: Upload screenshots
+        uses: PublishPipelineArtifact@1
         with:
           targetPath: /tmp/dash_artifacts
           artifactName: screenshots
