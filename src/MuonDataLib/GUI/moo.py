@@ -19,16 +19,16 @@ class View(Dash):
         Output('container-no-ctx', 'children'),
         Input('btn-1', 'n_clicks'),
         Input('btn-2', 'n_clicks'))(self.update)
- 
+
         callback(Output('container','children'),
                  Input('btn-1', 'n_clicks'),
                  Input('btn-2', 'n_clicks'),
                  Input('btn-3', 'n_clicks'))(self.display)
- 
+
 
     def update(self, btn1, btn2):
         return f'button 1: {btn1} & button 2: {btn2}'
-    
+
     def display(self, btn1, btn2, btn3):
         button_clicked = ctx.triggered_id
         return f'You last clicked button with ID {button_clicked}'

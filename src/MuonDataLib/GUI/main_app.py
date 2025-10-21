@@ -10,9 +10,13 @@ from MuonDataLib.data.loader.load_events import load_events
 import dash
 from dash import Dash, Input, Output, State, callback, dcc, html
 import dash_bootstrap_components as dbc
+import numpy as np
 
 
-class MainAPPView(Dash):
+def osc(x, A, omega, phi):
+    return A*np.sin(omega*x + phi)
+
+class MainApp(Dash):
     """
     Creates the main dash app for event filtering.
     This does mix the presenter and the view.
