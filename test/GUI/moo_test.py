@@ -26,8 +26,8 @@ def test_2(dash_duo):
         dash_duo.find_element('#btn-2').click()
         time.sleep(1)
         assert (dash_duo.find_element('#container').text == f'You last clicked button with ID btn-2')
-        assert (dash_duo.find_element('#container-no-ctx').text == f'button 1: None & button 2: 1')
+        assert (dash_duo.find_element('#container-no-ctx').text == f'a button 1: None & button 2: 1')
 
 
 # needed to install dash[testing] and selenium
-    
+
