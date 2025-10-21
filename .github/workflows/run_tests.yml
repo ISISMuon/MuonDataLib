@@ -79,7 +79,7 @@ jobs:
              python -m pytest
 
       - name: Upload screenshots
-        if: failure()
+        if: always()
         uses: PublishPipelineArtifact@1
         with:
           targetPath: /tmp/dash_artifacts
