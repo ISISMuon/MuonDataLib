@@ -1,129 +1,31 @@
-from MuonDataLib.GUI.load_bar.presenter import LoadBarPresenter
 from MuonDataLib.GUI.load_bar.view import CURRENT
-from MuonDataLib.GUI.save_bar.presenter import SaveBarPresenter
+from MuonDataLib.GUI.load_bar.presenter import LoadBarPresenter
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
-
+from MuonDataLib.GUI.save_bar.presenter import SaveBarPresenter
 
 from MuonDataLib.data.utils import create_data_from_function
 from MuonDataLib.data.loader.load_events import load_events
-import dash
-from dash import Dash, Input, Output, State, callback, dcc, html
-import dash_bootstrap_components as dbc
 import numpy as np
 
 
 def osc(x, A, omega, phi):
     return A*np.sin(omega*x + phi)
 
-class MainApp(Dash):
-    """
-    Creates the main dash app for event filtering.
-    This does mix the presenter and the view.
-    However, it is because this needs to be a
-    'Dash' like object.
-    """
+
+class MainAppPresenter(object):
+
     def __init__(self):
         """
-        Creates the view for the Dash app that can be used.
+        This is the presenter for the
+        main app. It follows the MVP
+        pattern, but the view
+        is the main app.
         """
-        super().__init__(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-        # get presenters
         self.load = LoadBarPresenter()
+        self.filter = FilterPresenter()
         self.plot = PlotAreaPresenter()
         self.save = SaveBarPresenter()
-        self.filter = FilterPresenter()
-
-        filter_width = 2
-
-        # setup the layout
-        self.layout = dbc.Container(
-            [
-                html.H1(
-                    "MuonDataGUI",
-                    style={"textAlign": "center"},
-                    className="mb-3"),
-
-                # place the notifcations just under the title
-                dbc.Alert([html.H4("ERROR MESSAGE", className='alert-heading'),
-                           html.P("Error", id='error_msg')],
-                          id='error',
-                          dismissable=True,
-                          fade=False,
-                          color='danger',
-                          is_open=False),
-                # ------------------------------------------------- #
-
-                # this is also placed inside Loading, so it produces
-                # a nice loading message when the GUI is busy.
-                dcc.Loading([self.load.layout,
-                             dbc.Row([
-                                 dbc.Col(self.filter.layout,
-                                         width=filter_width),
-                                 dbc.Col(self.plot.layout,
-                                         width=12-filter_width)],
-                                     className="g-0", align='center'),
-                             self.save.layout,
-                             ],
-                            overlay_style={"visibility": "visible",
-                                           "opacity": .5,
-                                           "backgroundColor": "white"},
-                            custom_spinner=html.H2(["Please wait ... ",
-                                                    dbc.Spinner(color="danger")
-                                                    ],
-                                                   id='spinner')
-                            ),
-
-                ],
-            fluid=True,
-        )
-        self.set_callbacks()
-
-    def set_callbacks(self):
-        """
-        A method to setup all of the callbacks needed
-        by the GUI.
-
-        Callbacks should all have unique Output's. However,
-        we want several things to be able to return an
-        error message. Instead of using the callback
-        context to determine what was called (and a long
-        if elif block) it was decided to use the
-        'allow_duplicate' option instead.
-        """
-        # opens the error notifcation if the error message changes
-        callback(Output('error', 'is_open'),
-                 Input('error_msg', 'children'),
-                 prevent_initial_call=True)(self.alert)
-
-        # Updates the information on the loaded filter. With error
-        # catching.
-        callback([Output('title_test_body', 'children'),
-                  Output('error_msg', 'children', allow_duplicate=True)],
-                 Input('title_test', 'children'),
-                 State('debug', 'on'),
-                 prevent_initial_call=True)(self.load_filter)
-
-        # Plots the data after it is loaded.
-        callback([Output('example_plot', 'figure'),
-                  Output('error_msg', 'children', allow_duplicate=True)],
-                 Input('file_name', 'children'),
-                 State('debug', 'on'),
-                 prevent_initial_call=True)(self.load_nxs)
-
-        # Turns on debug mode
-        callback(dash.dependencies.Input('debug', 'on'),
-                 prevent_initial_call=True)(self.debug)
-
-        # Saves the data (both histogram and filter file).
-        callback([Output('save_exe_dummy', 'children'),
-                  Output('error_msg', 'children', allow_duplicate=True)],
-                 Input('save_btn_dummy', 'children'),
-                 State('debug', 'on'),
-                 prevent_initial_call=True)(self.save_data)
-
-        return
 
     def debug(self, state):
         """

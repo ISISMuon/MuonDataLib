@@ -1,4 +1,4 @@
-from MuonDataLib.GUI.main_app import MainApp
+from MuonDataLib.GUI.main_app.view import MainApp
 from MuonDataLib.GUI.launch import launch_dash
 
 

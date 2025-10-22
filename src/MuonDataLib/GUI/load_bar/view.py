@@ -28,8 +28,8 @@ class LoadBarView(ViewTemplate):
                        n_clicks=0, className='me-md-2'),
             html.Div(id='file_name', children=CURRENT, className='me-md-2'),
 
-            dbc.Button('Settings', id='settings', color='primary',
-                       n_clicks=0, className='me-md-2'),
+            dbc.Button(id='settings', color='primary',
+                       n_clicks=0, className='bi-gear-fill ms-auto'),
             # code for the settings pop-up
             dbc.Modal(
                       [dbc.ModalHeader(dbc.ModalTitle("Settings")),
