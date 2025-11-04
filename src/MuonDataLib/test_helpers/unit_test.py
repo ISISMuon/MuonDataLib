@@ -1,5 +1,30 @@
 import numpy as np
 import unittest
+import os
+
+
+FILE = os.path.join(os.path.dirname(__file__),
+                    '..',
+                    '..',
+                    '..',
+                    'test',
+                    'data_files',
+                    'HIFI00195790.nxs')
+
+FILTER = os.path.join(os.path.dirname(__file__),
+                      '..',
+                      '..',
+                      '..',
+                      'test',
+                      'data_files',
+                      'load_filter.json')
+
+EXPECT = ("peak_property.Amplitudes: 3.14 \n"
+          "sample_log_filters.Temp: [0.0044, 0.163] \n"
+          "time_filters.keep_filters: {'first': [0.01, 0.02],"
+          " 'second': [0.05, 0.06]} \n"
+          "time_filters.remove_filters: {'one': [1, 2],"
+          " 'two': [5, 7]} \n")
 
 
 class TestHelper(unittest.TestCase):
@@ -52,3 +77,21 @@ class TestHelper(unittest.TestCase):
             else:
                 msg = f'values do not match in array {array[j]}, {ref[j]}'
                 self.assertAlmostEqual(array[j], ref[j], 3, msg=msg)
+
+    def assertMockOnce(self, mock, expected_args):
+        """
+        A method to check that a mock has the correct
+        args. We assume that it is called once.
+        This is needed as we often have arrays.
+        :param mock: the mock object
+        :param expected_args: the expected args for the
+        call
+        """
+        mock.assert_called_once()
+        args = mock.call_args[0]
+
+        self.assertEqual(len(expected_args),
+                         len(args))
+        for k in range(len(args)):
+            self.assertArrays(args[k],
+                              expected_args[k])

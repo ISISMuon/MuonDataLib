@@ -11,48 +11,35 @@ from time import sleep
 
 from PyQt5.QtWidgets import QMainWindow, QFileDialog
 
-from dash import Input, Output, callback, ctx
+from dash import ctx
 
 
-class MainDashWindow(QMainWindow):
+class BasicMainDashWindow(QMainWindow):
     """
-    A main window for the stand alone GUI
-    that contains the dash app.
+    A main window for embedding
+    a dash app using pyqt.
     """
-    open_file_signal = QtCore.pyqtSignal(str)
-    save_file_signal = QtCore.pyqtSignal(str)
 
     def __init__(self, dash_app, parent=None):
         """
         Creates the main window for the dash app.
         :param dash_app: the dash app we want to embed,
-        it should not be running
+        it should not be running or called
         :param parent: the parent of the GUI (typically
         None)
         """
         super().__init__(parent)
-        self.mainWidget = MainWidget(dash_app)
+        self.set_window(dash_app)
         self.setCentralWidget(self.mainWidget)
-        self.open_file_signal.connect(self.open_file_slot)
-        self.save_file_signal.connect(self.save_file_slot)
-        self.file = None
 
-        callback(
-                 Output('file_name', 'children'),
-                 Input('Load', 'n_clicks'),
-                 prevent_initial_call=True)(self.open)
-
-        callback(
-                 Output('title_test', 'children'),
-                 Input('load_filters', 'n_clicks'),
-                 prevent_initial_call=True)(self.open_json)
-
-        # open file browser on save (nxs)
-        callback(
-                 Output('save_btn_dummy', 'children'),
-                 [Input('Save', 'n_clicks'),
-                  Input('save_filters', 'n_clicks')],
-                 prevent_initial_call=True)(self.save)
+    def set_window(self, dash_app):
+        """
+        A method for setting the dash app
+        to the main window.
+        :param dash_app: the dash app as
+        a callable.
+        """
+        self.mainWidget = MainWidget(dash_app())
 
     def closeEvent(self, event):
         """
@@ -60,8 +47,45 @@ class MainDashWindow(QMainWindow):
         sure that the Dash app and thread
         is terminated gracefully
         """
-        super(MainDashWindow, self).closeEvent(event)
+        super(BasicMainDashWindow, self).closeEvent(event)
         self.mainWidget.worker.terminate()
+
+
+class MainDashWindow(BasicMainDashWindow):
+    """
+    A main window for the stand alone GUI
+    that contains the dash app.
+    This includes some pyqt for file
+    browsing
+    """
+    open_file_signal = QtCore.pyqtSignal(str)
+    save_file_signal = QtCore.pyqtSignal(str)
+
+    def set_window(self, dash_app):
+        """
+        A method for setting the dash app
+        to the main window.
+        :param dash_app: the dash app as
+        a callable.
+        """
+        self.mainWidget = MainWidget(dash_app(self.open,
+                                              self.open_json,
+                                              self.save))
+
+    def __init__(self, dash_app, parent=None):
+        """
+        Creates the main window for the dash app,
+        with some pyqt for file browsing
+        :param dash_app: the dash app we want to embed,
+        it should not be running
+        :param parent: the parent of the GUI (typically
+        None)
+        """
+        super().__init__(dash_app, parent)
+
+        self.open_file_signal.connect(self.open_file_slot)
+        self.save_file_signal.connect(self.save_file_slot)
+        self.file = None
 
     @QtCore.pyqtSlot(str)
     def open_file_slot(self, extension):

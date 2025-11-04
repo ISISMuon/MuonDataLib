@@ -9,19 +9,26 @@ class MainApp(Dash):
     """
     Creates the main dash app for event filtering.
     """
-    def __init__(self):
+    def __init__(self, open_nxs, open_json, save):
         """
         Creates the Dash app.
         This is in the MVP style,
         except this is the widget that needs
         to be called to activate it.
+
+        :param open_nxs: the function call for when the load
+        button is pressed.
+        :param open_json: the function call for when the load
+        filters button is pressed.
+        :param save: the function call for when the one of the
+        save buttons is pressed.
         """
         super().__init__(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
                                                          dbc.icons.BOOTSTRAP])
 
         self.presenter = MainAppPresenter()
         self.layout = self.generate()
-        self.set_callbacks()
+        self.set_callbacks(open_nxs, open_json, save)
 
     def generate(self):
         """
@@ -78,7 +85,7 @@ class MainApp(Dash):
             fluid=True,
         )
 
-    def set_callbacks(self):
+    def set_callbacks(self, open_nxs, open_json, save):
         """
         A method to setup all of the callbacks needed
         by the GUI.
@@ -89,6 +96,14 @@ class MainApp(Dash):
         context to determine what was called (and a long
         if elif block) it was decided to use the
         'allow_duplicate' option instead.
+
+        :param open_nxs: the function call for when the load
+        button is pressed.
+        :param open_json: the function call for when the load
+        filters button is pressed.
+        :param save: the function call for when the one of the
+        save buttons is pressed.
+
         """
         # opens the error notifcation if the error message changes
         callback(Output('error', 'is_open'),
@@ -120,3 +135,25 @@ class MainApp(Dash):
                  Input('save_btn_dummy', 'children'),
                  State('debug', 'on'),
                  prevent_initial_call=True)(self.presenter.save_data)
+
+        """
+        callbacks from pyqt
+        """
+        # open a nxs file
+        callback(
+                 Output('file_name', 'children'),
+                 Input('Load', 'n_clicks'),
+                 prevent_initial_call=True)(open_nxs)
+
+        # open a json filter file
+        callback(
+                 Output('title_test', 'children'),
+                 Input('load_filters', 'n_clicks'),
+                 prevent_initial_call=True)(open_json)
+
+        # open file browser on save (nxs and json)
+        callback(
+                 Output('save_btn_dummy', 'children'),
+                 [Input('Save', 'n_clicks'),
+                  Input('save_filters', 'n_clicks')],
+                 prevent_initial_call=True)(save)

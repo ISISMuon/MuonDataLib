@@ -1,9 +1,8 @@
-from MuonDataLib.GUI.utils.main_window import MainDashWindow
 import sys
 from PyQt5 import QtWidgets
 
 
-def launch_dash(dash_app):
+def launch_dash(dash_app, window):
     """
     A simple method to launch a dash app
     as part of a stand alone GUI.
@@ -12,7 +11,7 @@ def launch_dash(dash_app):
     """
     app = QtWidgets.QApplication(sys.argv)
 
-    mainWin = MainDashWindow(dash_app)
+    mainWin = window(dash_app)
     mainWin.show()
 
     sys.exit(app.exec_())

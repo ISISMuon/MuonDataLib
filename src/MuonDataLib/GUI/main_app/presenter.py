@@ -137,7 +137,7 @@ class MainAppPresenter(object):
 
         except Exception as err:
             self._data = None
-            return self.plot.plot([], [], [], []), f'An error occurred {err}'
+            return self.plot.plot([], [], [], []), f'An error occurred: {err}'
 
         # add fake sample log data
         x, y = self.gen_fake_data()
