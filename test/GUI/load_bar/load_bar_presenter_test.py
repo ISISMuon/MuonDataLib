@@ -1,7 +1,23 @@
 import unittest
 from unittest import mock
 from MuonDataLib.GUI.load_bar.presenter import LoadBarPresenter
-from MuonDataLib.test_helpers.unit_test import TestHelper, FILE, FILTER, EXPECT
+from MuonDataLib.test_helpers.unit_test import TestHelper
+import sys
+import os
+
+# getting the name of the directory
+# where the this file is present.
+current = os.path.dirname(os.path.realpath(__file__))
+
+# Getting the parent directory name
+# where the current directory is present.
+parent = os.path.dirname(current)
+
+# adding the parent directory to
+# the sys.path.
+sys.path.append(parent)
+
+from data_paths import FILE, FILTER, EXPECT  # noqa: E402
 
 
 class LoadBarPresenterTest(TestHelper):

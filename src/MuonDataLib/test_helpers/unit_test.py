@@ -1,30 +1,5 @@
 import numpy as np
 import unittest
-import os
-
-
-FILE = os.path.join(os.path.dirname(__file__),
-                    '..',
-                    '..',
-                    '..',
-                    'test',
-                    'data_files',
-                    'HIFI00195790.nxs')
-
-FILTER = os.path.join(os.path.dirname(__file__),
-                      '..',
-                      '..',
-                      '..',
-                      'test',
-                      'data_files',
-                      'load_filter.json')
-
-EXPECT = ("peak_property.Amplitudes: 3.14 \n"
-          "sample_log_filters.Temp: [0.0044, 0.163] \n"
-          "time_filters.keep_filters: {'first': [0.01, 0.02],"
-          " 'second': [0.05, 0.06]} \n"
-          "time_filters.remove_filters: {'one': [1, 2],"
-          " 'two': [5, 7]} \n")
 
 
 class TestHelper(unittest.TestCase):
