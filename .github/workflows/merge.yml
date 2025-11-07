@@ -48,7 +48,6 @@ jobs:
 
       - name: setup driver
         uses: browser-actions/setup-chrome@v2
-        run: chrome --version
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
