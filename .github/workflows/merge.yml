@@ -46,6 +46,8 @@ jobs:
         with:
           name: pyproject
 
+      - name: setup driver
+        uses: nanasess/setup-chromdriver@v2
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
         env:
