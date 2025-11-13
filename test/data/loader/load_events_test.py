@@ -34,6 +34,16 @@ class mock_data(object):
 
 class LoadEventsTest(TestHelper):
 
+    def test_load_fails(self):
+        file = os.path.join('HIFI00195790.nxs')
+        try:
+            _ = load_events(file, 64)
+            # if we get to this line something went wrong
+            self.assertTrue(False)
+        except RuntimeError as err:
+            self.assertEqual(str(err), 'The file '
+                             'HIFI00195790.nxs cannot be read')
+
     def test_load_with_logs(self):
         file = os.path.join(os.path.dirname(__file__),
                             '..',

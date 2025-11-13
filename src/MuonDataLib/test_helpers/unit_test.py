@@ -52,3 +52,21 @@ class TestHelper(unittest.TestCase):
             else:
                 msg = f'values do not match in array {array[j]}, {ref[j]}'
                 self.assertAlmostEqual(array[j], ref[j], 3, msg=msg)
+
+    def assertMockOnce(self, mock, expected_args):
+        """
+        A method to check that a mock has the correct
+        args. We assume that it is called once.
+        This is needed as we often have arrays.
+        :param mock: the mock object
+        :param expected_args: the expected args for the
+        call
+        """
+        mock.assert_called_once()
+        args = mock.call_args[0]
+
+        self.assertEqual(len(expected_args),
+                         len(args))
+        for k in range(len(args)):
+            self.assertArrays(args[k],
+                              expected_args[k])

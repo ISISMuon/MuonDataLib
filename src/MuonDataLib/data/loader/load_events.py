@@ -45,6 +45,21 @@ def load_logs(log, data):
 def load_events(file_name, N):
     """
     Load muon event nxs file (ISIS)
+    with error handling
+    :param file_name: the name of the file to load
+    :param N: the number of detectors
+    :return: a MuonEventData object
+    """
+    try:
+        return _load_events(file_name, N)
+    except Exception:
+        msg = f"The file {file_name} cannot be read"
+        raise RuntimeError(msg)
+
+
+def _load_events(file_name, N):
+    """
+    Load muon event nxs file (ISIS)
     :param file_name: the name of the file to load
     :param N: the number of detectors
     :return: a MuonEventData object
