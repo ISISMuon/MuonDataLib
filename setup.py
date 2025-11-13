@@ -42,7 +42,7 @@ setup(
     name=PACKAGE_NAME,
     requires=['numpy', 'cython', 'plotly'],
     setup_requires=['numpy', 'cython', 'plotly'],
-    install_requires=['numpy', 'cython', 'plotly'],
+    install_requires=['numpy', 'cython', 'plotly', 'h5py'],
     packages=find_packages(where='src'),
     ext_modules=extensions,
     version=version,

@@ -1,5 +1,5 @@
 [build-system]
-requires = ['cython', 'numpy', 'setuptools<=75.7.0', 'pyqt5']
+requires = ['cython', 'numpy', 'setuptools<=75.7.0', 'pyqt5', 'h5py']
 build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
