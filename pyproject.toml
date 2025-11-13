@@ -1,5 +1,5 @@
 [build-system]
-requires = ['cython', 'numpy', 'setuptools<=75.7.0', 'pyqt5', 'h5py=3.15.0']
+requires = ['cython', 'numpy', 'setuptools<=75.7.0', 'pyqt5', 'h5py==3.15.0']
 build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
@@ -15,7 +15,7 @@ name = 'muondatalib'
 version = "0.9.2b9"
 
 requires-python = ">=3.8"
-dependencies = ['numpy', 'h5py=3.15.0', 'plotly', 'cython', 'pyqt5', 'dash', 'dash_bootstrap_components', 'pyqtwebengine']
+dependencies = ['numpy', 'h5py==3.15.0', 'plotly', 'cython', 'pyqt5', 'dash', 'dash_bootstrap_components', 'pyqtwebengine']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
 description = 'Reading and writing for ISIS muon experiments.'
 readme = 'README.md'
