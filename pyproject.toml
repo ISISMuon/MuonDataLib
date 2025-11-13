@@ -15,7 +15,7 @@ name = 'muondatalib'
 version = "0.9.2b9"
 
 requires-python = ">=3.8"
-dependencies = ['numpy', 'h5py', 'plotly', 'cython', 'pyqt5', 'dash[testing]', 'dash_bootstrap_components', 'pyqtwebengine', 'dash_daq']
+dependencies = ['numpy', 'h5py==3.14', 'plotly', 'cython', 'pyqt5', 'dash[testing]', 'dash_bootstrap_components', 'pyqtwebengine', 'dash_daq']
 authors = [{name='Anthony Lim', email='anthony.lim@stfc.ac.uk'}]
 description = 'Reading and writing for ISIS muon experiments.'
 readme = 'README.md'
