@@ -2,7 +2,8 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.plot_area.view import PlotAreaView
 import plotly
 from plotly.subplots import make_subplots
-
+from dash import no_update
+import numpy as np
 
 class PlotAreaPresenter(PresenterTemplate):
     """
@@ -15,6 +16,53 @@ class PlotAreaPresenter(PresenterTemplate):
         Creates a Plot Area Presenter.
         """
         self._view = PlotAreaView(self)
+        self._min = 1000
+        self._max = -1000
+
+    def add_filter(self, data, fig):
+        #tmp = fig['layout']['xaxis']['range']
+        #print('mooo', tmp, self._min)
+        # clear the current filters from plot
+        self.fig.layout.shapes = []
+        self.fig.layout.annotations = []
+        # add the filters back
+        for filter_details in data:
+            if filter_details['Type_t'] == 'Include':
+                self.add_inc_data(filter_details)
+            else:
+                self.add_exc_data(filter_details)
+
+        return self.fig
+
+    def add_inc_data(self, data):
+        self.fig.add_vrect(x0=data['Start_t'], 
+                           x1=data['End_t'], 
+                           opacity=0.3, 
+                           fillcolor='PaleGreen',
+                           layer='above', 
+                           line={'color':'black',
+                                 'width':4}
+                           )
+ 
+    def add_exc_data(self, data):
+        self.fig.add_vrect(x0=self._min, 
+                           x1=data['Start_t'], 
+                           opacity=0.3, 
+                           fillcolor='PaleGreen',
+                           layer='above', 
+                           line={'color':'black',
+                                 'width':4}
+                           )
+ 
+        self.fig.add_vrect(x0=data['End_t'], 
+                           x1=self._max, 
+                           opacity=0.3, 
+                           fillcolor='PaleGreen',
+                           layer='above', 
+                           line={'color':'black',
+                                 'width':4}
+                           )
+ 
 
     def plot(self, x1, y1, x2, y2):
         """
@@ -35,26 +83,50 @@ class PlotAreaPresenter(PresenterTemplate):
         y_labels = ["Field (filtered)", "Temp (unfiltered)"]
 
         # create the subplots with a shared x axis.
-        fig = make_subplots(rows=self.n_rows,
-                            cols=self.n_cols,
-                            x_title='time',
-                            shared_xaxes=True,
-                            vertical_spacing=0.02,
-                            start_cell='top-left')
+        self.fig = make_subplots(rows=self.n_rows,
+                                 cols=self.n_cols,
+                                 x_title='time',
+                                 shared_xaxes=True,
+                                 vertical_spacing=0.02,
+                                 start_cell='top-left')
 
         self._height = 900
-        fig.update_layout(height=self._height)
+        self.fig.update_layout(height=self._height)
 
         # add data to the subplots
         for i in range(self.n_rows):
             for j in range(self.n_cols):
                 # plot lines as this is much faster than points
-                fig.add_trace(plotly.graph_objects.Scatter(
-                        x=x[i],
-                        y=y[i],
-                        name=f'Example plot: {y_labels[i]}',
-                        mode='lines'
-                        ),
-                              i + 1, j + 1)
-                fig.update_yaxes(title_text=y_labels[i], row=i+1, col=j+1)
-        return fig
+                self.fig.add_trace(plotly.graph_objects.Scatter(
+                            x=x[i],
+                            y=y[i],
+                            name=f'Example plot: {y_labels[i]}',
+                            mode='lines'
+                            ),
+                                  i + 1, j + 1)
+
+                if self._min > np.min(x[i]):
+                    self._min = np.min(x[i])
+
+                if self._max < np.max(x[i]):
+                    self._max = np.max(x[i])
+                self.fig.update_traces(hoverinfo='none')
+                self.fig.update_yaxes(title_text=y_labels[i], row=i+1, col=j+1)
+        return self.fig
+
+
+    def display_hover(self, data, filters):
+        if data is None:
+            return False, no_update, no_update
+        pt = data['points'][0]
+        bbox = pt['bbox']
+        txt = []
+        for filter_details in filters:
+            if filter_details['Type_t'] == 'Include' and filter_details['Start_t'] <= pt['x'] and filter_details['End_t'] >= pt['x']:
+                txt.append(filter_details['Name_t'])
+            elif filter_details['Type_t'] == 'Exclude' and (filter_details['Start_t'] >= pt['x'] or filter_details['End_t'] <= pt['x']):
+                txt.append(filter_details['Name_t'])
+
+
+        children = self._view.hover_text(pt, txt)
+        return True, bbox, children

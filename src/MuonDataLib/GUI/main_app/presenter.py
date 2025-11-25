@@ -134,6 +134,7 @@ class MainAppPresenter(object):
             # assume HIFI data for now, hence the magic 64 detectors.
             self._data = load_events(name[len(CURRENT):], 64)
             self.load._data = self._data
+            self.filter._data = self._data
 
         except Exception as err:
             self._data = None

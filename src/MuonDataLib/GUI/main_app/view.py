@@ -78,8 +78,8 @@ class MainApp(Dash):
                                                    className='bi-hourglass'
                                                              '-split'
                                                              ' me-md-2',
-                                                   id='spinner')
-                            ),
+                                                   id='spinner'),
+                            delay_show=50),
 
                 ],
             fluid=True,
@@ -113,7 +113,7 @@ class MainApp(Dash):
         # Updates the information on the loaded filter. With error
         # catching.
         callback([Output('title_test_body', 'children'),
-                  Output('error_msg', 'children', allow_duplicate=True)],
+                 Output('error_msg', 'children', allow_duplicate=True)],
                  Input('title_test', 'children'),
                  State('debug', 'on'),
                  prevent_initial_call=True)(self.presenter.load_filter)
