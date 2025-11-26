@@ -30,7 +30,6 @@ class FilterView(ViewTemplate):
             html.H3("Title: testing", id='title_test'),
             self.t._page,
             html.P('', id='title_test_body'),
-            dbc.Button('Calculate', id='calc_btn', color='primary', className='me-md-2'),
             html.P(NUM + NC, id='N_events'),
             ])
 

@@ -25,12 +25,18 @@ class PlotAreaPresenter(PresenterTemplate):
         # clear the current filters from plot
         self.fig.layout.shapes = []
         self.fig.layout.annotations = []
+        start = []
+        end = []
         # add the filters back
         for filter_details in data:
             if filter_details['Type_t'] == 'Include':
                 self.add_inc_data(filter_details)
             else:
-                self.add_exc_data(filter_details)
+                tmp = self.get_exc_data(filter_details)
+                start.append(tmp[0])
+                end.append(tmp[1])
+                #self.add_exc_data(filter_details)
+        self.apply_exc_data(start, end)
 
         return self.fig
 
@@ -44,6 +50,46 @@ class PlotAreaPresenter(PresenterTemplate):
                                  'width':4}
                            )
  
+    def get_exc_data(self, data):
+        return [data['Start_t'], data['End_t']]
+
+    def add_shaded_region(self, start, stop):
+        self.fig.add_vrect(x0=start, 
+                           x1=stop, 
+                           opacity=0.3, 
+                           fillcolor='PaleGreen',
+                           layer='above', 
+                           line={'color':'black',
+                                 'width':4}
+                           )
+ 
+
+    def apply_exc_data(self, start, end):
+        if len(start) == 0:
+            return
+
+        sorted_start = np.sort(start)
+        sorted_end = np.sort(end)
+        
+        f_start = [sorted_start[0]]
+        f_end = []
+        
+        for j in range(len(sorted_start)-1):
+            if sorted_start[j+1] > sorted_end[j]:
+                f_end.append(sorted_end[j])
+                f_start.append(sorted_start[j+1])
+        f_end.append(sorted_end[-1])
+
+        self.add_shaded_region(self._min, f_start[0])
+        for j in range(1, len(f_start)):
+            # need to add shaded areas: these are not shaded
+            print(f_start[j], f_end[j])
+            self.add_shaded_region(f_end[j-1], f_start[j])
+        
+        self.add_shaded_region(f_end[-1], self._max)
+
+
+
     def add_exc_data(self, data):
         self.fig.add_vrect(x0=self._min, 
                            x1=data['Start_t'], 
