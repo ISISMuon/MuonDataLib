@@ -11,10 +11,10 @@ class ViewTemplate(object):
         widget. The responses to the callbacks
         will be in the presenter.
         """
-        self._page = self.generate()
+        self._page = self.generate(presenter)
         self.set_callbacks(presenter)
 
-    def generate(self):
+    def generate(self, presenter):
         """
         This creates the view.
         However, in the template it raises

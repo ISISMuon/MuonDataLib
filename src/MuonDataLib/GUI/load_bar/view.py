@@ -14,7 +14,7 @@ class LoadBarView(ViewTemplate):
     A class for the load bar's view.
     This follows the MVP pattern.
     """
-    def generate(self):
+    def generate(self, presenter):
         """
         Creates the view for the
         load bar widget

@@ -16,11 +16,7 @@ class FilterView(ViewTemplate):
     pattern.
     """
 
-    def __init__(self, presenter):
-        self.t = TimeView()
-        super().__init__(presenter)
-
-    def generate(self):
+    def generate(self, presenter):
         """
         Creates the filter widget's GUI.
         :returns: the layout of the widget's
@@ -28,7 +24,7 @@ class FilterView(ViewTemplate):
         """
         return html.Div([
             html.H3("Title: testing", id='title_test'),
-            self.t._page,
+            presenter._time.layout,
             html.P('', id='title_test_body'),
             html.P(NUM + NC, id='N_events'),
             ])

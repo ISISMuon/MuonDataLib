@@ -1,4 +1,5 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
+from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.filters.view import FilterView
 
 
@@ -12,6 +13,7 @@ class FilterPresenter(PresenterTemplate):
         """
         Create the presenter.
         """
+        self._time = TimePresenter()
         self._view = FilterView(self)
         self._data = None
 

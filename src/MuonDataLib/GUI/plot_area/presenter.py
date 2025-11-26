@@ -21,23 +21,24 @@ class PlotAreaPresenter(PresenterTemplate):
 
     def add_filter(self, data, fig):
         self.fig.layout.shapes = []
-        #self.fig.layout.annotations = []
         if len(data) == 0:
             self.add_shaded_region(self._min, self._max)
             return self.fig
         start = []
         end = []
+        exc = False
         # add the filters back
         for filter_details in data:
             if filter_details['Type_t'] == 'Include':
                 self.add_inc_data(filter_details)
             else:
+                exc = True
                 tmp = self.get_exc_data(filter_details)
                 start.append(tmp[0])
                 end.append(tmp[1])
-                #self.add_exc_data(filter_details)
         self.apply_exc_data(start, end)
-
+        if not exc:
+            self.add_shaded_region(self._min, self._max)
         return self.fig
 
     def add_inc_data(self, data):
