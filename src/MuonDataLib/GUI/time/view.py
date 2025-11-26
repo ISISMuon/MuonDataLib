@@ -115,7 +115,9 @@ class TimeView(ViewTemplate):
         return True, ''
 
     def validate(self, data, previous):
-        
+        if len(data) == 0:
+            return True, ''
+
         names = [row['Name_t'] for row in data]
         repeat, num = Counter(names).most_common(1)[0]
         if num > 1:

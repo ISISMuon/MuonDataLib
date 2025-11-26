@@ -20,11 +20,11 @@ class PlotAreaPresenter(PresenterTemplate):
         self._max = -1000
 
     def add_filter(self, data, fig):
-        #tmp = fig['layout']['xaxis']['range']
-        #print('mooo', tmp, self._min)
-        # clear the current filters from plot
         self.fig.layout.shapes = []
-        self.fig.layout.annotations = []
+        #self.fig.layout.annotations = []
+        if len(data) == 0:
+            self.add_shaded_region(self._min, self._max)
+            return self.fig
         start = []
         end = []
         # add the filters back
@@ -82,33 +82,9 @@ class PlotAreaPresenter(PresenterTemplate):
 
         self.add_shaded_region(self._min, f_start[0])
         for j in range(1, len(f_start)):
-            # need to add shaded areas: these are not shaded
-            print(f_start[j], f_end[j])
             self.add_shaded_region(f_end[j-1], f_start[j])
         
         self.add_shaded_region(f_end[-1], self._max)
-
-
-
-    def add_exc_data(self, data):
-        self.fig.add_vrect(x0=self._min, 
-                           x1=data['Start_t'], 
-                           opacity=0.3, 
-                           fillcolor='PaleGreen',
-                           layer='above', 
-                           line={'color':'black',
-                                 'width':4}
-                           )
- 
-        self.fig.add_vrect(x0=data['End_t'], 
-                           x1=self._max, 
-                           opacity=0.3, 
-                           fillcolor='PaleGreen',
-                           layer='above', 
-                           line={'color':'black',
-                                 'width':4}
-                           )
- 
 
     def plot(self, x1, y1, x2, y2):
         """
@@ -158,21 +134,48 @@ class PlotAreaPresenter(PresenterTemplate):
                     self._max = np.max(x[i])
                 self.fig.update_traces(hoverinfo='none')
                 self.fig.update_yaxes(title_text=y_labels[i], row=i+1, col=j+1)
+        self.add_shaded_region(self._min, self._max)
         return self.fig
-
 
     def display_hover(self, data, filters):
         if data is None:
             return False, no_update, no_update
         pt = data['points'][0]
         bbox = pt['bbox']
-        txt = []
+        added = []
+        removed = []
         for filter_details in filters:
             if filter_details['Type_t'] == 'Include' and filter_details['Start_t'] <= pt['x'] and filter_details['End_t'] >= pt['x']:
-                txt.append(filter_details['Name_t'])
-            elif filter_details['Type_t'] == 'Exclude' and (filter_details['Start_t'] >= pt['x'] or filter_details['End_t'] <= pt['x']):
-                txt.append(filter_details['Name_t'])
+                added.append(filter_details['Name_t'])
+            elif filter_details['Type_t'] == 'Exclude' and (filter_details['Start_t'] <= pt['x'] and filter_details['End_t'] >= pt['x']):
+                removed.append(filter_details['Name_t'])
+        
+        txt = 'Keep data: '
+        len_removed = len(removed)
+        len_added = len(added)
+        if len_removed > 0 and len_added == 0:
+            txt += 'False. '
+            txt += 'Removed by: '
+            for name in removed:
+                txt += name +', '
 
+        elif len_removed==0 and len_added == 0:
+            txt += 'True.'
+
+        elif len_removed==0 and len_added > 0:
+            txt += 'True. '
+            txt += 'Kept by: '
+            for name in added:
+                txt += name +', '
+
+        elif len_removed > 0 and len_added > 0:
+            txt += 'True. '
+            txt += 'Removed by: '
+            for name in removed:
+                txt += name +', '
+            txt += '. But added back by: '
+            for name in added:
+                txt += name +', '
 
         children = self._view.hover_text(pt, txt)
         return True, bbox, children

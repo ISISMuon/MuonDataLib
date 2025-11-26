@@ -34,12 +34,11 @@ class PlotAreaView(ViewTemplate):
                  State('time-table', 'data'),
                  prevent_initial_call=True)(presenter.display_hover)
 
-    def hover_text(self, pt, txt=[]):
-        filters = html.Div([html.P(name) for name in txt])
+    def hover_text(self, pt, txt=''):
         children = html.Div([
             html.H5('Data Point'),
             html.P(f"x: {pt['x']:.3f},  y: {pt['y']:.3f}"),
-            html.H5('Active Filters'),
-            filters
+            html.H5('Status'),
+            html.P(txt)
             ])
         return children
