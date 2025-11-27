@@ -61,12 +61,7 @@ class MainApp(Dash):
                 # this is also placed inside Loading, so it produces
                 # a nice loading message when the GUI is busy.
                 dcc.Loading([self.presenter.load.layout,
-                             dbc.Row([
-                                 dbc.Col(self.presenter.filter.layout,
-                                         width=filter_width),
-                                 dbc.Col(self.presenter.plot.layout,
-                                         width=12-filter_width)],
-                                     className="g-0", align='center'),
+                             self.presenter.control.layout,
                              self.presenter.save.layout,
                              ],
                             overlay_style={"visibility": "visible",

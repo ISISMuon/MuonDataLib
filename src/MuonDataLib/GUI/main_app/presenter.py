@@ -1,7 +1,6 @@
 from MuonDataLib.GUI.load_bar.view import CURRENT
 from MuonDataLib.GUI.load_bar.presenter import LoadBarPresenter
-from MuonDataLib.GUI.filters.presenter import FilterPresenter
-from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+from MuonDataLib.GUI.control_pane.presenter import ControlPanePresenter
 from MuonDataLib.GUI.save_bar.presenter import SaveBarPresenter
 
 from MuonDataLib.data.utils import create_data_from_function
@@ -23,8 +22,7 @@ class MainAppPresenter(object):
         is the main app.
         """
         self.load = LoadBarPresenter()
-        self.filter = FilterPresenter()
-        self.plot = PlotAreaPresenter()
+        self.control = ControlPanePresenter()
         self.save = SaveBarPresenter()
 
     def debug(self, state):
@@ -117,6 +115,9 @@ class MainAppPresenter(object):
                                          [3, 6.1, 0.91],
                                          osc, seed=1)
 
+    def plot(self, x0, y0, x1, y1):
+        return self.control._plot.plot(x0, y0, x1, y1)
+
     def load_nxs(self, name, debug_state):
         """
         Loads a muon event nexus file.
@@ -126,7 +127,7 @@ class MainAppPresenter(object):
         :returns: the updated figure and the alert message
         """
         if 'None' in name:
-            return self.plot.plot([], [], [], []), ''
+            return self.plot([], [], [], []), ''
         try:
             if debug_state:
                 raise RuntimeError("Loading error")
@@ -134,11 +135,11 @@ class MainAppPresenter(object):
             # assume HIFI data for now, hence the magic 64 detectors.
             self._data = load_events(name[len(CURRENT):], 64)
             self.load._data = self._data
-            self.filter._data = self._data
+            #self.filter._data = self._data
 
         except Exception as err:
             self._data = None
-            return self.plot.plot([], [], [], []), f'An error occurred: {err}'
+            return self.plot([], [], [], []), f'An error occurred: {err}'
 
         # add fake sample log data
         x, y = self.gen_fake_data()
@@ -152,4 +153,4 @@ class MainAppPresenter(object):
         log = self._data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot.plot(a, b, x, y), ''
+        return self.plot(a, b, x, y), ''

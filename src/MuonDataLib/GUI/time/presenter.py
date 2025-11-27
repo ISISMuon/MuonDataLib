@@ -1,6 +1,5 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.table.header import Header
-from MuonDataLib.GUI.time.view import TimeView
 from dash import html
 import dash_bootstrap_components as dbc
 from dash import dash_table
@@ -24,24 +23,24 @@ class TimePresenter(TablePresenter):
 
         name = Header('Name_t', 'Name')
         data = Header('Type_t', 'data')
-        
+
         start = Header('Start_t', 'Start')
         start.add_type('numeric')
-        
+
         end = Header('End_t', 'End')
         end.add_type('numeric')
-        
+
         data.add_dropdown(['Include', 'Exclude'])
         data.add_condition('{Type_t} contains "Include"',
                            [name.ID, start.ID, end.ID],
                            'PowderBlue',
                            'Black')
-  
+
         data.add_condition('{Type_t} contains "Exclude"',
                            [name.ID, start.ID, end.ID],
                            'OrangeRed',
                            'White')
-               
+
         super().__init__('time-table',
                          [name, data, start, end],
                          name.ID)
@@ -55,8 +54,11 @@ class TimePresenter(TablePresenter):
     def generate_default(self):
         self.count += 1
         return {'Name_t': f'default_{self.count}',
-                'Type_t': 'Exclude', 
-                'Start_t': 500, 
+                'Type_t': 'Exclude',
+                'Start_t': 500,
                 'End_t': 1000}
+
+    def get_exc_data(self, data):
+        return [data['Start_t'], data['End_t']]
 
 

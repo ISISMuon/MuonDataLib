@@ -21,24 +21,3 @@ class PlotAreaView(ViewTemplate):
             dcc.Tooltip(id='tooltip'),
                      ])
 
-    def set_callbacks(self, presenter):
-        callback(Output('example_plot', 'figure', allow_duplicate=True),
-                 Input('time-table', 'data'),
-                 State('example_plot', 'figure'),
-                 prevent_initial_call=True)(presenter.add_filter)
-
-        callback([Output('tooltip', 'show', allow_duplicate=True),
-                  Output('tooltip', 'bbox', allow_duplicate=True),
-                  Output('tooltip', 'children', allow_duplicate=True)],
-                 Input('example_plot', 'hoverData'),
-                 State('time-table', 'data'),
-                 prevent_initial_call=True)(presenter.display_hover)
-
-    def hover_text(self, pt, txt=''):
-        children = html.Div([
-            html.H5('Data Point'),
-            html.P(f"x: {pt['x']:.3f},  y: {pt['y']:.3f}"),
-            html.H5('Status'),
-            html.P(txt)
-            ])
-        return children

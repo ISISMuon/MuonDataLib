@@ -1,5 +1,4 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
-from MuonDataLib.GUI.time.view import TimeView
 from dash import html
 import dash_bootstrap_components as dbc
 from dash import Input, Output, callback
@@ -24,8 +23,14 @@ class FilterView(ViewTemplate):
         """
         return html.Div([
             html.H3("Title: testing", id='title_test'),
-            presenter._time.layout,
+            dbc.Accordion([
+                dbc.AccordionItem(
+                    [presenter._time.layout],
+                    title="Time filters"),
+                ],
+                         start_collapsed=True),
             html.P('', id='title_test_body'),
+            dbc.Button('Calculate', id='calc_btn', color='primary', className='me-md-2'),
             html.P(NUM + NC, id='N_events'),
             ])
 
