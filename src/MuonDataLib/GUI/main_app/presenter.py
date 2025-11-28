@@ -1,7 +1,6 @@
 from MuonDataLib.GUI.load_bar.view import CURRENT
 from MuonDataLib.GUI.load_bar.presenter import LoadBarPresenter
-from MuonDataLib.GUI.filters.presenter import FilterPresenter
-from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+from MuonDataLib.GUI.control_pane.presenter import ControlPanePresenter
 from MuonDataLib.GUI.save_bar.presenter import SaveBarPresenter
 
 from MuonDataLib.data.utils import create_data_from_function
@@ -23,8 +22,7 @@ class MainAppPresenter(object):
         is the main app.
         """
         self.load = LoadBarPresenter()
-        self.filter = FilterPresenter()
-        self.plot = PlotAreaPresenter()
+        self.control = ControlPanePresenter()
         self.save = SaveBarPresenter()
 
     def debug(self, state):
@@ -83,6 +81,7 @@ class MainAppPresenter(object):
         :returns: the name of the saved file and
         the alert message
         """
+        data = self.load.get_data
         if 'None' in name:
             return '', ''
         dtype = name[0]
@@ -93,20 +92,20 @@ class MainAppPresenter(object):
 
             print("saving to ", file)
             if dtype == "n":
-                self._data.save_histograms(file)
+                data.save_histograms(file)
             elif dtype == 'j':
-                self._data.save_filters(file)
+                data.save_filters(file)
             return file, ''
         except Exception as err:
             return '', f'Saving Error: {err}'
 
-    def gen_fake_data(self):
+    def gen_fake_data(self, data):
         """
         This creates fake data for the sample log.
         It will not be present long term.
         We assume one data point per second.
         """
-        frame_start_times = self._data.get_frame_start_times()
+        frame_start_times = data.get_frame_start_times()
         start = frame_start_times[0]
         end = frame_start_times[-1] + 1
         # 1 days worth of logs at 1 per second
@@ -117,6 +116,16 @@ class MainAppPresenter(object):
                                          [3, 6.1, 0.91],
                                          osc, seed=1)
 
+    def plot(self, x0, y0, x1, y1):
+        """
+        A method to plot the sample log data.
+        :param x0: the first set of x values
+        :param y0: the first set of y values
+        :param x1: the second set of x values
+        :param y1: the second set of y values
+        """
+        return self.control._plot.plot(x0, y0, x1, y1)
+
     def load_nxs(self, name, debug_state):
         """
         Loads a muon event nexus file.
@@ -126,29 +135,25 @@ class MainAppPresenter(object):
         :returns: the updated figure and the alert message
         """
         if 'None' in name:
-            return self.plot.plot([], [], [], []), ''
+            return self.plot([], [], [], []), ''
         try:
             if debug_state:
                 raise RuntimeError("Loading error")
 
-            # assume HIFI data for now, hence the magic 64 detectors.
-            self._data = load_events(name[len(CURRENT):], 64)
-            self.load._data = self._data
+            self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
-            self._data = None
-            return self.plot.plot([], [], [], []), f'An error occurred: {err}'
+            return self.plot([], [], [], []), f'An error occurred: {err}'
 
+        data = self.load.get_data
+        self.control.set_data(data)
         # add fake sample log data
-        x, y = self.gen_fake_data()
-        self._data.add_sample_log("Test", x, y)
-
-        # add a filter to test the save method
-        self._data.keep_data_sample_log_above("Test", -0.2)
+        x, y = self.gen_fake_data(data)
+        data.add_sample_log("Test", x, y)
 
         # this will be user defined later. For now lets just
         # load the big data set we have made
-        log = self._data._get_sample_log("Test")
+        log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot.plot(a, b, x, y), ''
+        return self.plot(a, b, x, y), ''

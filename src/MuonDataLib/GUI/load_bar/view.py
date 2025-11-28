@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 
 from dash import Input, Output, callback
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
@@ -14,10 +14,11 @@ class LoadBarView(ViewTemplate):
     A class for the load bar's view.
     This follows the MVP pattern.
     """
-    def generate(self):
+    def generate(self, presenter):
         """
         Creates the view for the
         load bar widget
+        :param presenter: the presenter for the widget
         :returns: the layout for the
         load bar widget.
         """
@@ -30,6 +31,7 @@ class LoadBarView(ViewTemplate):
 
             dbc.Button(id='settings', color='primary',
                        n_clicks=0, className='bi-gear-fill ms-auto'),
+            # store the loaded data, makes it easier to get in other parts of the GUI
             # code for the settings pop-up
             dbc.Modal(
                       [dbc.ModalHeader(dbc.ModalTitle("Settings")),
