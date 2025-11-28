@@ -30,9 +30,11 @@ class TableView(ViewTemplate):
         css=[{"selector": ".Select-menu-outer", "rule": "display : block!important"}],
         editable=True,
         style_cell={"textAlign": "center"},
+        style_table={'overflowX': 'auto'},
         dropdown=presenter.options,
         style_data_conditional=presenter.conditions,
-       row_deletable=True,
+        merge_duplicate_headers=True,
+        row_deletable=True,
     ),
     html.Div(id='table-dropdown-container')
                     ])

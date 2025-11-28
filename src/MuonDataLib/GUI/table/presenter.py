@@ -29,8 +29,11 @@ class TablePresenter(PresenterTemplate):
         self.conditions = conditions
         self.cols = [head.get_header_dict for head in headers]
         
-        self._view = TableView(self)
+        self._view = self._set_view()
     
+    def _set_view(self):
+        return TableView(self)
+
     def _get_dropdown_info(self, ID, headers):
         """
         Creates the filter widget's GUI.

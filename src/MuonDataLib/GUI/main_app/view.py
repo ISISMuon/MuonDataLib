@@ -60,6 +60,7 @@ class MainApp(Dash):
 
                 # this is also placed inside Loading, so it produces
                 # a nice loading message when the GUI is busy.
+                # The delay stops the spinner flashing on screan.
                 dcc.Loading([self.presenter.load.layout,
                              self.presenter.control.layout,
                              self.presenter.save.layout,

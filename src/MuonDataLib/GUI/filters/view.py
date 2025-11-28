@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 from dash import html
 import dash_bootstrap_components as dbc
-from dash import Input, Output, callback
+from dash import Input, Output, callback, State
 
 
 NUM = 'Number of events: '
@@ -18,6 +18,7 @@ class FilterView(ViewTemplate):
     def generate(self, presenter):
         """
         Creates the filter widget's GUI.
+        :param presenter: the presenter for the widget
         :returns: the layout of the widget's
         GUI.
         """
@@ -35,10 +36,22 @@ class FilterView(ViewTemplate):
             ])
 
     def set_callbacks(self, presenter):
-        callback(Output('N_events', 'children'),
+        """
+        Sets the callbacks for the widget
+        :param presenter: the presenter for the widget
+        """
+        callback([Output('N_events', 'children'),
+                  Output('error_msg', 'children', allow_duplicate=True)],
                  Input('calc_btn', 'n_clicks'),
+                 [State('time-table', 'data'),
+                  State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
 
     def get_N(self, N):
+        """
+        Gets the updated GUI componenet for the 
+        number of events.
+        :param N: the number of events
+        """
         return html.P(NUM + str(N))
 

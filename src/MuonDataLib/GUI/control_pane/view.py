@@ -28,14 +28,16 @@ class ControlPaneView(ViewTemplate):
     def set_callbacks(self, presenter):
         callback(Output('example_plot', 'figure', allow_duplicate=True),
                  Input('time-table', 'data'),
-                 State('example_plot', 'figure'),
+                 [State('example_plot', 'figure'),
+                  State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.add_filter)
 
         callback([Output('tooltip', 'show', allow_duplicate=True),
                   Output('tooltip', 'bbox', allow_duplicate=True),
                   Output('tooltip', 'children', allow_duplicate=True)],
                  Input('example_plot', 'hoverData'),
-                 State('time-table', 'data'),
+                 [State('time-table', 'data'),
+                  State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)
 
     def hover_text(self, pt, txt=''):
