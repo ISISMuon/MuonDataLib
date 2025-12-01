@@ -50,6 +50,7 @@ class TimeView(TableView):
         callback([Output('dropdown-time', 'value'),
                   Output('time-table', 'data'),
                   Output('time-table', 'columns'),
+                  Output('time-table_changed_state', 'data')
                   ],
                  [Input('confirm-time', 'submit_n_clicks_timestamp'),
                   Input('confirm-time', 'cancel_n_clicks_timestamp')],

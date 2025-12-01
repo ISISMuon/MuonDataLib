@@ -6,7 +6,7 @@ from dash import Input, Output, callback, State
 
 NUM = 'Number of events: '
 NC = 'Not Calculated'
-
+ 
 
 class FilterView(ViewTemplate):
     """
@@ -32,7 +32,7 @@ class FilterView(ViewTemplate):
                          start_collapsed=True),
             html.P('', id='title_test_body'),
             dbc.Button('Calculate', id='calc_btn', color='primary', className='me-md-2'),
-            html.P(NUM + NC, id='N_events'),
+            html.P(self.no_events_str, id='N_events'),
             ])
 
     def set_callbacks(self, presenter):
@@ -46,6 +46,16 @@ class FilterView(ViewTemplate):
                  [State('time-table', 'data'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
+ 
+        callback(Output('N_events', 'children', allow_duplicate=True),
+                 Input('time-table_changed_state', 'data'),
+                 State('N_events', 'children'),
+                 prevent_initial_call=True)(presenter.update_N_events)
+
+    @property
+    def no_events_str(self):
+        return NUM + NC
+
 
     def get_N(self, N):
         """

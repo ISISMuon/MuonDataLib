@@ -81,12 +81,12 @@ class TablePresenter(PresenterTemplate):
         """
         valid, msg = self.validate(data, previous)
         if valid:
-            return data, ''
-        return previous, msg
+            return data, True, ''
+        return previous, False, msg
 
     def add(self, n, data):
         data.append(self.generate_default)
-        return data
+        return data, True
 
     @property
     def generate_default(self):

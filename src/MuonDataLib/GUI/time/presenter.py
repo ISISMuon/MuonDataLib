@@ -70,9 +70,9 @@ class TimePresenter(TablePresenter):
                             txt = self.cols[k][key][j]
                             self.cols[k][key][j] = txt.replace(self._previous, value)
             self._previous = value
-            return value, [], self.cols
+            return value, [], self.cols, True
         else:
-            return self._previous, data, self.cols
+            return self._previous, data, self.cols, False
 
     def load(self, file):
         name = 'remove_filters'

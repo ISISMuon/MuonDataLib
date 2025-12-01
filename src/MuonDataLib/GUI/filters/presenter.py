@@ -57,3 +57,9 @@ class FilterPresenter(PresenterTemplate):
     def load(self, file):
         data, state = self._time.load(file['time_filters'])
         return data, state
+
+    def update_N_events(self, update, current_str):
+        if update:
+            return self._view.no_events_str
+        else:
+            return current_str

@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 from dash import html
 import dash_bootstrap_components as dbc
-from dash import dash_table
+from dash import dash_table, dcc
 from dash import Input, Output, callback, State
 from collections import Counter
 
@@ -23,6 +23,7 @@ class TableView(ViewTemplate):
         return html.Div([
             dbc.Button(id=presenter.ID+ '_add', class_name='bi-plus-lg'),
             html.H3(""),
+            dcc.Store(data=False, id=presenter.ID +'_changed_state'),
             dash_table.DataTable(
         id=presenter.ID,
         data=[],
@@ -40,13 +41,15 @@ class TableView(ViewTemplate):
                     ])
 
     def set_callbacks(self, presenter):
-        callback(Output(presenter.ID, 'data', allow_duplicate=True),
+        callback([Output(presenter.ID, 'data', allow_duplicate=True),
+                  Output(presenter.ID + '_changed_state', 'data', allow_duplicate=True)],
                  Input(presenter.ID + '_add', 'n_clicks'),
                  State(presenter.ID, 'data'),
                  prevent_initial_call=True,
                  allow_duplicate=True)(presenter.add)
  
         callback([Output(presenter.ID, 'data', allow_duplicate=True),
+                  Output(presenter.ID + '_changed_state', 'data', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input(presenter.ID, 'data_timestamp'),
                  [State(presenter.ID, 'data'),
