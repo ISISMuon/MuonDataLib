@@ -109,6 +109,8 @@ class MainApp(Dash):
         # Updates the information on the loaded filter. With error
         # catching.
         callback([Output('title_test_body', 'children'),
+                  Output('time-table', 'data', allow_duplicate=True),
+                  Output('dropdown-time', 'value', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('title_test', 'children'),
                  State('debug', 'on'),
@@ -129,7 +131,9 @@ class MainApp(Dash):
         callback([Output('save_exe_dummy', 'children'),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('save_btn_dummy', 'children'),
-                 State('debug', 'on'),
+                 [State('time-table', 'data'),
+                  State('dropdown-time', 'values'),
+                  State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 
         """

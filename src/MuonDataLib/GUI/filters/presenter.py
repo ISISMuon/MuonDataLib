@@ -53,3 +53,7 @@ class FilterPresenter(PresenterTemplate):
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram()
         return self._view.get_N(self._data._cache.get_N_events), ''
+
+    def load(self, file):
+        data, state = self._time.load(file['time_filters'])
+        return data, state

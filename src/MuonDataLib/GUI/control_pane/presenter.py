@@ -10,6 +10,7 @@ from dash import Input, Output, callback, State
 from collections import Counter
 from dash import no_update
 import numpy as np
+import json
 
 
 class ControlPanePresenter(PresenterTemplate):
@@ -141,3 +142,9 @@ class ControlPanePresenter(PresenterTemplate):
 
         children = self._view.hover_text(pt, txt)
         return True, bbox, children
+
+    def read_filter(self, name):
+        with open(name, 'r') as file:
+            data = json.load(file)
+        data, state = self._filter.load(data)
+        return data, state

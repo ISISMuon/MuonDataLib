@@ -74,4 +74,21 @@ class TimePresenter(TablePresenter):
         else:
             return self._previous, data, self.cols
 
+    def load(self, file):
+        name = 'remove_filters'
+        new_state = 'Exclude'
+        if len(file['keep_filters']) == len(file['remove_filters']):
+            raise RuntimeError("Cannot have both include and exclude time filters")
+        elif len(file['keep_filters']) > 0:
+            name = 'keep_filters'
+            new_state = 'Include'
+        
+        data = []
+        for key in file[name].keys():
+            values = file[name][key]
+            data.append({'Name_t': key,
+                         'Start_t': values[0],
+                         'End_t': values[1]})
 
+        self._previous = new_state
+        return data, new_state
