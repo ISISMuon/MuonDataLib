@@ -36,9 +36,6 @@ class MainApp(Dash):
         :returns: the app's view
         """
 
-        # get presenters
-        filter_width = 2
-
         # setup the layout
         return dbc.Container(
             [
