@@ -3,7 +3,7 @@ import sys
 from conda_dict_to_yml import write_conda_yml_from_dict
 
 
-versions = ['3.9', '3.10', '3.11', '3.12', '3.13']
+versions = ['3.10', '3.11', '3.12', '3.13', '3.14']
 
 
 def get_input():

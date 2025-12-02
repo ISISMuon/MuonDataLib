@@ -1,6 +1,6 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 from dash import dcc, html
-from dash import Input, Output, callback, State
+
 
 class PlotAreaView(ViewTemplate):
     """
@@ -10,6 +10,7 @@ class PlotAreaView(ViewTemplate):
     def generate(self, presenter):
         """
         Creates the layout for the widget.
+        :param presenter: the presenter for the widget
         :returns: the layout for the view.
         """
         return html.Div([
@@ -20,4 +21,3 @@ class PlotAreaView(ViewTemplate):
                             'padding': '0 20'}),
             dcc.Tooltip(id='tooltip'),
                      ])
-

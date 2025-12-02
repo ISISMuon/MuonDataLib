@@ -1,28 +1,24 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.time.view import TimeView
 from MuonDataLib.GUI.table.header import Header
-from dash import html
-import dash_bootstrap_components as dbc
-from dash import dash_table
-from dash import Input, Output, callback, State
-from collections import Counter
 
 
 class TimePresenter(TablePresenter):
     """
-    A class for the view of the filter
+    A class for the view of the time filter
     widget. This follows the MVP
     pattern.
     """
     def __init__(self):
         """
-        This creates the view object for the
-        widget. The responses to the callbacks
-        will be in the presenter.
+        This creates the presenter object for the
+        widget.
         """
         self.count = 0
 
         self._previous = 'Exclude'
+
+        # create headers
         name = Header('Name_t', ['', 'Name'])
 
         start = Header('Start_t', ['Exclude data', 'Start'])
@@ -36,21 +32,42 @@ class TimePresenter(TablePresenter):
                          name.ID)
 
     def _set_view(self):
+        """
+        Overwrite the view to give a time table view
+        """
         return TimeView(self)
 
     def validate_row(self, new_row, old_row):
+        """
+        A method to check if a new row is valie
+        :param new_row: the new row
+        :param old_row: The old (previous) row
+        :returns: if to update and the error message
+        """
         if new_row['Start_t'] > new_row['End_t']:
-            return False, f'Start time {new_row["Start_t"]} is greater than end time {new_row["End_t"]}'
+            msg = f'Start time {new_row["Start_t"]} is '
+            msg += f'greater than end time {new_row["End_t"]}'
+            return False, msg
         return True, ''
 
     @property
     def generate_default(self):
+        """
+        The code needed to create a default
+        row for the time table
+        :returns: dict of the values for the time table.
+        """
         self.count += 1
         return {'Name_t': f'default_{self.count}',
                 'Start_t': 500,
                 'End_t': 1000}
 
-    def get_exc_data(self, data):
+    def get_range(self, data):
+        """
+        Gets the x range from the time table data
+        :peram data' The data from the table
+        :returns: the start and end values
+        """
         return [data['Start_t'], data['End_t']]
 
     def display_confirm(self, value, data):
@@ -61,6 +78,17 @@ class TimePresenter(TablePresenter):
         return False
 
     def confirm(self, submit, cancel, value, data):
+        """
+        Takes the user selection for the confirm dialog
+        and does the appropriate response
+        :param submit: the timestamp for the last time submit was pressed
+        :param cancel: the timestamp for the last time cancel was pressed
+        :param value: if to include or exclude the time table data
+        :param data: the data in the time table
+        :returns: the state for the time table (include/exclude),
+        the data for the table, the list of column names and
+        if the data has been changed
+        """
         if submit > cancel:
             for k in range(len(self.cols)):
                 header = self.cols[k]
@@ -68,21 +96,28 @@ class TimePresenter(TablePresenter):
                     if isinstance(header[key], list):
                         for j in range(len(header[key])):
                             txt = self.cols[k][key][j]
-                            self.cols[k][key][j] = txt.replace(self._previous, value)
+                            self.cols[k][key][j] = txt.replace(self._previous,
+                                                               value)
             self._previous = value
             return value, [], self.cols, True
         else:
             return self._previous, data, self.cols, False
 
     def load(self, file):
+        """
+        A method to load filters from a json file
+        :param file: the open file
+        :returns: the data, the new state (include/exclude)
+        """
         name = 'remove_filters'
         new_state = 'Exclude'
         if len(file['keep_filters']) == len(file['remove_filters']):
-            raise RuntimeError("Cannot have both include and exclude time filters")
+            raise RuntimeError("Cannot have both include and "
+                               "exclude time filters")
         elif len(file['keep_filters']) > 0:
             name = 'keep_filters'
             new_state = 'Include'
-        
+
         data = []
         for key in file[name].keys():
             values = file[name][key]

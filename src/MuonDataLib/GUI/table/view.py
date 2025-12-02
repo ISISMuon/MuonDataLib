@@ -3,53 +3,61 @@ from dash import html
 import dash_bootstrap_components as dbc
 from dash import dash_table, dcc
 from dash import Input, Output, callback, State
-from collections import Counter
 
 
 class TableView(ViewTemplate):
     """
-    A class for the view of the filter
+    A class for the view of a
     table. This follows the MVP
     pattern.
     """
 
     def generate(self, presenter):
         """
-        Creates the filter widget's GUI.
+        Creates the table widget's GUI.
+        :param presenter: the presenter for the GUI
         :returns: the layout of the widget's
         GUI.
         """
 
         return html.Div([
-            dbc.Button(id=presenter.ID+ '_add', class_name='bi-plus-lg'),
+            dbc.Button(id=presenter.ID + '_add', class_name='bi-plus-lg'),
             html.H3(""),
-            dcc.Store(data=False, id=presenter.ID +'_changed_state'),
-            dash_table.DataTable(
-        id=presenter.ID,
-        data=[],
-        columns=presenter.cols,
-        css=[{"selector": ".Select-menu-outer", "rule": "display : block!important"}],
-        editable=True,
-        style_cell={"textAlign": "center"},
-        style_table={'overflowX': 'auto'},
-        dropdown=presenter.options,
-        style_data_conditional=presenter.conditions,
-        merge_duplicate_headers=True,
-        row_deletable=True,
-    ),
-    html.Div(id='table-dropdown-container')
-                    ])
+            dcc.Store(data=False, id=presenter.ID + '_changed_state'),
+            dash_table.DataTable(id=presenter.ID,
+                                 data=[],
+                                 columns=presenter.cols,
+                                 css=[{"selector": ".Select-menu-outer",
+                                       "rule": "display : block!important"}],
+                                 editable=True,
+                                 style_cell={"textAlign": "center"},
+                                 style_table={'overflowX': 'auto'},
+                                 dropdown=presenter.options,
+                                 style_data_conditional=presenter.conditions,
+                                 merge_duplicate_headers=True,
+                                 row_deletable=True,
+                                 ),
+            html.Div(id='table-dropdown-container')
+            ])
 
     def set_callbacks(self, presenter):
+        """
+        Set the callbacks for the GUI.
+        :param presenter: the presenter for the GUI
+        """
         callback([Output(presenter.ID, 'data', allow_duplicate=True),
-                  Output(presenter.ID + '_changed_state', 'data', allow_duplicate=True)],
+                  Output(presenter.ID + '_changed_state',
+                         'data',
+                         allow_duplicate=True)],
                  Input(presenter.ID + '_add', 'n_clicks'),
                  State(presenter.ID, 'data'),
                  prevent_initial_call=True,
                  allow_duplicate=True)(presenter.add)
- 
+
         callback([Output(presenter.ID, 'data', allow_duplicate=True),
-                  Output(presenter.ID + '_changed_state', 'data', allow_duplicate=True),
+                  Output(presenter.ID + '_changed_state',
+                         'data',
+                         allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input(presenter.ID, 'data_timestamp'),
                  [State(presenter.ID, 'data'),

@@ -1,10 +1,6 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.table.view import TableView
 
-from dash import html
-import dash_bootstrap_components as dbc
-from dash import dash_table
-from dash import Input, Output, callback, State
 from collections import Counter
 
 
@@ -19,24 +15,33 @@ class TablePresenter(PresenterTemplate):
         This creates the view object for the
         widget. The responses to the callbacks
         will be in the presenter.
+        :param ID: the ID for the table
+        :param headers: a list of the headers for the
+        table (see header.py)
+        :param name_col: the name of the column
         """
         self.ID = ID
         self.name_col = name_col
-        
-        options, conditions = self._get_dropdown_info(self.ID,
-                                                      headers)
+
+        options, conditions = self._get_dropdown_info(headers)
         self.options = options
         self.conditions = conditions
         self.cols = [head.get_header_dict for head in headers]
-        
+
         self._view = self._set_view()
-    
+
     def _set_view(self):
+        """
+        A method to set the view for the widget
+        :returns: the view for the widget
+        """
         return TableView(self)
 
-    def _get_dropdown_info(self, ID, headers):
+    def _get_dropdown_info(self, headers):
         """
-        Creates the filter widget's GUI.
+        Gets the conditions and dropdown options
+        for a column
+        :param headers: the list of headers for the table
         :returns: the layout of the widget's
         GUI.
         """
@@ -45,7 +50,7 @@ class TablePresenter(PresenterTemplate):
         for head in headers:
             if head.dropdown is not None:
                 options[head.ID] = {
-                    'clearable':False,
+                    'clearable': False,
                     'options': head.get_options
                 }
 
@@ -53,13 +58,28 @@ class TablePresenter(PresenterTemplate):
                 if len(tmp) > 0:
                     for con in tmp:
                         conditions.append(con)
- 
+        conditions.append({'if': {'row_index': 'odd'},
+                           'backgroundColor': 'whitesmoke'})
         return options, conditions
 
     def validate_row(self, new_row, old_row):
+        """
+        Determines if a change to a row is valid
+        :param new_row: the new (changed) row
+        :param old_row: the old (previous) row
+        :returns: if its valid and the error message
+        """
         return True, ''
 
     def validate(self, data, previous):
+        """
+        A validation check for the table.
+        It has a rule that each row name
+        must be unique.
+        :param data: the data in the table
+        :param previous: the previous data in the table
+        :returns it to update and the error message
+        """
         if len(data) == 0:
             return True, ''
 
@@ -77,7 +97,13 @@ class TablePresenter(PresenterTemplate):
         """
         This allows the user to change a value and then
         click out of the cell (without pressing enter)
-        such that the table keeps the new value
+        such that the table keeps the new value (if valid).
+        If its not valid the table will be reverted.
+        :param timestamp: the timestamp for the interaction
+        :param data: the data from the table
+        :param previous: the previous data from the table
+        :returns: the valid data for the table, if its valid and
+        the error message
         """
         valid, msg = self.validate(data, previous)
         if valid:
@@ -85,9 +111,18 @@ class TablePresenter(PresenterTemplate):
         return previous, False, msg
 
     def add(self, n, data):
+        """
+        Adds a row to the table.
+        :param n: the number of clicks of the add button
+        :param data: the data in the table
+        :returns: the data for the table and if its valid
+        """
         data.append(self.generate_default)
         return data, True
 
     @property
     def generate_default(self):
-        raise NotImplemented(f"Need to set a default table for {self.ID}")
+        """
+        Code to create some default values
+        """
+        raise NotImplementedError(f"Need to set a default table for {self.ID}")

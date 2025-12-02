@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 
 from dash import Input, Output, callback
-from dash import html, dcc
+from dash import html
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
@@ -31,7 +31,6 @@ class LoadBarView(ViewTemplate):
 
             dbc.Button(id='settings', color='primary',
                        n_clicks=0, className='bi-gear-fill ms-auto'),
-            # store the loaded data, makes it easier to get in other parts of the GUI
             # code for the settings pop-up
             dbc.Modal(
                       [dbc.ModalHeader(dbc.ModalTitle("Settings")),

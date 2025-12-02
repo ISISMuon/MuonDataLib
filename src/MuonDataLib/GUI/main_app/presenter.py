@@ -4,7 +4,6 @@ from MuonDataLib.GUI.control_pane.presenter import ControlPanePresenter
 from MuonDataLib.GUI.save_bar.presenter import SaveBarPresenter
 
 from MuonDataLib.data.utils import create_data_from_function
-from MuonDataLib.data.loader.load_events import load_events
 import numpy as np
 
 
@@ -46,15 +45,16 @@ class MainAppPresenter(object):
         event data.
         :param name: The name of the filter file
         :param debug: If debug mode is on or off
-        :returns: A text string of the filters
+        :returns: A text string of the filters,
+        the list of rows for the time filter table,
+        the state of the time filters (include/exclude)
         and an error message (if it fails)
         """
         text = ''
         try:
             if debug:
                 raise RuntimeError("Filter error")
-            #text = self.load.load_filters(name[len(CURRENT):])
-            
+
             filters = name[len(CURRENT):]
             data, state = self.control.read_filter(filters)
             return text, data, state, ''
@@ -80,6 +80,9 @@ class MainAppPresenter(object):
         event data.
         :param name: a string of the data type (json
         or nexus) and the name of the file to save to.
+        :param filters: the filters (list of dicts) to use
+        :param time_mode: If the time filters are to include
+        or exclude the data
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -108,6 +111,8 @@ class MainAppPresenter(object):
         This creates fake data for the sample log.
         It will not be present long term.
         We assume one data point per second.
+        :param data: the muon event data object
+        :returns: the fake data
         """
         frame_start_times = data.get_frame_start_times()
         start = frame_start_times[0]
@@ -123,6 +128,7 @@ class MainAppPresenter(object):
     def plot(self, x0, y0, x1, y1):
         """
         A method to plot the sample log data.
+        This exists to make some code cleaner
         :param x0: the first set of x values
         :param y0: the first set of y values
         :param x1: the second set of x values

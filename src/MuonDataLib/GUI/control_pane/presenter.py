@@ -3,11 +3,6 @@ from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.GUI.control_pane.view import ControlPaneView
 
-
-import dash_bootstrap_components as dbc
-from dash import dash_table
-from dash import Input, Output, callback, State
-from collections import Counter
 from dash import no_update
 import numpy as np
 import json
@@ -15,7 +10,7 @@ import json
 
 class ControlPanePresenter(PresenterTemplate):
     """
-    The control pane contains the 
+    The control pane contains the
     filters and the plot area.
     This is the presenter for the
     widget. This follows the MVP
@@ -35,9 +30,10 @@ class ControlPanePresenter(PresenterTemplate):
         This methods adds filters to the plot.
         A filter is represented by removing the shaded
         region from the plot. i.e. only the shaded
-        data is used in calculations. 
+        data is used in calculations.
         :param data: the data from the filter table
         :param fig: the figure object
+        :param state: if the filter is an exclude or include
         :returns: an updated figure
         """
         # clear the shaded regions
@@ -52,10 +48,11 @@ class ControlPanePresenter(PresenterTemplate):
         # add the filters back
         if state == 'Include':
             for filter_details in data:
-                self._plot.add_inc_data(filter_details)
+                span = self._filter._time.get_range(filter_details)
+                self._plot.add_shaded_region(*span)
         else:
             for filter_details in data:
-                tmp = self._filter._time.get_exc_data(filter_details)
+                tmp = self._filter._time.get_range(filter_details)
                 start.append(tmp[0])
                 end.append(tmp[1])
             self.apply_exc_data(start, end)
@@ -63,10 +60,10 @@ class ControlPanePresenter(PresenterTemplate):
 
     def apply_exc_data(self, start, end):
         """
-        Applys the exclusion of data from 
+        Applys the exclusion of data from
         the analysis. i.e. the area is not
         shaded.
-        :param start: A list of start values 
+        :param start: A list of start values
         for the exluded regions
         :param end: A list of end values
         for the excluded regions
@@ -104,9 +101,12 @@ class ControlPanePresenter(PresenterTemplate):
         A method for getting the hover text
         for the plot. This will say if data is
         being used in the analysis or not and
-        which filters add/remove it. 
+        which filters add/remove it.
         :param hover_info: the hover data
         :param filters: the time filters
+        :param state: if the filter is an exclude or include
+        :returns: if to show tooltip text, the bounding box for the tooltip
+        and the text for the tooltip
         """
         if hover_info is None:
             return False, no_update, no_update
@@ -115,28 +115,30 @@ class ControlPanePresenter(PresenterTemplate):
         added = []
         removed = []
         txt = 'Keep data: '
-        
+
         if state == 'Include':
             for filter_details in filters:
-                if filter_details['Start_t'] <= pt['x'] and filter_details['End_t'] >= pt['x']:
+                start, end = self._filter._time.get_range(filter_details)
+                if start <= pt['x'] and end >= pt['x']:
                     added.append(filter_details['Name_t'])
             if len(added) > 0:
                 txt += 'True. '
                 txt += 'Added by: '
                 for name in added:
-                        txt += name +', '
+                    txt += name + ', '
             else:
                 txt += 'False'
 
         else:
             for filter_details in filters:
-                if (filter_details['Start_t'] <= pt['x'] and filter_details['End_t'] >= pt['x']):
+                start, end = self._filter._time.get_range(filter_details)
+                if (start <= pt['x'] and end >= pt['x']):
                     removed.append(filter_details['Name_t'])
             if len(removed) > 0:
                 txt += 'False. '
                 txt += 'Removed by: '
                 for name in removed:
-                    txt += name +', '
+                    txt += name + ', '
             else:
                 txt += 'True'
 
@@ -144,6 +146,12 @@ class ControlPanePresenter(PresenterTemplate):
         return True, bbox, children
 
     def read_filter(self, name):
+        """
+        A method to get the filters from a file
+        and populate the GUI.
+        :param name: the name of the json file
+        :returns: the data and state for the time filter (include/exclude)
+        """
         with open(name, 'r') as file:
             data = json.load(file)
         data, state = self._filter.load(data)
