@@ -13,7 +13,7 @@ def osc(x, A, omega, phi):
 
 class MainAppPresenter(object):
 
-    def __init__(self):
+    def __init__(self, open_nxs_func):
         """
         This is the presenter for the
         main app. It follows the MVP
@@ -23,6 +23,19 @@ class MainAppPresenter(object):
         self.load = LoadBarPresenter()
         self.control = ControlPanePresenter()
         self.save = SaveBarPresenter()
+        self._open_nxs_func = open_nxs_func
+        self.N_submit = 0
+
+    def open_nxs(self, n_clicks, name):
+        if n_clicks > self.N_submit:
+            self.N_submit += 1
+            return self._open_nxs_func(self.N_submit)
+        return name
+
+    def confirm_load(self, n_clicks, data, submit):
+        if len(data) > 0:
+            return True, submit
+        return False, submit + 1
 
     def debug(self, state):
         """
@@ -136,16 +149,25 @@ class MainAppPresenter(object):
         """
         return self.control._plot.plot(x0, y0, x1, y1)
 
-    def load_nxs(self, name, debug_state):
+    def confirm(self, n_clicks):
+        return True
+
+    def load_nxs(self, name, data, debug_state):
         """
         Loads a muon event nexus file.
         :param name: the 'CURRENT' text string and
         the name of the file to open.
+        :param data: the time filter table data
         :param debug_state: if debug mode is on or off.
-        :returns: the updated figure and the alert message
+        :returns: the updated figure, the time filter table
+        data and the alert message
         """
+        if name == self.load.file:
+            return self.control._plot.fig, data, ''
+        self.load.set_file(name)
+
         if 'None' in name:
-            return self.plot([], [], [], []), ''
+            return self.plot([], [], [], []), [], ''
         try:
             if debug_state:
                 raise RuntimeError("Loading error")
@@ -153,7 +175,7 @@ class MainAppPresenter(object):
             self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
-            return self.plot([], [], [], []), f'An error occurred: {err}'
+            return self.plot([], [], [], []), [], f'An error occurred: {err}'
 
         data = self.load.get_data
         self.control.set_data(data)
@@ -166,4 +188,4 @@ class MainAppPresenter(object):
         log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot(a, b, x, y), ''
+        return self.plot(a, b, x, y), [], ''

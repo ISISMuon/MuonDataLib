@@ -17,7 +17,9 @@ class PlotAreaPresenter(PresenterTemplate):
         This widget deals with plotly
         """
         self._view = PlotAreaView(self)
-        # the range of the plot
+        self.reset_plot_range()
+
+    def reset_plot_range(self):
         self._min = 1000
         self._max = -1000
 

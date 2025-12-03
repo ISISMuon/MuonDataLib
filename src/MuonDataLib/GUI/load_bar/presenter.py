@@ -15,8 +15,16 @@ class LoadBarPresenter(PresenterTemplate):
         """
         self._view = LoadBarView(self)
         self._data = None
+        self.name = ''
         self._load_btn_press = 0
         self._load_filter_press = 0
+
+    @property
+    def file(self):
+        return self.name
+
+    def set_file(self, name):
+        self.name = name
 
     def load_filters(self, name):
         """

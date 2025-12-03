@@ -92,8 +92,10 @@ class ControlPanePresenter(PresenterTemplate):
     def set_data(self, data):
         """
         A simple setter for the MuonEventData
+        Will also reset the range for the plot
         :param data: MuonEventData
         """
+        self._plot.reset_plot_range()
         self._filter._data = data
 
     def display_hover(self, hover_info, filters, state):

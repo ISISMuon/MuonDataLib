@@ -26,9 +26,10 @@ class MainApp(Dash):
         super().__init__(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP,
                                                          dbc.icons.BOOTSTRAP])
 
-        self.presenter = MainAppPresenter()
+        self.N_submit = 0
+        self.presenter = MainAppPresenter(open_nxs)
         self.layout = self.generate()
-        self.set_callbacks(open_nxs, open_json, save)
+        self.set_callbacks(open_json, save)
 
     def generate(self):
         """
@@ -78,7 +79,7 @@ class MainApp(Dash):
             fluid=True,
         )
 
-    def set_callbacks(self, open_nxs, open_json, save):
+    def set_callbacks(self, open_json, save):
         """
         A method to setup all of the callbacks needed
         by the GUI.
@@ -90,8 +91,6 @@ class MainApp(Dash):
         if elif block) it was decided to use the
         'allow_duplicate' option instead.
 
-        :param open_nxs: the function call for when the load
-        button is pressed.
         :param open_json: the function call for when the load
         filters button is pressed.
         :param save: the function call for when the one of the
@@ -115,9 +114,11 @@ class MainApp(Dash):
 
         # Plots the data after it is loaded.
         callback([Output('example_plot', 'figure'),
+                  Output('time-table', 'data', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
-                 State('debug', 'on'),
+                 [State('time-table', 'data'),
+                  State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.load_nxs)
 
         # Turns on debug mode
@@ -133,14 +134,22 @@ class MainApp(Dash):
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 
+        callback([Output('load_confirm', 'displayed'),
+                  Output('load_confirm', 'submit_n_clicks')],
+                 Input('Load', 'n_clicks'),
+                 [State('time-table', 'data'),
+                  State('load_confirm', 'submit_n_clicks')],
+                 prevent_initial_call=True)(self.presenter.confirm_load)
+
         """
         callbacks from pyqt
         """
         # open a nxs file
         callback(
                  Output('file_name', 'children'),
-                 Input('Load', 'n_clicks'),
-                 prevent_initial_call=True)(open_nxs)
+                 Input('load_confirm', 'submit_n_clicks'),
+                 State('file_name', 'children'),
+                 prevent_initial_call=True)(self.presenter.open_nxs)
 
         # open a json filter file
         callback(

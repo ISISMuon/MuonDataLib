@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 
 from dash import Input, Output, callback
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
@@ -23,8 +23,12 @@ class LoadBarView(ViewTemplate):
         load bar widget.
         """
         return html.Div([
+            dcc.ConfirmDialog(id='load_confirm',
+                              message='test',
+                              submit_n_clicks=0),
             dbc.Button('Load', id='Load',
-                       color='primary', className='me-md-2'),
+                       color='primary',
+                       className='me-md-2'),
             dbc.Button('Load filters', id='load_filters', color='primary',
                        n_clicks=0, className='me-md-2'),
             html.Div(id='file_name', children=CURRENT, className='me-md-2'),
