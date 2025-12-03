@@ -20,7 +20,7 @@ def _load_data(file_name):
 
         with h5py.File(file_name, 'r') as file:
             tmp = file.require_group('raw_data_1')
-            tmp = tmp.require_group('detector_1')
+            tmp = tmp.require_group('detector_1_events')
 
             N = tmp['event_id'].len()
 
