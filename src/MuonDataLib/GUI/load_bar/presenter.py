@@ -21,9 +21,17 @@ class LoadBarPresenter(PresenterTemplate):
 
     @property
     def file(self):
+        """
+        Gets the name of the current file
+        :returns: the value for current file
+        """
         return self.name
 
     def set_file(self, name):
+        """
+        A method to update the name
+        of the current file
+        """
         self.name = name
 
     def load_filters(self, name):

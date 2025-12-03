@@ -19,6 +19,8 @@ class MainAppPresenter(object):
         main app. It follows the MVP
         pattern, but the view
         is the main app.
+        :param open_nxs_func: gets the html funtion
+        )
         """
         self.load = LoadBarPresenter()
         self.control = ControlPanePresenter()
@@ -27,12 +29,25 @@ class MainAppPresenter(object):
         self.N_submit = 0
 
     def open_nxs(self, n_clicks, name):
+        """
+        A method to open a nexus fike,#
+        If the filters are empty it
+        wwskips the confirm dialog.
+        :param n_cliks: number of this submit
+        has been pressed
+        """
         if n_clicks > self.N_submit:
             self.N_submit += 1
             return self._open_nxs_func(self.N_submit)
         return name
 
     def confirm_load(self, n_clicks, data, submit):
+        """
+        Gives a confirm pop up iff filters re presnt.
+        reuturn: if to show the GUI and tge state if
+        the tine filters
+        :param n_clicksL Number of clicks from tye user
+        """
         if len(data) > 0:
             return True, submit
         return False, submit + 1
@@ -148,9 +163,6 @@ class MainAppPresenter(object):
         :param y1: the second set of y values
         """
         return self.control._plot.plot(x0, y0, x1, y1)
-
-    def confirm(self, n_clicks):
-        return True
 
     def load_nxs(self, name, data, debug_state):
         """

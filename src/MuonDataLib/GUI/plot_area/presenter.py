@@ -20,6 +20,12 @@ class PlotAreaPresenter(PresenterTemplate):
         self.reset_plot_range()
 
     def reset_plot_range(self):
+        """
+        Resets the plot range.
+        So when new data is plotted
+        it will correctly get the
+        min and max time values.
+        """
         self._min = 1000
         self._max = -1000
 

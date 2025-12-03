@@ -24,7 +24,12 @@ class LoadBarView(ViewTemplate):
         """
         return html.Div([
             dcc.ConfirmDialog(id='load_confirm',
-                              message='test',
+                              message='Loading new data will clear all '
+                                      'of the filters.'
+                                      'If you want to keep them, you '
+                                      'should save the '
+                                      'filters first. Are you sure you '
+                                      'wish to continue?',
                               submit_n_clicks=0),
             dbc.Button('Load', id='Load',
                        color='primary',
