@@ -831,9 +831,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         tmp = result['time_filters']['remove_filters']
         self.assertArrays(list(tmp.keys()), ['one', 'two'])
-        print(tmp['one'])
         self.assertArrays(tmp['one'], [1, 2])
-        self.assertArrays(tmp["two"], [5, 7])
+        self.assertArrays(tmp['two'], [5, 7])
 
         tmp = result['time_filters']['keep_filters']
         self.assertArrays(list(tmp.keys()), ['first', 'second'])
@@ -890,7 +889,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         file = os.path.join(os.path.dirname(__file__),
                             '..',
                             'data_files',
-                            'load_filter.json')
+                            'script_load_filter.json')
         data.load_filters(file)
         result = data.report_filters()
         self.expected_report(result)
