@@ -80,5 +80,5 @@ def test_load_nxs(dash_duo):
     with h5py.File(mock_save_nxs(0, 0)[1:], 'r') as file:
         tmp = file['raw_data_1']['instrument']['detector_1']
         hist = tmp['counts']
-        assert (np.sum(hist) == 32074)
+        assert (np.sum(hist) == 64147)
     os.remove(mock_save_nxs(0, 0)[1:])

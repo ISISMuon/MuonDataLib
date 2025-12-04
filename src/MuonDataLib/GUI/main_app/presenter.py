@@ -30,10 +30,10 @@ class MainAppPresenter(object):
 
     def open_nxs(self, n_clicks, name):
         """
-        A method to open a nexus fike,#
+        A method to open a nexus file.
         If the filters are empty it
         wwskips the confirm dialog.
-        :param n_cliks: number of this submit
+        :param n_clicks: number of times submit
         has been pressed
         """
         if n_clicks > self.N_submit:
@@ -43,10 +43,12 @@ class MainAppPresenter(object):
 
     def confirm_load(self, n_clicks, data, submit):
         """
-        Gives a confirm pop up iff filters re presnt.
-        reuturn: if to show the GUI and tge state if
+        Gives a confirm pop up iff filters are presnt.
+        :param n_clicks: Number of clicks of load
+        :param data: the time filter table data
+        :param submit: the number of clicks of submit
+        :reuturn: if to show the GUI and the state of
         the tine filters
-        :param n_clicksL Number of clicks from tye user
         """
         if len(data) > 0:
             return True, submit
@@ -124,7 +126,7 @@ class MainAppPresenter(object):
             if debug:
                 raise RuntimeError("Saving error")
 
-            print("saving to ", file)
+            print("saving to ", file, dtype)
             self.control._filter.apply_filters(filters, time_mode)
             if dtype == "n":
                 data.save_histograms(file)

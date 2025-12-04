@@ -831,8 +831,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         tmp = result['time_filters']['remove_filters']
         self.assertArrays(list(tmp.keys()), ['one', 'two'])
+        print(tmp['one'])
         self.assertArrays(tmp['one'], [1, 2])
-        self.assertArrays(tmp['two'], [5, 7])
+        self.assertArrays(tmp["two"], [5, 7])
 
         tmp = result['time_filters']['keep_filters']
         self.assertArrays(list(tmp.keys()), ['first', 'second'])
