@@ -106,10 +106,22 @@ class TestHelper(unittest.TestCase):
          :param expected: the expected shapes
         """
         N_plots = 2
-        shapes = self.presenter._plot.fig.layout.shapes
+        fig = self.get_fig
+        shapes = fig.layout.shapes
         n = 0
 
         for k in range(len(expected)):
             for j in range(N_plots):
                 self.check_shape(shapes[n], j, *expected[k])
                 n += 1
+
+    @property
+    def get_fig(self):
+        """
+        This is a method to allow different tests
+        to use the above functions without needing
+        to change or inject into them.
+        This just gives the fig object.
+        :returns: the fig object
+        """
+        raise NotImplementedError("Need to set a method to get the fig")

@@ -1,6 +1,6 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.time.view import TimeView
-from MuonDataLib.GUI.table.header import Header
+from MuonDataLib.GUI.table.column import Column
 
 
 class TimePresenter(TablePresenter):
@@ -18,13 +18,13 @@ class TimePresenter(TablePresenter):
 
         self._previous = 'Exclude'
 
-        # create headers
-        name = Header('Name_t', ['', 'Name'])
+        # create columns
+        name = Column('Name_t', ['', 'Name'])
 
-        start = Header('Start_t', ['Exclude data', 'Start'])
+        start = Column('Start_t', ['Exclude data', 'Start'])
         start.add_type('numeric')
 
-        end = Header('End_t', ['Exclude data', 'End'])
+        end = Column('End_t', ['Exclude data', 'End'])
         end.add_type('numeric')
 
         super().__init__('time-table',
@@ -89,6 +89,9 @@ class TimePresenter(TablePresenter):
         the data for the table, the list of column names and
         if the data has been changed
         """
+
+        # found a bug: dont add row, change option. The title is wrong
+
         if submit > cancel:
             for k in range(len(self.cols)):
                 header = self.cols[k]

@@ -1,4 +1,4 @@
-class Header(object):
+class Column(object):
     """
     A simple class for creating columns for
     a dash data table. This stores the extra
@@ -7,7 +7,7 @@ class Header(object):
     """
     def __init__(self, ID, name):
         """
-        Create the header for the column.
+        Create the details for the column.
         :param ID: the ID for the column
         :param name: the displayed name in the
         column.
@@ -24,12 +24,17 @@ class Header(object):
         column.
         Allowed values are:
         - numeric
-        - tet
+        - text
         - datetime (YYYY-MM-DD HH:MM:SS)
         - any
         :param data_type: the data type for the
         column
         """
+        if data_type not in ['numeric',
+                             'text',
+                             'datetime',
+                             'any']:
+            raise ValueError(f"Unkown data type {data_type}")
         self.type = data_type
 
     def add_dropdown(self, options):
@@ -38,10 +43,13 @@ class Header(object):
         into the rows for the column.
         :param options: the options for the dropdown
         """
-        self.dropdown = options
+        if isinstance(options, list):
+            self.dropdown = options
+            return
+        raise ValueError("dropdown options should be a list")
 
     @property
-    def get_header_dict(self):
+    def get_column_dict(self):
         """
         Thos method generates a dict
         for the config of the column.

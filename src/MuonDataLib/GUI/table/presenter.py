@@ -10,23 +10,23 @@ class TablePresenter(PresenterTemplate):
     table. This follows the MVP
     pattern.
     """
-    def __init__(self, ID, headers, name_col):
+    def __init__(self, ID, columns, name_col):
         """
         This creates the view object for the
         widget. The responses to the callbacks
         will be in the presenter.
         :param ID: the ID for the table
-        :param headers: a list of the headers for the
-        table (see header.py)
+        :param headers: a list of the columns for the
+        table (see column.py)
         :param name_col: the name of the column
         """
         self.ID = ID
         self.name_col = name_col
 
-        options, conditions = self._get_dropdown_info(headers)
+        options, conditions = self._get_dropdown_info(columns)
         self.options = options
         self.conditions = conditions
-        self.cols = [head.get_header_dict for head in headers]
+        self.cols = [col.get_column_dict for col in columns]
 
         self._view = self._set_view()
 
@@ -37,7 +37,7 @@ class TablePresenter(PresenterTemplate):
         """
         return TableView(self)
 
-    def _get_dropdown_info(self, headers):
+    def _get_dropdown_info(self, columns):
         """
         Gets the conditions and dropdown options
         for a column
@@ -47,14 +47,14 @@ class TablePresenter(PresenterTemplate):
         """
         options = {}
         conditions = []
-        for head in headers:
-            if head.dropdown is not None:
-                options[head.ID] = {
+        for col in columns:
+            if col.dropdown is not None:
+                options[col.ID] = {
                     'clearable': False,
-                    'options': head.get_options
+                    'options': col.get_options
                 }
 
-                tmp = head.get_conditions
+                tmp = col.get_conditions
                 if len(tmp) > 0:
                     for con in tmp:
                         conditions.append(con)

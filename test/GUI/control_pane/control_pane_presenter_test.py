@@ -20,6 +20,10 @@ class ControlPanePresenterTest(TestHelper):
         # just add a plot
         self.presenter._plot.plot([0], [1], [2], [2])
 
+    @property
+    def get_fig(self):
+        return self.presenter._plot.fig
+
     def test_add_filter_include(self):
         # by default should have 2 shapes that cover both plots
         self.check_shapes([[0, 2, 0, 1],
