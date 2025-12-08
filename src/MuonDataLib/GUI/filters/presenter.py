@@ -28,7 +28,6 @@ class FilterPresenter(PresenterTemplate):
         :param filters: A list of filters (dicts)
         :param state: If to include or exclude the data
         """
-        print("hii", state, filters)
         if len(filters) == 0:
             return
         elif state == 'Exclude':
@@ -69,7 +68,7 @@ class FilterPresenter(PresenterTemplate):
 
     def load(self, filters):
         """
-        Loads the filters from a json file
+        Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
         """
         data, state = self._time.load(filters['time_filters'])

@@ -33,8 +33,7 @@ class ControlPaneView(ViewTemplate):
         """
         callback(Output('example_plot', 'figure', allow_duplicate=True),
                  Input('time-table', 'data'),
-                 [State('example_plot', 'figure'),
-                  State('dropdown-time', 'value')],
+                 [State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.add_filter)
 
         callback([Output('tooltip', 'show', allow_duplicate=True),

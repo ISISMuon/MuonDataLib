@@ -25,14 +25,13 @@ class ControlPanePresenter(PresenterTemplate):
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 
-    def add_filter(self, data, fig, state):
+    def add_filter(self, data, state):
         """
         This methods adds filters to the plot.
         A filter is represented by removing the shaded
         region from the plot. i.e. only the shaded
         data is used in calculations.
         :param data: the data from the filter table
-        :param fig: the figure object
         :param state: if the filter is an exclude or include
         :returns: an updated figure
         """

@@ -35,6 +35,8 @@ class MainAppPresenter(object):
         wwskips the confirm dialog.
         :param n_clicks: number of times submit
         has been pressed
+        :param name: the name of the current file
+        :returns: the name of the "new file"
         """
         if n_clicks > self.N_submit:
             self.N_submit += 1
@@ -44,11 +46,15 @@ class MainAppPresenter(object):
     def confirm_load(self, n_clicks, data, submit):
         """
         Gives a confirm pop up iff filters are presnt.
+        Of the pop up is not shown we still increment
+        the number of submit clicks for the pop-up,
+        because we still want to trigger the
+        events.
         :param n_clicks: Number of clicks of load
         :param data: the time filter table data
         :param submit: the number of clicks of submit
-        :reuturn: if to show the GUI and the state of
-        the tine filters
+        :reuturn: if to show the confirm pop=-p and the number
+        of submit clicks.
         """
         if len(data) > 0:
             return True, submit

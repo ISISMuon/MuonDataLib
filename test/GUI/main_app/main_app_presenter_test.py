@@ -44,6 +44,44 @@ class MainAppPresenterTest(TestHelper):
         control.assert_called_once_with()
         save.assert_called_once_with()
 
+    def test_open_nxs(self):
+        mock_open = mock.Mock(return_value='bob.nxs')
+        app = MainAppPresenter(mock_open)
+        new_name = app.open_nxs(1, 'old.nxs')
+
+        self.assertEqual(new_name, 'bob.nxs')
+        mock_open.assert_called_once_with(1)
+
+    def test_open_nxs_no_update(self):
+        mock_open = mock.Mock(return_value='bob.nxs')
+        app = MainAppPresenter(mock_open)
+        new_name = app.open_nxs(0, 'old.nxs')
+
+        self.assertEqual(new_name, 'old.nxs')
+        mock_open.assert_not_called()
+
+    def test_confirm_load_no_filters(self):
+        app = MainAppPresenter(dummy_open)
+        state, clicks = app.confirm_load(2, {}, 1)
+        self.assertFalse(state)
+        self.assertEqual(clicks, 2)
+
+    def test_confirm_load_with_filters(self):
+        app = MainAppPresenter(dummy_open)
+        filters = {'Name_t': 'test',
+                   'Start_t': 1,
+                   'End_t': 3}
+        state, clicks = app.confirm_load(2, filters, 1)
+        self.assertTrue(state)
+        self.assertEqual(clicks, i
+    def test_confirm_load_no_filters(self):
+        app = MainAppPresenter(dummy_open)
+        state, clicks = app.confirm_load(2, {}, 1)
+        self.assertFalse(state)
+        self.assertEqual(clicks, 2)
+
+)
+
     def test_load_nxs(self):
 
         app = MainAppPresenter(dummy_open)
@@ -312,7 +350,6 @@ class MainAppPresenterTest(TestHelper):
 
         with open('test.json') as f:
             result = json.load(f)
-        print(result)
         self.assertEqual(len(result), 3)
 
         self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
@@ -336,7 +373,6 @@ class MainAppPresenterTest(TestHelper):
 
         with open('test.json') as f:
             result = json.load(f)
-        print(result)
         self.assertEqual(len(result), 3)
 
         self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
