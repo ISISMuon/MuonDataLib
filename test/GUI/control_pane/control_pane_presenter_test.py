@@ -20,34 +20,6 @@ class ControlPanePresenterTest(TestHelper):
         # just add a plot
         self.presenter._plot.plot([0], [1], [2], [2])
 
-    def check_shape(self, shape, k, x0, x1, y0, y1):
-        self.assertEqual(shape['fillcolor'], 'PaleGreen')
-        self.assertEqual(shape['layer'], 'above')
-        self.assertEqual(shape['line']['color'], 'black')
-        self.assertEqual(shape['line']['width'], 4)
-        self.assertEqual(shape['opacity'], 0.3)
-        self.assertEqual(shape['type'], 'rect')
-        self.assertEqual(shape['x0'], x0)
-        self.assertEqual(shape['x1'], x1)
-        self.assertEqual(shape['y0'], y0)
-        self.assertEqual(shape['y1'], y1)
-        if k == 0:
-            self.assertEqual(shape['xref'], 'x')
-            self.assertEqual(shape['yref'], 'y domain')
-        else:
-            self.assertEqual(shape['xref'], f'x{k+1}')
-            self.assertEqual(shape['yref'], f'y{k+1} domain')
-
-    def check_shapes(self, expected):
-        N_plots = 2
-        shapes = self.presenter._plot.fig.layout.shapes
-        n = 0
-
-        for k in range(len(expected)):
-            for j in range(N_plots):
-                self.check_shape(shapes[n], j, *expected[k])
-                n += 1
-
     def test_add_filter_include(self):
         # by default should have 2 shapes that cover both plots
         self.check_shapes([[0, 2, 0, 1],
