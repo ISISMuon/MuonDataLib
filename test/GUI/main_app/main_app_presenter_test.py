@@ -60,12 +60,6 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(new_name, 'old.nxs')
         mock_open.assert_not_called()
 
-    def test_confirm_load_no_filters(self):
-        app = MainAppPresenter(dummy_open)
-        state, clicks = app.confirm_load(2, {}, 1)
-        self.assertFalse(state)
-        self.assertEqual(clicks, 2)
-
     def test_confirm_load_with_filters(self):
         app = MainAppPresenter(dummy_open)
         filters = {'Name_t': 'test',
@@ -73,14 +67,13 @@ class MainAppPresenterTest(TestHelper):
                    'End_t': 3}
         state, clicks = app.confirm_load(2, filters, 1)
         self.assertTrue(state)
-        self.assertEqual(clicks, i
+        self.assertEqual(clicks, 1)
+
     def test_confirm_load_no_filters(self):
         app = MainAppPresenter(dummy_open)
         state, clicks = app.confirm_load(2, {}, 1)
         self.assertFalse(state)
         self.assertEqual(clicks, 2)
-
-)
 
     def test_load_nxs(self):
 
