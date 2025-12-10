@@ -58,9 +58,9 @@ class TimePresenter(TablePresenter):
         :returns: dict of the values for the time table.
         """
         self.count += 1
-        return {'Name_t': f'default_{self.count}',
-                'Start_t': 500,
-                'End_t': 1000}
+        return {'Name': f'default_{self.count}',
+                'Start': 500,
+                'End': 1000}
 
     def get_range(self, data):
         """

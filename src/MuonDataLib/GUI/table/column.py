@@ -55,14 +55,14 @@ class Column(object):
         for the config of the column.
         :returns: the dict of the config
         """
-        header = {'id': self.ID,
-                  'name': self.name}
-        if self.type is not None:
-            header['type'] = self.type
+        #header = {'id': self.ID,
+        #          'name': self.name}
+        #if self.type is not None:
+        #    header['type'] = self.type
 
-        if self.dropdown is not None:
-            header['presentation'] = 'dropdown'
-
+        #if self.dropdown is not None:
+        #    header['presentation'] = 'dropdown'
+        header = {'field': self.name}
         return header
 
     @property
