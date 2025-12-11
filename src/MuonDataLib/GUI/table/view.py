@@ -3,7 +3,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 from dash import dash_table, dcc
 import dash_ag_grid as dag
-
+import dash_iconify
 from dash import Input, Output, callback, State
 
 import json
@@ -22,8 +22,8 @@ class TableView(ViewTemplate):
         :returns: the layout of the widget's
         GUI.
         """
-        self.data = [{'Delete_t': 'a', 'Name_t': 'moo', 'Start_t':100, 'End_t':200},
-                     {'Delete_t': 'a', 'Name_t': 'baa', 'Start_t':1, 'End_t': 5}]
+        self.data = [{'Delete_t': '  a  ', 'Name_t': 'moo', 'Start_t':100, 'End_t':200},
+                     {'Delete_t': '  a  ', 'Name_t': 'baa', 'Start_t':1, 'End_t': 5}]
 
         col_defs = [
 
