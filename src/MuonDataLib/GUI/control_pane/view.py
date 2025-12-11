@@ -32,7 +32,7 @@ class ControlPaneView(ViewTemplate):
         :param pressenter: the presenter for the widget
         """
         callback(Output('example_plot', 'figure', allow_duplicate=True),
-                 Input('time-table', 'data'),
+                 Input('time-table', 'rowData'),
                  [State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.add_filter)
 
@@ -40,7 +40,7 @@ class ControlPaneView(ViewTemplate):
                   Output('tooltip', 'bbox', allow_duplicate=True),
                   Output('tooltip', 'children', allow_duplicate=True)],
                  Input('example_plot', 'hoverData'),
-                 [State('time-table', 'data'),
+                 [State('time-table', 'rowData'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)
 

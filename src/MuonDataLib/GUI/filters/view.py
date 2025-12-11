@@ -46,7 +46,7 @@ class FilterView(ViewTemplate):
         callback([Output('N_events', 'children'),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('calc_btn', 'n_clicks'),
-                 [State('time-table', 'data'),
+                 [State('time-table', 'rowData'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
 

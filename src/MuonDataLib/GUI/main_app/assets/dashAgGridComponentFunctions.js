@@ -7,7 +7,7 @@ dagcomponentfuncs.Button = function (props) {
         setData();
     }
     let icon
-    icon = React.createElement('i', {className: props.icon});
+    icon = React.createElement('i', {className: props.Icon});
     return React.createElement(
         'Button',
         {

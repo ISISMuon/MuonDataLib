@@ -29,11 +29,11 @@ class TableView(ViewTemplate):
 
                 {'field': 'Delete_t',
                  'headerName': '',
-                 'width':80,
+                 'width':100,
                  'editable': False,
                  "cellRenderer": "Button",
                  "cellRendererParams": {
-                                        'icon': 'bi bi-trash me-2',
+                                        'Icon': 'bi bi-trash me-2',
                                         'className': 'btn btn-danger',
                                         }},
                 {'field': 'Name_t', 'headerName': 'Name', 'width':100,
