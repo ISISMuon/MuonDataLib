@@ -26,9 +26,9 @@ class TablePresenter(PresenterTemplate):
         options, conditions = self._get_dropdown_info(columns)
         self.options = options
         self.conditions = conditions
-        self.cols = [col.get_column_dict for col in columns]
 
         self._view = self._set_view()
+        self.cols = self._view.col#[col.get_column_dict for col in columns]
 
     def _set_view(self):
         """

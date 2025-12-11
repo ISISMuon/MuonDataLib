@@ -72,6 +72,7 @@ class TimePresenter(TablePresenter):
 
     def display_confirm(self, value, data):
         if len(data) == 0:
+            self._previous = value
             return False
         elif self._previous != value:
             return True
@@ -91,17 +92,17 @@ class TimePresenter(TablePresenter):
         """
 
         # found a bug: dont add row, change option. The title is wrong
-
         if submit > cancel:
-            for k in range(len(self.cols)):
-                header = self.cols[k]
-                for key in header.keys():
-                    if isinstance(header[key], list):
-                        for j in range(len(header[key])):
-                            txt = self.cols[k][key][j]
-                            self.cols[k][key][j] = txt.replace(self._previous,
-                                                               value)
+            #for k in range(len(self.cols)):
+            #    header = self.cols[k]
+            #    for key in header.keys():
+            #        if isinstance(header[key], list):
+            #            for j in range(len(header[key])):
+            #                txt = self.cols[k][key][j]
+            #                self.cols[k][key][j] = txt.replace(self._previous,
+            #                                                   value)
             self._previous = value
+            self.cols[2]['headerName'] = f'{value} Filter details'
             return value, [], self.cols, True
         else:
             return self._previous, data, self.cols, False

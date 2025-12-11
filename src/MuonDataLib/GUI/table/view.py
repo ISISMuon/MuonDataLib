@@ -22,8 +22,8 @@ class TableView(ViewTemplate):
         :returns: the layout of the widget's
         GUI.
         """
-        self.data = [{'Delete_t': '', 'Name_t': 'moo', 'Start_t':100, 'End_t':200},
-                     {'Delete_t': '', 'Name_t': 'baa', 'Start_t':1, 'End_t': 5}]
+        self.data = [{'Delete_t': 'a', 'Name_t': 'moo', 'Start_t':100, 'End_t':200},
+                     {'Delete_t': 'a', 'Name_t': 'baa', 'Start_t':1, 'End_t': 5}]
 
         col_defs = [
 
@@ -31,10 +31,10 @@ class TableView(ViewTemplate):
                  'headerName': '',
                  'width':80,
                  'editable': False,
-                 "cellRenderer": "DBC_Button",
-                 "cellRendererParams": {"className": "btn btn-success",
-                                        'color': 'danger',
-                                        'Icon': 'bi bi-trash me-2',
+                 "cellRenderer": "Button",
+                 "cellRendererParams": {
+                                        'icon': 'bi bi-trash me-2',
+                                        'className': 'btn btn-danger',
                                         }},
                 {'field': 'Name_t', 'headerName': 'Name', 'width':100,
                                     'cellEditor': 'agLargeTextCellEditor',
@@ -42,8 +42,7 @@ class TableView(ViewTemplate):
                                     'cellEditorParams': {
                                                          'maxLength': 50,
                                                         }},
-            {"headerName": "Include Filter details",
-             'openByDefault': True,
+            {"headerName": "Exclude Filter details",
              "children": [
                  {'field': 'Start_t', 'headerName': 'Start', 'width':100,
                   'cellEditor': 'agNumberCellEditor',
@@ -61,7 +60,7 @@ class TableView(ViewTemplate):
                   },
                  ]},
              ]
-
+        self.col = col_defs
         return html.Div([
             dbc.Button(id=presenter.ID + '_add', class_name='bi-plus-lg'),
             html.H3(id='moo', children=""),
@@ -69,21 +68,22 @@ class TableView(ViewTemplate):
             dag.AgGrid(id=presenter.ID,
                        columnDefs=col_defs,
                        rowData=self.data,
-                       defaultColDef={'editable': True}),
+                       defaultColDef={'editable': True,
+                                      'suppressMovable':True}),
             html.H3('hi', id="test_test"),
             html.Div(id='table-dropdown-container')
             ])
 
-    def showChange(self, n):
+    def showChange(self, n, data):
         return json.dumps(n)
 
-    def test_add(self, n):
+    def test_add(self, n, data):
         # cant get previous values, so need to store it manually... grrr
-        self.data.append({'Delete_t': '',
+        data.append({'Delete_t': '',
                           'Name_t': 'baaa',
                           'Start_t': 22,
                           'End_t': 55})
-        return self.data
+        return data
 
     def test_validate(self, change, data):
         changed = change[0]
@@ -104,9 +104,10 @@ class TableView(ViewTemplate):
         data[changed['rowIndex']][col_name] = new_value
         return data
 
-    def test(self, data):
-        print(data)
-        return 'wsss'
+    def test_delete(self, info, data):
+        data.pop(info['rowIndex'])
+        return data
+
 
     def set_callbacks(self, presenter):
         """
@@ -115,6 +116,7 @@ class TableView(ViewTemplate):
         """
         callback(Output(presenter.ID, 'rowData'),
                  Input(presenter.ID + '_add', 'n_clicks'),
+                 State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(self.test_add)
 
         callback(Output(presenter.ID, 'rowData', allow_duplicate=True),
@@ -122,9 +124,10 @@ class TableView(ViewTemplate):
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(self.test_validate)
 
-        callback(Output("test_test", "children"),
+        callback(Output(presenter.ID, "rowData", allow_duplicate=True),
                  Input(presenter.ID, "cellRendererData"),
-                 prevent_initial_call=True)(self.test)
+                 State(presenter.ID, 'virtualRowData'),
+                 prevent_initial_call=True)(self.test_delete)
 
         """
         callback([Output(presenter.ID, 'data', allow_duplicate=True),

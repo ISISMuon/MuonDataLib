@@ -6,21 +6,14 @@ dagcomponentfuncs.Button = function (props) {
     function onClick() {
         setData();
     }
-    let Icon;
-    Icon = React.createElement('i', {className: props.Icon,});
+    let icon
+    icon = React.createElement('i', {className: props.icon});
     return React.createElement(
         'Button',
         {
 	    onClick,
-            style: {
-                margin: props.margin,
-		'background-color': props.color,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-            },
-        },
-	Icon,
-        props.value
+            className: props.className   
+	},
+	icon,
     );
 };

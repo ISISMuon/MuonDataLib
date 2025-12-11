@@ -45,16 +45,16 @@ class TimeView(TableView):
 
         callback(Output('confirm-time', 'displayed'),
                  Input('dropdown-time', 'value'),
-                 State('time-table', 'data'),
+                 State('time-table', 'rowData'),
                  prevent_initial_call=True)(presenter.display_confirm)
 
         callback([Output('dropdown-time', 'value'),
-                  Output('time-table', 'data'),
-                  Output('time-table', 'columns'),
+                  Output('time-table', 'rowData', allow_duplicate=True),
+                  Output('time-table', 'columnDefs'),
                   Output('time-table_changed_state', 'data')
                   ],
                  [Input('confirm-time', 'submit_n_clicks_timestamp'),
                   Input('confirm-time', 'cancel_n_clicks_timestamp')],
                  State('dropdown-time', 'value'),
-                 State('time-table', 'data'),
+                 State('time-table', 'rowData'),
                  prevent_initial_call=True)(presenter.confirm)
