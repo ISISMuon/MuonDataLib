@@ -9,9 +9,10 @@ class SaveBarView(ViewTemplate):
     This code follows the MVP pattern.
     """
 
-    def generate(self):
+    def generate(self, presenter):
         """
         Gets the view for the widget
+        :param presenter: the presenter for the widget
         :returns: the layout for the widget
         """
         return html.Div([

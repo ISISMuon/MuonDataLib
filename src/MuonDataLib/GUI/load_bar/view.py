@@ -1,7 +1,7 @@
 from MuonDataLib.GUI.view_template import ViewTemplate
 
 from dash import Input, Output, callback
-from dash import html
+from dash import html, dcc
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 
@@ -14,16 +14,26 @@ class LoadBarView(ViewTemplate):
     A class for the load bar's view.
     This follows the MVP pattern.
     """
-    def generate(self):
+    def generate(self, presenter):
         """
         Creates the view for the
         load bar widget
+        :param presenter: the presenter for the widget
         :returns: the layout for the
         load bar widget.
         """
         return html.Div([
+            dcc.ConfirmDialog(id='load_confirm',
+                              message='Loading new data will clear all '
+                                      'of the filters.'
+                                      'If you want to keep them, you '
+                                      'should save the '
+                                      'filters first. Are you sure you '
+                                      'wish to continue?',
+                              submit_n_clicks=0),
             dbc.Button('Load', id='Load',
-                       color='primary', className='me-md-2'),
+                       color='primary',
+                       className='me-md-2'),
             dbc.Button('Load filters', id='load_filters', color='primary',
                        n_clicks=0, className='me-md-2'),
             html.Div(id='file_name', children=CURRENT, className='me-md-2'),

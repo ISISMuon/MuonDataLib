@@ -889,7 +889,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         file = os.path.join(os.path.dirname(__file__),
                             '..',
                             'data_files',
-                            'load_filter.json')
+                            'script_load_filter.json')
         data.load_filters(file)
         result = data.report_filters()
         self.expected_report(result)
