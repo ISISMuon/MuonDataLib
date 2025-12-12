@@ -22,13 +22,10 @@ class TablePresenter(PresenterTemplate):
         """
         self.ID = ID
         self.name_col = name_col
-
-        options, conditions = self._get_dropdown_info(columns)
-        self.options = options
-        self.conditions = conditions
+        self.count = 0
 
         self._view = self._set_view()
-        self.cols = self._view.col#[col.get_column_dict for col in columns]
+        self.cols = columns
 
     def _set_view(self):
         """
@@ -36,79 +33,6 @@ class TablePresenter(PresenterTemplate):
         :returns: the view for the widget
         """
         return TableView(self)
-
-    def _get_dropdown_info(self, columns):
-        """
-        Gets the conditions and dropdown options
-        for a column
-        :param headers: the list of headers for the table
-        :returns: the layout of the widget's
-        GUI.
-        """
-        options = {}
-        conditions = []
-        for col in columns:
-            if col.dropdown is not None:
-                options[col.ID] = {
-                    'clearable': False,
-                    'options': col.get_options
-                }
-
-                tmp = col.get_conditions
-                if len(tmp) > 0:
-                    for con in tmp:
-                        conditions.append(con)
-        conditions.append({'if': {'row_index': 'odd'},
-                           'backgroundColor': 'whitesmoke'})
-        return options, conditions
-
-    def validate_row(self, new_row, old_row):
-        """
-        Determines if a change to a row is valid
-        :param new_row: the new (changed) row
-        :param old_row: the old (previous) row
-        :returns: if its valid and the error message
-        """
-        return True, ''
-
-    def validate(self, data, previous):
-        """
-        A validation check for the table.
-        It has a rule that each row name
-        must be unique.
-        :param data: the data in the table
-        :param previous: the previous data in the table
-        :returns it to update and the error message
-        """
-        if len(data) == 0:
-            return True, ''
-
-        names = [row[self.name_col] for row in data]
-        repeat, num = Counter(names).most_common(1)[0]
-        if num > 1:
-            return False, f'Repeated name {repeat}'
-
-        for new_row, old_row in zip(data, previous):
-            if new_row != old_row:
-                return self.validate_row(new_row, old_row)
-        return True, ''
-
-    def update(self, timestamp, data, previous):
-        """
-        This allows the user to change a value and then
-        click out of the cell (without pressing enter)
-        such that the table keeps the new value (if valid).
-        If its not valid the table will be reverted.
-        :param timestamp: the timestamp for the interaction
-        :param data: the data from the table
-        :param previous: the previous data from the table
-        :returns: the valid data for the table, if its valid and
-        the error message
-        """
-        valid, msg = self.validate(data, previous)
-        if valid:
-            return data, True, ''
-        return previous, False, msg
 
     def add(self, n, data):
         """
@@ -118,11 +42,69 @@ class TablePresenter(PresenterTemplate):
         :returns: the data for the table and if its valid
         """
         data.append(self.generate_default)
-        return data, True
+        return data
+
+    def validate(self, change, data):
+        """
+        A validation check for the table.
+        It has a rule that each row name
+        must be unique.
+        :param change: the change in the table (row)
+        :param data: the data in the table
+        :returns it to update and the error message
+        """
+        names = [row['Name_' + self.ID] for row in data]
+        repeat, num = Counter(names).most_common(1)[0]
+        if num > 1:
+            return data, f'Repeated name {repeat}'
+
+        return self.validate_row(change, data)
+
+    def validate_row(self, change, data):
+        """
+        A validation check for the table.
+        It has a rule that each row name
+        must be unique.
+        :param change: the change in the table (row)
+        :param data: the data in the table
+        :returns: it to update and the error message
+        """
+        changed = change[0]
+        col_name = changed['colId']
+        row = changed['data']
+
+        data[changed['rowIndex']][col_name] = row[col_name]
+        return data, ''
+
+    def delete_row(self, info, data):
+        data.pop(info['rowIndex'])
+        return data
+
+    @property
+    def get_next_row_name(self):
+        self.count += 1
+        return f'default_{self.count}'
 
     @property
     def generate_default(self):
         """
         Code to create some default values
         """
-        raise NotImplementedError(f"Need to set a default table for {self.ID}")
+        return {'Delete_' + self.ID: '',
+                self.name_col: self.get_next_row_name,
+                **self.default_row}
+
+    @property
+    def default_row(self):
+        raise NotImplementedError(f"Need to set a default_row for {self.ID}")
+
+    @property
+    def _delete_row_col(self):
+        return {'field': 'Delete_t',
+                'headerName': '',
+                'width': 100,
+                'editable': False,
+                'cellRenderer': 'Button',
+                'cellRendererParams': {'Icon': 'bi bi-trash me-2',
+                                       'className': 'btn btn-danger'}
+                }

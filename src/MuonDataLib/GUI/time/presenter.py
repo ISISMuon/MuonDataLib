@@ -14,21 +14,22 @@ class TimePresenter(TablePresenter):
         This creates the presenter object for the
         widget.
         """
-        self.count = 0
-
         self._previous = 'Exclude'
 
         # create columns
-        name = Column('Name_t', ['', 'Name'])
+        name = Column('Name_t', 'Name', 'text')
 
-        start = Column('Start_t', ['Exclude data', 'Start'])
-        start.add_type('numeric')
+        start = Column('Start_t', 'Start', 'numeric')
+        end = Column('End_t', 'End', 'numeric')
 
-        end = Column('End_t', ['Exclude data', 'End'])
-        end.add_type('numeric')
+        self.cols = [self._delete_row_col,
+                     name.get_column_dict,
+                     {'headerName': 'Exclude filter details',
+                      'children': [start.get_column_dict,
+                                   end.get_column_dict]}]
 
         super().__init__('time-table',
-                         [name, start, end],
+                         self.cols,
                          name.ID)
 
     def _set_view(self):
@@ -37,30 +38,54 @@ class TimePresenter(TablePresenter):
         """
         return TimeView(self)
 
-    def validate_row(self, new_row, old_row):
+    def validate_row(self, change, data):
         """
-        A method to check if a new row is valie
-        :param new_row: the new row
-        :param old_row: The old (previous) row
-        :returns: if to update and the error message
+        A validation check for the table.
+        It has a rule that each row name
+        must be unique.
+        :param change: the change in the table (row)
+        :param data: the data in the table
+        :returns: it to update and the error message
         """
-        if new_row['Start_t'] > new_row['End_t']:
-            msg = f'Start time {new_row["Start_t"]} is '
-            msg += f'greater than end time {new_row["End_t"]}'
-            return False, msg
-        return True, ''
+        changed = change[0]
+        print(changed)
+        col_name = changed['colId']
+        row = changed['data']
+
+        msg = ''
+        new_value = row[col_name]
+        if new_value is None:
+            # keep the old one
+            msg = (f'The new value {new_value} is '
+                   f'outside of the data range.')
+            new_value = changed['oldValue']
+        elif col_name == 'Start_t':
+            end_value = row['End_t']
+            if new_value > end_value:
+                # keep the old one
+                msg = (f'The start value {new_value} is '
+                       f'larger than the end value {end_value}')
+                new_value = changed['oldValue']
+        elif col_name == 'End_t':
+            start_value = row['Start_t']
+            if new_value < start_value:
+                # keep the old one
+                msg = (f'The end value {new_value} is '
+                       f'smaller than the start value {start_value}')
+                new_value = changed['oldValue']
+        print(msg)
+        data[changed['rowIndex']][col_name] = new_value
+        return data, msg
 
     @property
-    def generate_default(self):
+    def default_row(self):
         """
         The code needed to create a default
         row for the time table
         :returns: dict of the values for the time table.
         """
-        self.count += 1
-        return {'Name': f'default_{self.count}',
-                'Start': 500,
-                'End': 1000}
+        return {'Start_t': 500,
+                'End_t': 1000}
 
     def get_range(self, data):
         """
@@ -93,14 +118,6 @@ class TimePresenter(TablePresenter):
 
         # found a bug: dont add row, change option. The title is wrong
         if submit > cancel:
-            #for k in range(len(self.cols)):
-            #    header = self.cols[k]
-            #    for key in header.keys():
-            #        if isinstance(header[key], list):
-            #            for j in range(len(header[key])):
-            #                txt = self.cols[k][key][j]
-            #                self.cols[k][key][j] = txt.replace(self._previous,
-            #                                                   value)
             self._previous = value
             self.cols[2]['headerName'] = f'{value} Filter details'
             return value, [], self.cols, True
