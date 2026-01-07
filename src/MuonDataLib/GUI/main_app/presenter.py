@@ -187,7 +187,7 @@ class MainAppPresenter(object):
         self.load.set_file(name)
 
         if 'None' in name:
-            return self.plot([], [], [], []), [], ''
+            return self.plot([], [], [], []), [], True, ''
         try:
             if debug_state:
                 raise RuntimeError("Loading error")
@@ -195,7 +195,10 @@ class MainAppPresenter(object):
             self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
-            return self.plot([], [], [], []), [], f'An error occurred: {err}'
+            return (self.plot([], [], [], []),
+                    [],
+                    True,
+                    f'An error occurred: {err}')
 
         data = self.load.get_data
         self.control.set_data(data)
@@ -208,4 +211,4 @@ class MainAppPresenter(object):
         log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot(a, b, x, y), [], ''
+        return self.plot(a, b, x, y), [], False, ''

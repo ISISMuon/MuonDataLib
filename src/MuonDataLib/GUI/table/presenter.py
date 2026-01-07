@@ -44,21 +44,22 @@ class TablePresenter(PresenterTemplate):
         data.append(self.generate_default)
         return data
 
-    def validate(self, change, data):
+    def validate(self, row, data):
         """
         A validation check for the table.
         It has a rule that each row name
         must be unique.
-        :param change: the change in the table (row)
+        :param row: the change in the table (row)
         :param data: the data in the table
         :returns it to update and the error message
         """
+        print(row)
         names = [row['Name_' + self.ID] for row in data]
         repeat, num = Counter(names).most_common(1)[0]
         if num > 1:
             return data, f'Repeated name {repeat}'
 
-        return self.validate_row(change, data)
+        return self.validate_row(row, data)
 
     def validate_row(self, change, data):
         """

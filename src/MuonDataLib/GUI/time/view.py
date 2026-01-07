@@ -43,14 +43,15 @@ class TimeView(TableView):
     def set_callbacks(self, presenter):
         super().set_callbacks(presenter)
 
-        callback(Output('confirm-time', 'displayed'),
+        callback([Output('confirm-time', 'displayed'),
+                  Output('time-table', 'columnDefs')],
                  Input('dropdown-time', 'value'),
                  State('time-table', 'rowData'),
                  prevent_initial_call=True)(presenter.display_confirm)
 
         callback([Output('dropdown-time', 'value'),
                   Output('time-table', 'rowData', allow_duplicate=True),
-                  Output('time-table', 'columnDefs'),
+                  Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('time-table_changed_state', 'data')
                   ],
                  [Input('confirm-time', 'submit_n_clicks_timestamp'),

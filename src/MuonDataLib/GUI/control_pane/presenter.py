@@ -121,7 +121,7 @@ class ControlPanePresenter(PresenterTemplate):
             for filter_details in filters:
                 start, end = self._filter._time.get_range(filter_details)
                 if start <= pt['x'] and end >= pt['x']:
-                    added.append(filter_details['Name_t'])
+                    added.append(filter_details['Name_time-table'])
             if len(added) > 0:
                 txt += 'True. '
                 txt += 'Added by: '
@@ -134,7 +134,7 @@ class ControlPanePresenter(PresenterTemplate):
             for filter_details in filters:
                 start, end = self._filter._time.get_range(filter_details)
                 if (start <= pt['x'] and end >= pt['x']):
-                    removed.append(filter_details['Name_t'])
+                    removed.append(filter_details['Name_time-table'])
             if len(removed) > 0:
                 txt += 'False. '
                 txt += 'Removed by: '

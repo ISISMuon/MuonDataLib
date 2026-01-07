@@ -1,6 +1,9 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.time.view import TimeView
-from MuonDataLib.GUI.table.column import Column
+from MuonDataLib.GUI.table.column import Column, TableGroup, TableColumns
+
+
+TIME_TABLE = 'time-table'
 
 
 class TimePresenter(TablePresenter):
@@ -17,10 +20,10 @@ class TimePresenter(TablePresenter):
         self._previous = 'Exclude'
 
         # create columns
-        name = Column('Name_t', 'Name', 'text')
+        name = Column('Name_' + TIME_TABLE, 'Name', 'text')
 
-        start = Column('Start_t', 'Start', 'numeric')
-        end = Column('End_t', 'End', 'numeric')
+        start = Column('Start_' + TIME_TABLE, 'Start', 'numeric')
+        end = Column('End_' + TIME_TABLE, 'End', 'numeric')
 
         self.cols = [self._delete_row_col,
                      name.get_column_dict,
@@ -28,7 +31,17 @@ class TimePresenter(TablePresenter):
                       'children': [start.get_column_dict,
                                    end.get_column_dict]}]
 
-        super().__init__('time-table',
+        # still need to work this out
+        cols = TableColumns([TableGroup([name]),
+                             TableGroup([start,
+                                         end],
+                                        'Exclude filter details')],
+                            inc_delete_row=True,
+                            btn_ID=TIME_TABLE)
+
+        cols = cols.get_column_dict
+
+        super().__init__(TIME_TABLE,
                          self.cols,
                          name.ID)
 
@@ -48,7 +61,7 @@ class TimePresenter(TablePresenter):
         :returns: it to update and the error message
         """
         changed = change[0]
-        print(changed)
+        print('mooo', changed)
         col_name = changed['colId']
         row = changed['data']
 
@@ -59,15 +72,15 @@ class TimePresenter(TablePresenter):
             msg = (f'The new value {new_value} is '
                    f'outside of the data range.')
             new_value = changed['oldValue']
-        elif col_name == 'Start_t':
-            end_value = row['End_t']
+        elif col_name == 'Start_' + TIME_TABLE:
+            end_value = row['End_' + TIME_TABLE]
             if new_value > end_value:
                 # keep the old one
                 msg = (f'The start value {new_value} is '
                        f'larger than the end value {end_value}')
                 new_value = changed['oldValue']
-        elif col_name == 'End_t':
-            start_value = row['Start_t']
+        elif col_name == 'End_' + TIME_TABLE:
+            start_value = row['Start_' + TIME_TABLE]
             if new_value < start_value:
                 # keep the old one
                 msg = (f'The end value {new_value} is '
@@ -84,8 +97,8 @@ class TimePresenter(TablePresenter):
         row for the time table
         :returns: dict of the values for the time table.
         """
-        return {'Start_t': 500,
-                'End_t': 1000}
+        return {'Start_' + TIME_TABLE: 500,
+                'End_' + TIME_TABLE: 1000}
 
     def get_range(self, data):
         """
@@ -93,15 +106,15 @@ class TimePresenter(TablePresenter):
         :peram data' The data from the table
         :returns: the start and end values
         """
-        return [data['Start_t'], data['End_t']]
+        return [data['Start_' + TIME_TABLE], data['End_' + TIME_TABLE]]
 
     def display_confirm(self, value, data):
         if len(data) == 0:
             self._previous = value
-            return False
+            self.cols[2]['headerName'] = f'{value} Filter details'
+            return False, self.cols
         elif self._previous != value:
-            return True
-        return False
+            return True, self.cols
 
     def confirm(self, submit, cancel, value, data):
         """
@@ -115,8 +128,6 @@ class TimePresenter(TablePresenter):
         the data for the table, the list of column names and
         if the data has been changed
         """
-
-        # found a bug: dont add row, change option. The title is wrong
         if submit > cancel:
             self._previous = value
             self.cols[2]['headerName'] = f'{value} Filter details'
@@ -142,9 +153,9 @@ class TimePresenter(TablePresenter):
         data = []
         for key in file[name].keys():
             values = file[name][key]
-            data.append({'Name_t': key,
-                         'Start_t': values[0],
-                         'End_t': values[1]})
+            data.append({'Name_' + TIME_TABLE: key,
+                         'Start_' + TIME_TABLE: values[0],
+                         'End_' + TIME_TABLE: values[1]})
 
         self._previous = new_state
         return data, new_state

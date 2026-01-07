@@ -21,7 +21,9 @@ class TableView(ViewTemplate):
         GUI.
         """
         return html.Div([
-            dbc.Button(id=presenter.ID + '_add', class_name='bi-plus-lg'),
+            dbc.Button(id=presenter.ID + '_add',
+                       class_name='bi-plus-lg',
+                       disabled=True),
             html.H3(id='moo', children=""),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
             dag.AgGrid(id=presenter.ID,
