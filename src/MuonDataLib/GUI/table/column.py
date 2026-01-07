@@ -50,8 +50,8 @@ class Column(object):
                                        'max': self._max,
                                        'precision': 3}
         elif self.dtype == 'button':
-            col['editable'] = False,
-            col['cellRenderer'] = 'Button',
+            col['editable'] = False
+            col['cellRenderer'] = 'Button'
             col['cellRendererParams'] = {'Icon': 'bi bi-trash me-2',
                                          'className': 'btn btn-danger'}
         return col

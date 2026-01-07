@@ -27,7 +27,7 @@ class TableView(ViewTemplate):
             html.H3(id='moo', children=""),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
             dag.AgGrid(id=presenter.ID,
-                       columnDefs=presenter.cols,
+                       columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
                        defaultColDef={'editable': True,
                                       'suppressMovable': True}),

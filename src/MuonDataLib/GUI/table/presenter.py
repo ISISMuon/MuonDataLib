@@ -24,8 +24,8 @@ class TablePresenter(PresenterTemplate):
         self.name_col = name_col
         self.count = 0
 
-        self._view = self._set_view()
         self.cols = columns
+        self._view = self._set_view()
 
     def _set_view(self):
         """

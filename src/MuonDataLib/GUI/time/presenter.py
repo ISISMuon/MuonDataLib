@@ -25,13 +25,6 @@ class TimePresenter(TablePresenter):
         start = Column('Start_' + TIME_TABLE, 'Start', 'numeric')
         end = Column('End_' + TIME_TABLE, 'End', 'numeric')
 
-        self.cols = [self._delete_row_col,
-                     name.get_column_dict,
-                     {'headerName': 'Exclude filter details',
-                      'children': [start.get_column_dict,
-                                   end.get_column_dict]}]
-
-        # still need to work this out
         cols = TableColumns([TableGroup([name]),
                              TableGroup([start,
                                          end],
@@ -39,10 +32,8 @@ class TimePresenter(TablePresenter):
                             inc_delete_row=True,
                             btn_ID=TIME_TABLE)
 
-        cols = cols.get_column_dict
-
         super().__init__(TIME_TABLE,
-                         self.cols,
+                         cols,
                          name.ID)
 
     def _set_view(self):
