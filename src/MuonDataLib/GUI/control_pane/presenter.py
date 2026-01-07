@@ -95,7 +95,11 @@ class ControlPanePresenter(PresenterTemplate):
         :param data: MuonEventData
         """
         self._plot.reset_plot_range()
-        self._filter._data = data
+        self._filter.set_data(data)
+
+    @property
+    def headers(self):
+        return self._filter.headers
 
     def display_hover(self, hover_info, filters, state):
         """

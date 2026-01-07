@@ -106,6 +106,5 @@ class TableColumns(object):
 
     def set_range(self, min_value, max_value):
         for col in self.cols:
-            if col.is_numberic:
-                col.set_range(min_value,
-                              max_value)
+            col.set_range(min_value,
+                          max_value)

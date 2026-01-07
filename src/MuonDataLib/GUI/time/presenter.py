@@ -35,12 +35,19 @@ class TimePresenter(TablePresenter):
         super().__init__(TIME_TABLE,
                          cols,
                          name.ID)
+        self.start = 0
+        self.end = 1000
 
     def _set_view(self):
         """
         Overwrite the view to give a time table view
         """
         return TimeView(self)
+
+    def set_time_range(self, start, end):
+        self._start = start
+        self._end = end
+        self.cols.set_range(start, end)
 
     def validate_row(self, change, data):
         """
@@ -52,7 +59,6 @@ class TimePresenter(TablePresenter):
         :returns: it to update and the error message
         """
         changed = change[0]
-        print('mooo', changed)
         col_name = changed['colId']
         row = changed['data']
 
@@ -61,7 +67,8 @@ class TimePresenter(TablePresenter):
         if new_value is None:
             # keep the old one
             msg = (f'The new value {new_value} is '
-                   f'outside of the data range.')
+                   f'outside of the data range.'
+                   f' Range is {self._start} to {self._end}')
             new_value = changed['oldValue']
         elif col_name == 'Start_' + TIME_TABLE:
             end_value = row['End_' + TIME_TABLE]
@@ -88,8 +95,8 @@ class TimePresenter(TablePresenter):
         row for the time table
         :returns: dict of the values for the time table.
         """
-        return {'Start_' + TIME_TABLE: 500,
-                'End_' + TIME_TABLE: 1000}
+        return {'Start_' + TIME_TABLE: 0.33 * self._end,
+                'End_' + TIME_TABLE: 0.66 * self._end}
 
     def get_range(self, data):
         """

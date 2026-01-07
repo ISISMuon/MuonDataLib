@@ -183,11 +183,15 @@ class MainAppPresenter(object):
         data and the alert message
         """
         if name == self.load.file:
-            return self.control._plot.fig, data, ''
+            return self.control._plot.fig, data, self.control.headers, ''
         self.load.set_file(name)
 
         if 'None' in name:
-            return self.plot([], [], [], []), [], True, ''
+            return (self.plot([], [], [], []),
+                    [],
+                    True,
+                    self.control.headers,
+                    '')
         try:
             if debug_state:
                 raise RuntimeError("Loading error")
@@ -198,6 +202,7 @@ class MainAppPresenter(object):
             return (self.plot([], [], [], []),
                     [],
                     True,
+                    self.control.headers,
                     f'An error occurred: {err}')
 
         data = self.load.get_data
@@ -211,4 +216,4 @@ class MainAppPresenter(object):
         log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot(a, b, x, y), [], False, ''
+        return self.plot(a, b, x, y), [], False, self.control.headers, ''

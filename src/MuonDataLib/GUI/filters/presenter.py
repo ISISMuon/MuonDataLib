@@ -19,6 +19,16 @@ class FilterPresenter(PresenterTemplate):
         self._view = FilterView(self)
         self._data = None
 
+    @property
+    def headers(self):
+        return self._time.cols.get_column_dict
+
+    def set_data(self, data):
+        self._data = data
+        times = self._data.get_frame_start_times()
+
+        self._time.set_time_range(times[0], times[-1] + 1)
+
     def apply_filters(self, filters, state):
         """
         A method to apply the filters to the
@@ -33,15 +43,15 @@ class FilterPresenter(PresenterTemplate):
         elif state == 'Exclude':
             for filter_details in filters:
                 self._data.remove_data_time_between(
-                        filter_details['Name_t'],
-                        filter_details['Start_t'],
-                        filter_details['End_t'])
+                        filter_details['Name_time-table'],
+                        filter_details['Start_time-table'],
+                        filter_details['End_time-table'])
         else:
             for filter_details in filters:
                 self._data.only_keep_data_time_between(
-                        filter_details['Name_t'],
-                        filter_details['Start_t'],
-                        filter_details['End_t'])
+                        filter_details['Name_time-table'],
+                        filter_details['Start_time-table'],
+                        filter_details['End_time-table'])
 
     def calculate(self, n_clicks, filters, state):
         """

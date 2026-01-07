@@ -116,6 +116,7 @@ class MainApp(Dash):
         callback([Output('example_plot', 'figure'),
                   Output('time-table', 'rowData', allow_duplicate=True),
                   Output('time-table_add', 'disabled'),
+                  Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
                  [State('time-table', 'rowData'),
