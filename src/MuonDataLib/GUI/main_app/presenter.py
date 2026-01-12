@@ -90,10 +90,10 @@ class MainAppPresenter(object):
                 raise RuntimeError("Filter error")
 
             filters = name[len(CURRENT):]
-            data, state = self.control.read_filter(filters)
-            return data, state, ''
+            data, state, cols = self.control.read_filter(filters)
+            return data, state, cols, ''
         except Exception as err:
-            return [], 'Exclude', f'Load filter error: {err}'
+            return [], 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
         """

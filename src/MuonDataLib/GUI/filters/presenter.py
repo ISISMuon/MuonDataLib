@@ -99,7 +99,8 @@ class FilterPresenter(PresenterTemplate):
         """
         data, state = self._time.load(filters['time_filters'])
         self._file_data = data
-        return data, state
+        self._time.set_state(state)
+        return data, state, self.headers
 
     def update_N_events(self, update, current_str):
         """

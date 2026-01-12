@@ -106,6 +106,9 @@ class TimePresenter(TablePresenter):
         """
         return [data['Start_' + TIME_TABLE], data['End_' + TIME_TABLE]]
 
+    def set_state(self, value):
+        self.cols.set_title(2, f'{value} Filter details')
+
     def display_confirm(self, value, data):
         state = False
         if len(data) == 0:

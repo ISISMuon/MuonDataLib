@@ -159,5 +159,5 @@ class ControlPanePresenter(PresenterTemplate):
         """
         with open(name, 'r') as file:
             data = json.load(file)
-        data, state = self._filter.load(data)
-        return data, state
+        data, state, cols = self._filter.load(data)
+        return data, state, cols
