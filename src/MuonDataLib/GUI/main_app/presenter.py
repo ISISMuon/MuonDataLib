@@ -81,21 +81,19 @@ class MainAppPresenter(object):
         event data.
         :param name: The name of the filter file
         :param debug: If debug mode is on or off
-        :returns: A text string of the filters,
-        the list of rows for the time filter table,
+        :returns: The list of rows for the time filter table,
         the state of the time filters (include/exclude)
         and an error message (if it fails)
         """
-        text = ''
         try:
             if debug:
                 raise RuntimeError("Filter error")
 
             filters = name[len(CURRENT):]
             data, state = self.control.read_filter(filters)
-            return text, data, state, ''
+            return data, state, ''
         except Exception as err:
-            return '', [], 'Exclude', f'Load filter error: {err}'
+            return [], 'Exclude', f'Load filter error: {err}'
 
     def alert(self, text):
         """

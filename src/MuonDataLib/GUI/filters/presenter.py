@@ -18,6 +18,13 @@ class FilterPresenter(PresenterTemplate):
         self._time = TimePresenter()
         self._view = FilterView(self)
         self._data = None
+        self._file_data = []
+
+    def show_file(self, name, data):
+        if self._file_data == data:
+            self._file = name
+            return False
+        return True
 
     @property
     def headers(self):
@@ -35,7 +42,7 @@ class FilterPresenter(PresenterTemplate):
         self._data = data
         times = self._data.get_frame_start_times()
 
-        self._time.set_time_range(times[0], times[-1] + 1)
+        self._time.set_time_range(times[0], times[-1] + 32e-6)
 
     def apply_filters(self, filters, state):
         """
@@ -91,6 +98,7 @@ class FilterPresenter(PresenterTemplate):
         :returns: the filters and if to include/exclude
         """
         data, state = self._time.load(filters['time_filters'])
+        self._file_data = data
         return data, state
 
     def update_N_events(self, update, current_str):

@@ -23,14 +23,14 @@ class FilterView(ViewTemplate):
         GUI.
         """
         return html.Div([
-            html.H3("Title: testing", id='title_test'),
+            html.P("Title: testing", id='title_test',
+                   hidden=True),
             dbc.Accordion([
                 dbc.AccordionItem(
                     [presenter._time.layout],
                     title="Time filters"),
                 ],
                          start_collapsed=True),
-            html.P('', id='title_test_body'),
             dbc.Button('Calculate',
                        id='calc_btn',
                        color='primary',
@@ -49,6 +49,11 @@ class FilterView(ViewTemplate):
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
+
+        callback(Output('title_test', 'hidden'),
+                 [Input('title_test', 'children'),
+                  Input('time-table', 'rowData')],
+                 prevent_initial_call=True)(presenter.show_file)
 
         callback(Output('N_events', 'children', allow_duplicate=True),
                  Input('time-table_changed_state', 'data'),

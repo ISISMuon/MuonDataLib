@@ -104,7 +104,7 @@ class MainApp(Dash):
 
         # Updates the information on the loaded filter. With error
         # catching.
-        callback([Output('title_test_body', 'children'),
+        callback([
                   Output('time-table', 'rowData', allow_duplicate=True),
                   Output('dropdown-time', 'value', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
