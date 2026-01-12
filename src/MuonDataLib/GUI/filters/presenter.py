@@ -21,9 +21,17 @@ class FilterPresenter(PresenterTemplate):
 
     @property
     def headers(self):
+        """
+        Get the column headers
+        :returns: the column headers (time table)
+        """
         return self._time.cols.get_column_dict
 
     def set_data(self, data):
+        """
+        A method to set the muon data
+        :param data: MuonEventData
+        """
         self._data = data
         times = self._data.get_frame_start_times()
 
@@ -80,6 +88,7 @@ class FilterPresenter(PresenterTemplate):
         """
         Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
+        :returns: the filters and if to include/exclude
         """
         data, state = self._time.load(filters['time_filters'])
         return data, state

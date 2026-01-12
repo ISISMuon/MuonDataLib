@@ -32,7 +32,7 @@ class MainAppPresenter(object):
         """
         A method to open a nexus file.
         If the filters are empty it
-        wwskips the confirm dialog.
+        skips the confirm dialog.
         :param n_clicks: number of times submit
         has been pressed
         :param name: the name of the current file
@@ -46,7 +46,7 @@ class MainAppPresenter(object):
     def confirm_load(self, n_clicks, data, submit):
         """
         Gives a confirm pop up iff filters are presnt.
-        Of the pop up is not shown we still increment
+        If the pop up is not shown we still increment
         the number of submit clicks for the pop-up,
         because we still want to trigger the
         events.
@@ -132,7 +132,7 @@ class MainAppPresenter(object):
             if debug:
                 raise RuntimeError("Saving error")
 
-            print("saving to ", file, dtype)
+            print("saving to ", file)
             self.control._filter.apply_filters(filters, time_mode)
             if dtype == "n":
                 data.save_histograms(file)
@@ -180,7 +180,8 @@ class MainAppPresenter(object):
         :param data: the time filter table data
         :param debug_state: if debug mode is on or off.
         :returns: the updated figure, the time filter table
-        data and the alert message
+        data, if to enable the filter table, the filter table column names
+        and the alert message
         """
         if name == self.load.file:
             return self.control._plot.fig, data, self.control.headers, ''
