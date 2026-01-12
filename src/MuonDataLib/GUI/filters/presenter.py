@@ -89,7 +89,8 @@ class FilterPresenter(PresenterTemplate):
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram()
-        return self._view.get_N(self._data._cache.get_N_events), ''
+        N = f"{self._data._cache.get_N_events:,}"
+        return self._view.get_N(N), ''
 
     def load(self, filters):
         """
