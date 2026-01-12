@@ -119,6 +119,9 @@ class TableGroup(object):
             return [{'headerName': self.name,
                      'children': children}]
 
+    def set_title(self, title):
+        self.name = title
+
 
 class TableColumns(object):
     def __init__(self, col_groups, inc_delete_row, btn_ID=''):
@@ -139,6 +142,9 @@ class TableColumns(object):
 
         for tmp in col_groups:
             self.cols.append(tmp)
+
+    def set_title(self, index, title):
+        self.cols[index].set_title(title)
 
     @property
     def get_column_dict(self):

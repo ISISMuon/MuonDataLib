@@ -107,12 +107,14 @@ class TimePresenter(TablePresenter):
         return [data['Start_' + TIME_TABLE], data['End_' + TIME_TABLE]]
 
     def display_confirm(self, value, data):
+        state = False
         if len(data) == 0:
             self._previous = value
-            self.cols[2]['headerName'] = f'{value} Filter details'
-            return False, self.cols
+            self.cols.set_title(2, f'{value} Filter details')
+
         elif self._previous != value:
-            return True, self.cols
+            state = True
+        return state, self.cols.get_column_dict
 
     def confirm(self, submit, cancel, value, data):
         """
@@ -128,10 +130,10 @@ class TimePresenter(TablePresenter):
         """
         if submit > cancel:
             self._previous = value
-            self.cols[2]['headerName'] = f'{value} Filter details'
-            return value, [], self.cols, True
+            self.cols.set_title(2, f'{value} Filter details')
+            return value, [], self.cols.get_column_dict, True
         else:
-            return self._previous, data, self.cols, False
+            return self._previous, data, self.cols.get_column_dict, False
 
     def load(self, file):
         """
