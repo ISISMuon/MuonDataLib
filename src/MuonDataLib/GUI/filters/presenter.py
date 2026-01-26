@@ -21,8 +21,17 @@ class FilterPresenter(PresenterTemplate):
         self._file_data = []
 
     def show_file(self, name, data):
+        """
+        If to display the name of the loaded
+        filter file. This method chekcs
+        the data currently in the table,
+        so if you alter it and then change it
+        back the file name will reappear.
+        :param name: the name of the file
+        :param data: the data from the file
+        :returns: if to show the name in the GUI
+        """
         if self._file_data == data:
-            self._file = name
             return False
         return True
 

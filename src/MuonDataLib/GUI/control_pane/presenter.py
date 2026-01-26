@@ -99,6 +99,9 @@ class ControlPanePresenter(PresenterTemplate):
 
     @property
     def headers(self):
+        """
+        :returns: the column headers
+        """
         return self._filter.headers
 
     def display_hover(self, hover_info, filters, state):
@@ -155,7 +158,8 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the data and state for the time filter (include/exclude)
+        :returns: the data, the state for the time filter (include/exclude)
+        and the column headers
         """
         with open(name, 'r') as file:
             data = json.load(file)

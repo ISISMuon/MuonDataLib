@@ -19,8 +19,8 @@ class MainAppPresenter(object):
         main app. It follows the MVP
         pattern, but the view
         is the main app.
-        :param open_nxs_func: gets the html funtion
-        )
+        :param open_nxs_func: the function for
+        opening a nxs file
         """
         self.load = LoadBarPresenter()
         self.control = ControlPanePresenter()
@@ -82,7 +82,8 @@ class MainAppPresenter(object):
         :param name: The name of the filter file
         :param debug: If debug mode is on or off
         :returns: The list of rows for the time filter table,
-        the state of the time filters (include/exclude)
+        the state of the time filters (include/exclude),
+        the column headers
         and an error message (if it fails)
         """
         try:
@@ -93,6 +94,7 @@ class MainAppPresenter(object):
             data, state, cols = self.control.read_filter(filters)
             return data, state, cols, ''
         except Exception as err:
+            cols = self.control.headers
             return [], 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
@@ -167,6 +169,7 @@ class MainAppPresenter(object):
         :param y0: the first set of y values
         :param x1: the second set of x values
         :param y1: the second set of y values
+        :returns: the plot object
         """
         return self.control._plot.plot(x0, y0, x1, y1)
 

@@ -13,6 +13,9 @@ sys.path.append(parent)
 from data_paths import FILTER  # noqa: E402
 
 
+TT = '_time-table'
+
+
 class ControlPanePresenterTest(TestHelper):
 
     def setUp(self):
@@ -29,12 +32,12 @@ class ControlPanePresenterTest(TestHelper):
         self.check_shapes([[0, 2, 0, 1],
                            ])
 
-        self.presenter.add_filter([{'Name_t': 'unit',
-                                    'Start_t': 0.2,
-                                    'End_t': 0.4},
-                                   {'Name_t': 'test',
-                                    'Start_t': 0.7,
-                                    'End_t': 0.8}],
+        self.presenter.add_filter([{'Name' + TT: 'unit',
+                                    'Start' + TT: 0.2,
+                                    'End' + TT: 0.4},
+                                   {'Name' + TT: 'test',
+                                    'Start' + TT: 0.7,
+                                    'End' + TT: 0.8}],
                                   'Include')
 
         self.check_shapes([[0.2, 0.4, 0, 1],
@@ -46,12 +49,12 @@ class ControlPanePresenterTest(TestHelper):
         self.check_shapes([[0, 2, 0, 1],
                            ])
 
-        self.presenter.add_filter([{'Name_t': 'unit',
-                                    'Start_t': 0.2,
-                                    'End_t': 0.4},
-                                   {'Name_t': 'test',
-                                    'Start_t': 0.7,
-                                    'End_t': 0.8}],
+        self.presenter.add_filter([{'Name' + TT: 'unit',
+                                    'Start' + TT: 0.2,
+                                    'End' + TT: 0.4},
+                                   {'Name' + TT: 'test',
+                                    'Start' + TT: 0.7,
+                                    'End' + TT: 0.8}],
                                   'Exclude')
 
         self.check_shapes([[0.0, 0.2, 0, 1],
@@ -108,7 +111,7 @@ class ControlPanePresenterTest(TestHelper):
         reset = mock.Mock()
         self.presenter._plot.reset_plot_range = reset
         data = mock.Mock()
-
+        data.get_frame_start_times = mock.Mock(return_value=[0.1, 3, 6, 11])
         self.presenter.set_data(data)
         self.assertEqual(reset.call_count, 1)
         self.assertEqual(self.presenter._filter._data,
@@ -122,6 +125,10 @@ class ControlPanePresenterTest(TestHelper):
         self.assertEqual(result[1], no_update)
         self.assertEqual(result[2], no_update)
 
+    def test_headers(self):
+        # just check the number of header groups
+        self.assertEqual(len(self.presenter.headers), 3)
+
     def check_hover_text(self, hover, expect):
 
         # loop over html objects for the tooltip
@@ -134,9 +141,9 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.2,
                             'y': 0.5}]
-        filters = [{'Name_t': 'test',
-                    'Start_t': 0.4,
-                    'End_t': 0.6}]
+        filters = [{'Name' + TT: 'test',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6}]
 
         result = self.presenter.display_hover(hover,
                                               filters,
@@ -155,9 +162,9 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.5,
                             'y': 0.5}]
-        filters = [{'Name_t': 'test',
-                    'Start_t': 0.4,
-                    'End_t': 0.6}]
+        filters = [{'Name' + TT: 'test',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6}]
 
         result = self.presenter.display_hover(hover,
                                               filters,
@@ -176,12 +183,12 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.5,
                             'y': 0.5}]
-        filters = [{'Name_t': 'unit',
-                    'Start_t': 0.4,
-                    'End_t': 0.6},
-                   {'Name_t': 'test',
-                    'Start_t': 0.2,
-                    'End_t': 0.7},
+        filters = [{'Name' + TT: 'unit',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6},
+                   {'Name' + TT: 'test',
+                    'Start' + TT: 0.2,
+                    'End' + TT: 0.7},
                    ]
 
         result = self.presenter.display_hover(hover,
@@ -201,9 +208,9 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.5,
                             'y': 0.5}]
-        filters = [{'Name_t': 'test',
-                    'Start_t': 0.4,
-                    'End_t': 0.6}]
+        filters = [{'Name' + TT: 'test',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6}]
 
         result = self.presenter.display_hover(hover,
                                               filters,
@@ -222,9 +229,9 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.2,
                             'y': 0.5}]
-        filters = [{'Name_t': 'test',
-                    'Start_t': 0.4,
-                    'End_t': 0.6}]
+        filters = [{'Name' + TT: 'test',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6}]
 
         result = self.presenter.display_hover(hover,
                                               filters,
@@ -243,12 +250,12 @@ class ControlPanePresenterTest(TestHelper):
         hover['points'] = [{'bbox': [1, 2, 3, 4],
                             'x': 0.5,
                             'y': 0.5}]
-        filters = [{'Name_t': 'unit',
-                    'Start_t': 0.4,
-                    'End_t': 0.6},
-                   {'Name_t': 'test',
-                    'Start_t': 0.2,
-                    'End_t': 0.7},
+        filters = [{'Name' + TT: 'unit',
+                    'Start' + TT: 0.4,
+                    'End' + TT: 0.6},
+                   {'Name' + TT: 'test',
+                    'Start' + TT: 0.2,
+                    'End' + TT: 0.7},
                    ]
 
         result = self.presenter.display_hover(hover,
@@ -264,15 +271,17 @@ class ControlPanePresenterTest(TestHelper):
         self.check_hover_text(result[2], expect)
 
     def test_read_filter(self):
-        data, state = self.presenter.read_filter(FILTER)
+        data, state, cols = self.presenter.read_filter(FILTER)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
-        self.assertEqual(data[0], {'Name_t': 'first',
-                                   'Start_t': 0.01,
-                                   'End_t': 0.02})
-        self.assertEqual(data[1], {'Name_t': 'second',
-                                   'Start_t': 0.05,
-                                   'End_t': 0.06})
+        self.assertEqual(data[0], {'Name' + TT: 'first',
+                                   'Start' + TT: 0.01,
+                                   'End' + TT: 0.02})
+        self.assertEqual(data[1], {'Name' + TT: 'second',
+                                   'Start' + TT: 0.05,
+                                   'End' + TT: 0.06})
+        # this is the only bit that can change
+        self.assertEqual(cols[2]['headerName'], 'Include Filter details')
 
 
 if __name__ == '__main__':

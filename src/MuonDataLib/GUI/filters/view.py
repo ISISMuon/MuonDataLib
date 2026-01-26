@@ -74,4 +74,4 @@ class FilterView(ViewTemplate):
         number of events.
         :param N: the number of events
         """
-        return html.P(NUM + N)
+        return html.P(NUM + str(N))
