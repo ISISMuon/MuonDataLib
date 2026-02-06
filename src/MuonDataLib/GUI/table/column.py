@@ -92,7 +92,23 @@ class TableGroup(object):
         all of the columns.
         """
         self.name = name
-        self.cols = cols
+        if name is not None and len(cols) > 0:
+            self._set_cols(cols)
+        elif (len(cols) > 1 and name is None) or len(cols) == 0:
+            raise ValueError("Must name the group of columns")
+        else:
+            self._set_cols(cols)
+
+    def _set_cols(self, cols):
+        if isinstance(cols, list):
+            self.cols = []
+            for c in cols:
+                if isinstance(c, Column):
+                    self.cols.append(c)
+                else:
+                    raise ValueError("Must use Columns")
+        else:
+            raise ValueError("Must use Columns")
 
     def set_range(self, min_value, max_value):
         """
@@ -120,6 +136,10 @@ class TableGroup(object):
                      'children': children}]
 
     def set_title(self, title):
+        """
+        Sets the shared title for the group
+        :param title: the new shared title
+        """
         self.name = title
 
 
@@ -133,6 +153,9 @@ class TableColumns(object):
         :param inc_delete_row" if to add a delete button to the rows
         :param btn_ID: the ID for the row button
         """
+        self.cols = []
+        if len(col_groups) <= 0:
+            raise ValueError("List of TableGroups must be at least 1")
         if inc_delete_row and btn_ID == '':
             raise RuntimeError('Need to include an ID '
                                'for the delete button')
@@ -140,10 +163,21 @@ class TableColumns(object):
             self.cols = [TableGroup([Column('Delete_' + btn_ID,
                                             '', 'button')])]
 
-        for tmp in col_groups:
-            self.cols.append(tmp)
+        if isinstance(col_groups, list):
+            for tmp in col_groups:
+                if isinstance(tmp, TableGroup):
+                    self.cols.append(tmp)
+                else:
+                    raise ValueError("Must use TableGroup's as input")
 
     def set_title(self, index, title):
+        """
+        Sets the shared title for a specific group
+        :param index: the index for the new shared title
+        :param title: the new shared title
+        """
+        if index > len(self.cols) - 1:
+            raise RuntimeError("Cannot set title, column group doesn't exist")
         self.cols[index].set_title(title)
 
     @property

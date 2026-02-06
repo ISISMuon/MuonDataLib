@@ -28,7 +28,7 @@ class TimePresenter(TablePresenter):
         cols = TableColumns([TableGroup([name]),
                              TableGroup([start,
                                          end],
-                                        'Exclude filter details')],
+                                        'Exclude Filter details')],
                             inc_delete_row=True,
                             btn_ID=TIME_TABLE)
 
@@ -45,8 +45,13 @@ class TimePresenter(TablePresenter):
         return TimeView(self)
 
     def set_time_range(self, start, end):
-        self._start = start
-        self._end = end
+        """
+        Sets the range of allowed times
+        :param start: the start time for the data
+        :param end: the end time for the data
+        """
+        self.start = start
+        self.end = end
         self.cols.set_range(start, end)
 
     def validate_row(self, change, data):
@@ -55,8 +60,8 @@ class TimePresenter(TablePresenter):
         It has a rule that each row name
         must be unique.
         :param change: the change in the table (row)
-        :param data: the data in the table
-        :returns: it to update and the error message
+        :param data: the table data as a list of rows (dicts)
+        :returns: the updated data and the error message
         """
         changed = change[0]
         col_name = changed['colId']
@@ -66,25 +71,24 @@ class TimePresenter(TablePresenter):
         new_value = row[col_name]
         if new_value is None:
             # keep the old one
-            msg = (f'The new value {new_value} is '
+            msg = (f'The new value is '
                    f'outside of the data range.'
-                   f' Range is {self._start} to {self._end}')
+                   f' Range is {self.start} to {self.end}')
             new_value = changed['oldValue']
         elif col_name == 'Start_' + TIME_TABLE:
             end_value = row['End_' + TIME_TABLE]
-            if new_value > end_value:
+            if new_value >= end_value:
                 # keep the old one
                 msg = (f'The start value {new_value} is '
                        f'larger than the end value {end_value}')
                 new_value = changed['oldValue']
         elif col_name == 'End_' + TIME_TABLE:
             start_value = row['Start_' + TIME_TABLE]
-            if new_value < start_value:
+            if new_value <= start_value:
                 # keep the old one
                 msg = (f'The end value {new_value} is '
                        f'smaller than the start value {start_value}')
                 new_value = changed['oldValue']
-        print(msg)
         data[changed['rowIndex']][col_name] = new_value
         return data, msg
 
@@ -95,21 +99,34 @@ class TimePresenter(TablePresenter):
         row for the time table
         :returns: dict of the values for the time table.
         """
-        return {'Start_' + TIME_TABLE: 0.33 * self._end,
-                'End_' + TIME_TABLE: 0.66 * self._end}
+        return {'Start_' + TIME_TABLE: 0.33 * self.end,
+                'End_' + TIME_TABLE: 0.66 * self.end}
 
     def get_range(self, data):
         """
-        Gets the x range from the time table data
-        :peram data' The data from the table
+        Gets the x range from the time table data.
+        Used for creating shaded region for the row
+        :peram data' The row data from the table
         :returns: the start and end values
         """
         return [data['Start_' + TIME_TABLE], data['End_' + TIME_TABLE]]
 
     def set_state(self, value):
+        """
+        Sets the group name in the table
+        :param value: the updated part of the table name
+        (expect either Include or Exclude)
+        """
         self.cols.set_title(2, f'{value} Filter details')
 
     def display_confirm(self, value, data):
+        """
+        Check if to display a confirmation dialog
+        :param value: the new mode (Exclude/Include)
+        :param data: the table data (list of rows)
+        :returns: if to show the display and the
+        coloumn headers as a dict
+        """
         state = False
         if len(data) == 0:
             self._previous = value
@@ -138,24 +155,27 @@ class TimePresenter(TablePresenter):
         else:
             return self._previous, data, self.cols.get_column_dict, False
 
-    def load(self, file):
+    def load(self, file_data):
         """
         A method to load filters from a json file
-        :param file: the open file
-        :returns: the data, the new state (include/exclude)
+        :param file: the json dicts from the open file
+        :returns: a list of the row details
+        for the time table (exluding the remove button),
+        and the new state (include/exclude)
         """
         name = 'remove_filters'
         new_state = 'Exclude'
-        if len(file['keep_filters']) == len(file['remove_filters']):
+        if (len(file_data['keep_filters']) > 0 and
+                len(file_data['remove_filters']) > 0):
             raise RuntimeError("Cannot have both include and "
                                "exclude time filters")
-        elif len(file['keep_filters']) > 0:
+        elif len(file_data['keep_filters']) > 0:
             name = 'keep_filters'
             new_state = 'Include'
 
         data = []
-        for key in file[name].keys():
-            values = file[name][key]
+        for key in file_data[name].keys():
+            values = file_data[name][key]
             data.append({'Name_' + TIME_TABLE: key,
                          'Start_' + TIME_TABLE: values[0],
                          'End_' + TIME_TABLE: values[1]})

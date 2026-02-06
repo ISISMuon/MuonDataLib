@@ -1,0 +1,19 @@
+{
+    "peak_property": {
+        "Amplitudes": 0.0
+    },
+    "sample_log_filters": {},
+    "time_filters": {
+        "keep_filters": {
+            "default_1": [
+                200,
+                400
+            ],
+            "default_2": [
+                600,
+                1100
+            ]
+        },
+        "remove_filters": {}
+    }
+}

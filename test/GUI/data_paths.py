@@ -11,11 +11,14 @@ shared = os.path.join(os.path.dirname(current),
 FILE = os.path.join(shared,
                     'HIFI00195790.nxs')
 
+
 FILTER = os.path.join(shared,
                       'load_filter.json')
 
+
 BADFILTER = os.path.join(shared,
                          'load_bad_filter.json')
+
 
 EXPECT = ("peak_property.Amplitudes: 3.14 \n"
           "sample_log_filters.Temp: [0.0044, 0.163] \n"
