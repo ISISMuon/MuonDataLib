@@ -18,7 +18,7 @@ class TableColumnsTest(TestHelper):
         for data in bad_input:
             with self.subTest(data=data):
                 try:
-                    table = TableColumns(data, False)
+                    _ = TableColumns(data, False)
                 except ValueError:
                     pass
                     return
@@ -55,23 +55,22 @@ class TableColumnsTest(TestHelper):
         for data in COL_GROUPS:
             with self.subTest(data=data):
                 try:
-                    table = TableColumns(data, True)
+                    _ = TableColumns(data, True)
                 except RuntimeError:
                     pass
                     return
                 self.fail('Should throw an error if no ID')
 
     def test_init_fail_bad_input(self):
-        bad = ['fail', [], COLS, [1,2,3]]
+        bad = ['fail', [], COLS, [1, 2, 3]]
         for data in bad:
             with self.subTest(data=data):
                 try:
-                    table = TableColumns(data, True)
+                    _ = TableColumns(data, True)
                 except RuntimeError:
                     pass
                     return
                 self.fail('Should throw an error if no ID')
-
 
     def test_set_title(self):
         for data in COL_GROUPS:
@@ -83,7 +82,7 @@ class TableColumnsTest(TestHelper):
                     title_at_k = table.cols[k].name
                     expect = name
                     if k == 0:
-                       expect = 'new'
+                        expect = 'new'
                     self.assertEqual(title_at_k, expect)
 
     def test_set_title_index_1(self):
@@ -97,7 +96,7 @@ class TableColumnsTest(TestHelper):
                         title_at_k = table.cols[k].name
                         expect = name
                         if k == 1:
-                           expect = 'new'
+                            expect = 'new'
                         self.assertEqual(title_at_k, expect)
 
                 except RuntimeError:
@@ -120,23 +119,23 @@ class TableColumnsTest(TestHelper):
                             self.assertEqual(col._max, 1000.0)
 
     def test_get_column_dict(self):
-       names = ['test', 'more']
-       IDs = ['Test', 'More']
-       for data in COL_GROUPS:
-           with self.subTest(data=data):
-               table = TableColumns(data, False)
-               col_dict = table.get_column_dict
-               for j, group in enumerate(table.cols):
-                   if len(group.cols) > 1:
-                       self.assertEqual(col_dict[j]['headerName'], 'group')
-                       for k, col in enumerate(group.cols):
-                           self.assertEqual(col_dict[j]['headerName'],
-                                            'group')
-                           children = col_dict[j]['children']
-                           self.assertEqual(children[k],
-                                            expected_col_dict(col.dtype,
-                                                              IDs[k],
-                                                              names[k]))
+        names = ['test', 'more']
+        IDs = ['Test', 'More']
+        for data in COL_GROUPS:
+            with self.subTest(data=data):
+                table = TableColumns(data, False)
+                col_dict = table.get_column_dict
+                for j, group in enumerate(table.cols):
+                    if len(group.cols) > 1:
+                        self.assertEqual(col_dict[j]['headerName'], 'group')
+                        for k, col in enumerate(group.cols):
+                            self.assertEqual(col_dict[j]['headerName'],
+                                             'group')
+                            children = col_dict[j]['children']
+                            self.assertEqual(children[k],
+                                             expected_col_dict(col.dtype,
+                                                               IDs[k],
+                                                               names[k]))
                     else:
                         for col in group.cols:
                             self.assertEqual(col_dict[j],
