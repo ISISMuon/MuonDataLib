@@ -42,6 +42,8 @@ class TablePresenter(PresenterTemplate):
         :param data: A list of the row data (as a dict)
         :returns: the data for the table and if its valid
         """
+        if not isinstance(data, list):
+            data = []
         data.append(self.generate_default)
         return data
 

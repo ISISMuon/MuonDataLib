@@ -41,6 +41,12 @@ class TablePresenterTest(TestHelper):
         self.assertEqual(len(result), 1)
         self.assert_data(result[0], 'default_1', 42)
 
+    def test_add_None(self):
+        data = None
+        result = self.presenter.add(0, data)
+        self.assertEqual(len(result), 1)
+        self.assert_data(result[0], 'default_1', 42)
+
     def test_add(self):
         data = [{'Delete_table_test': '',
                  NAME: 'keep row',
