@@ -59,11 +59,6 @@ class TimePresenterTest(TestHelper):
         self.view = view
         self.presenter = TimePresenter()
 
-    def assert_data(self, result, name, value):
-        self.assertEqual(result, {'Delete_table_test': '',
-                                  NAME: name,
-                                  'Data': value})
-
     def test_set_view(self):
         self.view.assert_called_once()
 
