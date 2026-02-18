@@ -185,7 +185,8 @@ class MainAppPresenter(object):
         and the alert message
         """
         if name == self.load.file:
-            return self.control._plot.fig, data, self.control.headers, ''
+            return (self.control._plot.fig, data, True, True,
+                    self.control.headers, '')
         self.load.set_file(name)
 
         if 'None' in name:
@@ -204,6 +205,7 @@ class MainAppPresenter(object):
             return (self.plot([], [], [], []),
                     [],
                     True,
+                    True,
                     self.control.headers,
                     f'An error occurred: {err}')
 
@@ -218,4 +220,5 @@ class MainAppPresenter(object):
         log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return self.plot(a, b, x, y), [], False, self.control.headers, ''
+        return (self.plot(a, b, x, y), [], False, False,
+                self.control.headers, '')

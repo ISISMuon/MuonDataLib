@@ -71,7 +71,9 @@ def _load_events(file_name, N):
         p_type = p_group['type'][:]
 
         # store data in objects
+        print("mooo", N)
         _, events = load_data(file_name, N)
+        print("waaa")
         cache = EventsCache(start_time,
                             events.get_total_frames)
 

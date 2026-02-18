@@ -24,15 +24,13 @@ class TableView(ViewTemplate):
             dbc.Button(id=presenter.ID + '_add',
                        class_name='bi-plus-lg',
                        disabled=True),
-            html.H3(id='moo', children=""),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
             dag.AgGrid(id=presenter.ID,
                        columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
                        defaultColDef={'editable': True,
                                       'suppressMovable': True}),
-            html.H3('hi', id="test_test"),
-            html.Div(id='table-dropdown-container')
+            html.Div(id=presenter.ID + '-dropdown-container')
             ])
 
     def set_callbacks(self, presenter):
@@ -51,7 +49,8 @@ class TableView(ViewTemplate):
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.validate)
 
-        callback(Output(presenter.ID, "rowData", allow_duplicate=True),
+        callback([Output(presenter.ID, "rowData", allow_duplicate=True),
+                  Output('log_selector', 'is_open', allow_duplicate=True)],
                  Input(presenter.ID, "cellRendererData"),
                  State(presenter.ID, 'virtualRowData'),
-                 prevent_initial_call=True)(presenter.delete_row)
+                 prevent_initial_call=True)(presenter.btn_pressed)

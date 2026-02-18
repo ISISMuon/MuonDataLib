@@ -1,5 +1,6 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
+from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.filters.view import FilterView
 
 
@@ -16,6 +17,7 @@ class FilterPresenter(PresenterTemplate):
         - time filter table
         """
         self._time = TimePresenter()
+        self._log = LogPresenter()
         self._view = FilterView(self)
         self._data = None
         self._file_data = []

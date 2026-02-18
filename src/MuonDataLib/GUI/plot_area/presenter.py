@@ -11,11 +11,12 @@ class PlotAreaPresenter(PresenterTemplate):
     This follows the MVP pattern.
     """
 
-    def __init__(self):
+    def __init__(self, ID):
         """
         Creates a Plot Area Presenter.
         This widget deals with plotly
         """
+        self.ID = ID
         self._view = PlotAreaView(self)
         self.reset_plot_range()
 

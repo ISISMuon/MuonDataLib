@@ -21,7 +21,7 @@ class ControlPanePresenter(PresenterTemplate):
         This creates the presenter object for the
         widget.
         """
-        self._plot = PlotAreaPresenter()
+        self._plot = PlotAreaPresenter('main')
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 

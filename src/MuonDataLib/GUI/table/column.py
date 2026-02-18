@@ -23,9 +23,15 @@ class Column(object):
             self.dtype = dtype
             self._min = 0
             self._max = 1000
+            self._icon = 'bi bi-trash me-2'
+            self._className = 'btn btn-danger'
         else:
             raise ValueError(f"Unkown column dtype {dtype}."
                              "Options are 'text', 'numeric' and 'button'.")
+
+    def set_icon(self, icon, class_name):
+        self._icon = icon
+        self._className = class_name
 
     def set_range(self, min_value, max_value):
         """
@@ -65,8 +71,8 @@ class Column(object):
         elif self.dtype == 'button':
             col['editable'] = False
             col['cellRenderer'] = 'Button'
-            col['cellRendererParams'] = {'Icon': 'bi bi-trash me-2',
-                                         'className': 'btn btn-danger'}
+            col['cellRendererParams'] = {'Icon': self._icon,
+                                         'className': self._className}
         return col
 
     @property
