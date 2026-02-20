@@ -1,4 +1,4 @@
-name: moo
+name: MuonDataLib-dev
 
 channels:
   - conda-forge
