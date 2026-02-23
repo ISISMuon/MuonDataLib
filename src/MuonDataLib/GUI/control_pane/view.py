@@ -44,8 +44,11 @@ class ControlPaneView(ViewTemplate):
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)
 
-        callback(Output('log_plot', 'figure'),
-                 Input('log_selector', 'is_open'),
+        callback([Output('log_plot', 'figure'),
+                  Output('log_selection', 'options'),
+                  Output('log_selection', 'value')],
+                 [Input('log_selector', 'is_open'),
+                  Input('log-table_row_value', 'data')],
                  prevent_initial_call=True)(presenter.select_log)
 
     def hover_text(self, pt, txt=''):

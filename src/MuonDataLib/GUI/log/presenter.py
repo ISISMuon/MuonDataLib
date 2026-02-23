@@ -50,11 +50,32 @@ class LogPresenter(TablePresenter):
         del self._plot.fig
         self._plot.fig = None
 
-    @property
-    def default_row(self):
+    def add(self, n, data):
+        """
+        Adds a row to the table.
+        :param n: the number of clicks of the add button
+        :param data: A list of the row data (as a dict)
+        :returns: the data for the table and if its valid
+        """
+        if not isinstance(data, list):
+            data = []
+        data.append(self.generate_default(data))
+        return data
+
+    def generate_default(self, data):
+        """
+        Code to create some default values
+        :returns: a default dict
+        """
+        return {'Delete_' + self.ID: '',
+                self.name_col: self.get_next_row_name,
+                **self.default_row(data)}
+
+    def default_row(self, data):
         """
         The code needed to create a default
         row for the time table
         :returns: dict of the values for the time table.
         """
-        return {}
+        # names = self.logs.
+        return {'sample_log-table': 'Temp_Sample'}

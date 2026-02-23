@@ -25,6 +25,7 @@ class TableView(ViewTemplate):
                        class_name='bi-plus-lg',
                        disabled=True),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
+            dcc.Store(data=False, id=presenter.ID + '_row_value'),
             dag.AgGrid(id=presenter.ID,
                        columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
@@ -50,7 +51,8 @@ class TableView(ViewTemplate):
                  prevent_initial_call=True)(presenter.validate)
 
         callback([Output(presenter.ID, "rowData", allow_duplicate=True),
-                  Output('log_selector', 'is_open', allow_duplicate=True)],
+                  Output('log_selector', 'is_open', allow_duplicate=True),
+                  Output('log-table_row_value', 'data', allow_duplicate=True)],
                  Input(presenter.ID, "cellRendererData"),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.btn_pressed)

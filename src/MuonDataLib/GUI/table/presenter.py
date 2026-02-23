@@ -81,10 +81,11 @@ class TablePresenter(PresenterTemplate):
         return data, ''
 
     def btn_pressed(self, info, data):
+        row = data[info['rowIndex']]
         if 'change_btn_log-table' == info['colId']:
-            return data, True
+            return data, True, row
         else:
-            return self.delete_row(info, data), False
+            return self.delete_row(info, data), False, row
 
     def delete_row(self, info, data):
         """

@@ -166,6 +166,7 @@ class ControlPanePresenter(PresenterTemplate):
         data, state, cols = self._filter.load(data)
         return data, state, cols
 
-    def select_log(self, state):
+    def select_log(self, state, row):
         logs = self._filter._data._dict['logs']
-        return self._plot.new_plot([], logs)
+        name = row['sample_log-table']
+        return self._plot.new_plot([name], logs), logs.get_names(), name

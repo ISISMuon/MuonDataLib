@@ -172,8 +172,10 @@ class MainAppPresenter(object):
         :returns: the plot object
         """
         logs = self.control._filter._data._dict['logs']
-
-        return self.control._plot.new_plot(['Temperature'],
+        name = 'Temp_Sample'
+        if name not in logs.get_names():
+            name = logs.get_names()[0]
+        return self.control._plot.new_plot([name],
                                            logs)
 
     def load_nxs(self, name, data, debug_state):
@@ -214,6 +216,7 @@ class MainAppPresenter(object):
 
         data = self.load.get_data
         self.control.set_data(data)
+
         # add fake sample log data
         x, y = self.gen_fake_data(data)
         data.add_sample_log("Test", x, y)
