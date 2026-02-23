@@ -28,27 +28,18 @@ class LogView(TableView):
                          html.P('mean: 0.0'),
                          html.P('min: 0.0'),
                          html.Hr(),
-                         html.H4('Sigma selection'),
-                         dcc.Slider(min=1,
-                                    max=6,
-                                    step=1,
-                                    value=3,
-                                    tooltip={'always_visible': True,
-                                             'template': "{value} sigma",
-                                             'placement': 'bottom'}),
-                         html.P(' '),
-                         html.P('mean - 1*sigma: 0.0'),
-                         html.P('mean + 1*sigma: 0.0')
+                         html.P('sigme: 0.0'),
                          ])
         # set width of the text area
         filter_width = 4
 
         # setup the layout
-        body = dbc.Row([
+        tmp = dbc.Row([
                         dbc.Col(text, width=filter_width),
                         dbc.Col(presenter._plot.layout, width=12-filter_width)
                        ],
                        className="g-0", align='center')
+
         btns = html.Div([dbc.Button('ok',
                                     color='secondary',
                                     id='log_ok',
@@ -60,8 +51,9 @@ class LogView(TableView):
 
         return html.Div([
             dbc.Modal(
-                [dbc.ModalHeader(dbc.ModalTitle('Sample log selection')),
-                 dbc.ModalBody(body),
+                [dbc.ModalHeader(dbc.ModalTitle('Sample log selection'),
+                                 close_button=False),
+                 dbc.ModalBody(tmp),
                  dbc.ModalFooter(btns)],
                 id='log_selector',
                 size='xl',
@@ -71,5 +63,7 @@ class LogView(TableView):
     def set_callbacks(self, presenter):
         super().set_callbacks(presenter)
 
-        callback(Output('log_plot', 'figure'),
-                 Input('log_selector', 'is_open'))(presenter.select)
+        callback(Output('log_selector', 'is_open'),
+                 [Input('log_cancel', 'n_clicks'),
+                  Input('log_ok', 'n_clicks')],
+                 prevent_initial_call=True)(presenter.close_modal)

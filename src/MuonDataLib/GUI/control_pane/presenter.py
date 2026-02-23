@@ -165,3 +165,7 @@ class ControlPanePresenter(PresenterTemplate):
             data = json.load(file)
         data, state, cols = self._filter.load(data)
         return data, state, cols
+
+    def select_log(self, state):
+        logs = self._filter._data._dict['logs']
+        return self._plot.new_plot([], logs)

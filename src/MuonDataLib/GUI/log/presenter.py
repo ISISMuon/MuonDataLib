@@ -41,11 +41,14 @@ class LogPresenter(TablePresenter):
         """
         return LogView(self)
 
-    def select(self, state):
-        return self._plot.plot([1, 2, 3, 4],
-                               [1, 2, 3, 4],
-                               [11, 12, 24],
-                               [7, 3, 1])
+    def select(self, name, log):
+
+        return self._plot.new_plot([], log)
+        # return self._plot.new_plot([name], log)
+
+    def close_modal(self, a, b):
+        del self._plot.fig
+        self._plot.fig = None
 
     @property
     def default_row(self):

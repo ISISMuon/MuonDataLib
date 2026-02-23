@@ -19,6 +19,7 @@ class PlotAreaPresenter(PresenterTemplate):
         self.ID = ID
         self._view = PlotAreaView(self)
         self.reset_plot_range()
+        self.fig = None
 
     def reset_plot_range(self):
         """
@@ -43,8 +44,47 @@ class PlotAreaPresenter(PresenterTemplate):
                            fillcolor='PaleGreen',
                            layer='above',
                            line={'color': 'black',
-                                 'width': 4}
-                           )
+                                 'width': 4})
+
+    def shade_all(self):
+        # for a fresh plot, lets assume all of the data is included
+        self.add_shaded_region(self._min, self._max)
+
+    def new_plot(self, names, logs):
+        N = len(names)
+        if N == 0:
+            self.fig = {}
+            return self.fig
+
+        print("check", names, N)
+        self.fig = make_subplots(rows=N,
+                                 cols=1,
+                                 x_title='time',
+                                 shared_xaxes=True,
+                                 vertical_spacing=0.02,
+                                 start_cell='top-left')
+        self._height = 900
+        self.fig.update_layout(height=self._height)
+        # add data to the subplots
+        for i, name in enumerate(names):
+            # plot lines as this is much faster than points
+            log_data = logs.get_sample_log(name)
+            x, y = log_data.get_original_values()
+            self.fig.add_trace(plotly.graph_objects.Scatter(
+                        x=x,
+                        y=y,
+                        name=name,
+                        mode='lines'
+                        ),
+                              i + 1, 1)
+            if self._min > np.min(x):
+                self._min = np.min(x)
+
+            if self._max < np.max(x):
+                self._max = np.max(x)
+            self.fig.update_traces(hoverinfo='none')
+            self.fig.update_yaxes(title_text=name, row=i+1, col=1)
+        return self.fig
 
     def plot(self, x1, y1, x2, y2):
         """

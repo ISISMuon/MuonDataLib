@@ -171,7 +171,10 @@ class MainAppPresenter(object):
         :param y1: the second set of y values
         :returns: the plot object
         """
-        return self.control._plot.plot(x0, y0, x1, y1)
+        logs = self.control._filter._data._dict['logs']
+
+        return self.control._plot.new_plot(['Temperature'],
+                                           logs)
 
     def load_nxs(self, name, data, debug_state):
         """

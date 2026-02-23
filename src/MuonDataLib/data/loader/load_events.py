@@ -24,7 +24,7 @@ def load_log_data(log, key, data):
     :param data: the muon data object
     """
     x = log['value_log']['time'][:]
-    if isinstance(x[0], np.float32):
+    if isinstance(x[0], np.float32) or isinstance(x[0], np.float64):
         y = log['value_log']['value'][:]
         data.add_sample_log(key,
                             np.asarray(x, dtype=np.double),
@@ -71,9 +71,7 @@ def _load_events(file_name, N):
         p_type = p_group['type'][:]
 
         # store data in objects
-        print("mooo", N)
         _, events = load_data(file_name, N)
-        print("waaa")
         cache = EventsCache(start_time,
                             events.get_total_frames)
 

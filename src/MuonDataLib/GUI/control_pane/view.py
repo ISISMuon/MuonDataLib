@@ -44,6 +44,10 @@ class ControlPaneView(ViewTemplate):
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)
 
+        callback(Output('log_plot', 'figure'),
+                 Input('log_selector', 'is_open'),
+                 prevent_initial_call=True)(presenter.select_log)
+
     def hover_text(self, pt, txt=''):
         """
         A method to generate the text for the tooltip
