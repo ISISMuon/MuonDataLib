@@ -39,20 +39,23 @@ class TableView(ViewTemplate):
         Set the callbacks for the GUI.
         :param presenter: the presenter for the GUI
         """
-        callback(Output(presenter.ID, 'rowData'),
-                 Input(presenter.ID + '_add', 'n_clicks'),
-                 State(presenter.ID, 'virtualRowData'),
-                 prevent_initial_call=True)(presenter.add)
-
         callback([Output(presenter.ID, 'rowData', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input(presenter.ID, 'cellValueChanged'),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.validate)
 
-        callback([Output(presenter.ID, "rowData", allow_duplicate=True),
-                  Output('log_selector', 'is_open', allow_duplicate=True),
-                  Output('log-table_row_value', 'data', allow_duplicate=True)],
+        self.set_btn_callback(presenter)
+        self.set_add_callback(presenter)
+
+    def set_btn_callback(self, presenter):
+        callback(Output(presenter.ID, "rowData", allow_duplicate=True),
                  Input(presenter.ID, "cellRendererData"),
                  State(presenter.ID, 'virtualRowData'),
-                 prevent_initial_call=True)(presenter.btn_pressed)
+                 prevent_initial_call=True)(presenter.delete_row)
+
+    def set_add_callback(self, presenter):
+        callback(Output(presenter.ID, 'rowData'),
+                 Input(presenter.ID + '_add', 'n_clicks'),
+                 State(presenter.ID, 'virtualRowData'),
+                 prevent_initial_call=True)(presenter.add)

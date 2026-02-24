@@ -2,6 +2,7 @@ from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.log.view import LogView
 from MuonDataLib.GUI.table.column import Column, TableGroup, TableColumns
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+import numpy as np
 
 
 LOG_TABLE = 'log-table'
@@ -18,6 +19,12 @@ class LogPresenter(TablePresenter):
         This creates the presenter object for the
         widget.
         """
+        self._logs = None
+        self._defaults = ['Temp_Sample']
+        self._ok_clicks = 0
+        self._row = None
+        self._replace = None
+        self._selected_name = self._defaults[0]
         # create columns
         name = Column('Name_' + LOG_TABLE, 'Name', 'text')
         log = Column('change_btn_' + LOG_TABLE, '', 'button')
@@ -41,14 +48,61 @@ class LogPresenter(TablePresenter):
         """
         return LogView(self)
 
-    def select(self, name, log):
+    def set_logs(self, logs):
+        self._logs = logs
 
-        return self._plot.new_plot([], log)
-        # return self._plot.new_plot([name], log)
+    def btn_pressed(self, info, data):
+        if 'change_btn_log-table' == info['colId']:
+            self._selected_name = data[info['rowIndex']]['sample_log-table']
+            self._replace = info['rowIndex']
+            return data, True
+        else:
+            return self.delete_row(info, data), False
 
-    def close_modal(self, a, b):
+    def get_available_logs(self, data):
+        names = self._logs.get_names().copy()
+        in_use = [row['sample_' + LOG_TABLE] for row in data]
+        for taken in in_use:
+            if not self._replace or self._selected_name != taken:
+                names.remove(taken)
+        return names
+
+    def get_new_log_name(self, data):
+        names = self.get_available_logs(data)
+        for default in self._defaults:
+            if default in names:
+                return default
+        return names[0]
+
+    def show_log_data(self, name):
+        print('baaaa', name)
+        _, y = self._logs.get_sample_log(name).get_original_values()
+
+        return (self._plot.new_plot([name], self._logs),
+                f'Max: {np.max(y):.3f}',
+                f'Mean: {np.mean(y):.3f}',
+                f'Min: {np.min(y):.3f}',
+                f'Sigma (std): {np.std(y):.3f}')
+
+    def select_log(self, state, data):
+        options = self.get_available_logs(data)
+        if self._replace is not None:
+            return options, self._selected_name
+        return options, self.get_new_log_name(data)
+
+    def close_modal(self, ok, cancel, name, data):
         del self._plot.fig
         self._plot.fig = None
+        print("waaaaaaaaaaa", data)
+        # otherwise assume cancel pressed
+        if self._ok_clicks < ok:
+            if self._replace is not None:
+                data[self._replace]['sample_log-table'] = name
+            else:
+                data.append(self.generate_default(data,
+                                                  name))
+            self._ok_clicks += 1
+        return False, data
 
     def add(self, n, data):
         """
@@ -57,25 +111,15 @@ class LogPresenter(TablePresenter):
         :param data: A list of the row data (as a dict)
         :returns: the data for the table and if its valid
         """
-        if not isinstance(data, list):
-            data = []
-        data.append(self.generate_default(data))
-        return data
+        self._replace = None
+        self._selected_name = self.get_new_log_name(data)
+        return True, self.get_new_log_name(data)
 
-    def generate_default(self, data):
+    def generate_default(self, data, name):
         """
         Code to create some default values
         :returns: a default dict
         """
         return {'Delete_' + self.ID: '',
                 self.name_col: self.get_next_row_name,
-                **self.default_row(data)}
-
-    def default_row(self, data):
-        """
-        The code needed to create a default
-        row for the time table
-        :returns: dict of the values for the time table.
-        """
-        # names = self.logs.
-        return {'sample_log-table': 'Temp_Sample'}
+                'sample_log-table': name}

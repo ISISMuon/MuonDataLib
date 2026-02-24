@@ -32,9 +32,10 @@ class ControlPaneView(ViewTemplate):
         :param pressenter: the presenter for the widget
         """
         callback(Output('main_plot', 'figure', allow_duplicate=True),
-                 Input('time-table', 'rowData'),
+                 [Input('time-table', 'rowData'),
+                  Input('log-table', 'rowData')],
                  [State('dropdown-time', 'value')],
-                 prevent_initial_call=True)(presenter.add_filter)
+                 prevent_initial_call=True)(presenter.make_plot)
 
         callback([Output('main_tooltip', 'show', allow_duplicate=True),
                   Output('main_tooltip', 'bbox', allow_duplicate=True),
@@ -43,13 +44,6 @@ class ControlPaneView(ViewTemplate):
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)
-
-        callback([Output('log_plot', 'figure'),
-                  Output('log_selection', 'options'),
-                  Output('log_selection', 'value')],
-                 [Input('log_selector', 'is_open'),
-                  Input('log-table_row_value', 'data')],
-                 prevent_initial_call=True)(presenter.select_log)
 
     def hover_text(self, pt, txt=''):
         """

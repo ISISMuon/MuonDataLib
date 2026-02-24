@@ -25,7 +25,7 @@ class ControlPanePresenter(PresenterTemplate):
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 
-    def add_filter(self, data, state):
+    def make_plot(self, time_data, log_data, state):
         """
         This methods adds filters to the plot.
         A filter is represented by removing the shaded
@@ -35,10 +35,12 @@ class ControlPanePresenter(PresenterTemplate):
         :param state: if the filter is an exclude or include
         :returns: an updated figure
         """
-        # clear the shaded regions
-        self._plot.fig.layout.shapes = []
+        names = [row['sample_log-table'] for row in log_data]
+        self._plot.new_plot(names, self._filter._log._logs)
+        return self.add_time_filters(time_data, state)
 
-        if len(data) == 0 and state == 'Exclude':
+    def add_time_filters(self, time_data, state):
+        if len(time_data) == 0 and state == 'Exclude':
             self._plot.add_shaded_region(self._plot._min, self._plot._max)
             return self._plot.fig
 
@@ -46,11 +48,11 @@ class ControlPanePresenter(PresenterTemplate):
         end = []
         # add the filters back
         if state == 'Include':
-            for filter_details in data:
+            for filter_details in time_data:
                 span = self._filter._time.get_range(filter_details)
                 self._plot.add_shaded_region(*span)
         else:
-            for filter_details in data:
+            for filter_details in time_data:
                 tmp = self._filter._time.get_range(filter_details)
                 start.append(tmp[0])
                 end.append(tmp[1])
@@ -165,8 +167,3 @@ class ControlPanePresenter(PresenterTemplate):
             data = json.load(file)
         data, state, cols = self._filter.load(data)
         return data, state, cols
-
-    def select_log(self, state, row):
-        logs = self._filter._data._dict['logs']
-        name = row['sample_log-table']
-        return self._plot.new_plot([name], logs), logs.get_names(), name

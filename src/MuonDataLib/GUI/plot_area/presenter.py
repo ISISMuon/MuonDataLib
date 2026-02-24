@@ -52,8 +52,8 @@ class PlotAreaPresenter(PresenterTemplate):
 
     def new_plot(self, names, logs):
         N = len(names)
+
         if N == 0:
-            self.fig = {}
             return self.fig
 
         print("check", names, N)

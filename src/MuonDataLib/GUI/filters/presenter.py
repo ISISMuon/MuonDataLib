@@ -51,6 +51,7 @@ class FilterPresenter(PresenterTemplate):
         :param data: MuonEventData
         """
         self._data = data
+        self._log.set_logs(data._dict['logs'])
         times = self._data.get_frame_start_times()
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)
