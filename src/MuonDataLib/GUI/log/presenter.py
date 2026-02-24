@@ -22,7 +22,6 @@ class LogPresenter(TablePresenter):
         self._logs = None
         self._defaults = ['Temp_Sample']
         self._ok_clicks = 0
-        self._row = None
         self._replace = None
         self._selected_name = self._defaults[0]
         # create columns
@@ -63,7 +62,7 @@ class LogPresenter(TablePresenter):
         names = self._logs.get_names().copy()
         in_use = [row['sample_' + LOG_TABLE] for row in data]
         for taken in in_use:
-            if not self._replace or self._selected_name != taken:
+            if self._replace is None or self._selected_name != taken:
                 names.remove(taken)
         return names
 
@@ -75,7 +74,6 @@ class LogPresenter(TablePresenter):
         return names[0]
 
     def show_log_data(self, name):
-        print('baaaa', name)
         _, y = self._logs.get_sample_log(name).get_original_values()
 
         return (self._plot.new_plot([name], self._logs),
@@ -93,7 +91,6 @@ class LogPresenter(TablePresenter):
     def close_modal(self, ok, cancel, name, data):
         del self._plot.fig
         self._plot.fig = None
-        print("waaaaaaaaaaa", data)
         # otherwise assume cancel pressed
         if self._ok_clicks < ok:
             if self._replace is not None:
