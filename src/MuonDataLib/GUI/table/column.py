@@ -25,9 +25,13 @@ class Column(object):
             self._max = 1000
             self._icon = 'bi bi-trash me-2'
             self._className = 'btn btn-danger'
+            self._editable = True
         else:
             raise ValueError(f"Unkown column dtype {dtype}."
                              "Options are 'text', 'numeric' and 'button'.")
+
+    def set_uneditable(self):
+        self._editable = False
 
     def set_icon(self, icon, class_name):
         self._icon = icon
@@ -57,7 +61,8 @@ class Column(object):
         """
         col = {'field': self.ID,
                'headerName': self.name,
-               'width': 100}
+               'width': 100,
+               'editable': self._editable}
         if self.dtype == 'text':
             col['cellEditor'] = 'agLargeTextCellEditor'
             col['cellEditorPopup'] = False

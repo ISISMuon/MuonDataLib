@@ -161,7 +161,7 @@ class MainAppPresenter(object):
                                          [3, 6.1, 0.91],
                                          osc, seed=1)
 
-    def plot(self, x0, y0, x1, y1):
+    def plot(self):
         """
         A method to plot the sample log data.
         This exists to make some code cleaner
@@ -171,12 +171,7 @@ class MainAppPresenter(object):
         :param y1: the second set of y values
         :returns: the plot object
         """
-        logs = self.control._filter._data._dict['logs']
-        name = 'Temp_Sample'
-        if name not in logs.get_names():
-            name = logs.get_names()[0]
-        return self.control._plot.new_plot([name],
-                                           logs)
+        return self.control.plot_default()
 
     def load_nxs(self, name, data, debug_state):
         """
@@ -195,7 +190,7 @@ class MainAppPresenter(object):
         self.load.set_file(name)
 
         if 'None' in name:
-            return (self.plot([], [], [], []),
+            return (self.plot(),
                     [],
                     True,
                     self.control.headers,
@@ -207,7 +202,7 @@ class MainAppPresenter(object):
             self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
-            return (self.plot([], [], [], []),
+            return (self.plot(),
                     [],
                     True,
                     True,
@@ -226,5 +221,5 @@ class MainAppPresenter(object):
         log = data._get_sample_log("Test")
         a, b = log.get_values()
 
-        return (self.plot(a, b, x, y), [], False, False,
+        return (self.plot(), [], False, False,
                 self.control.headers, '')

@@ -25,6 +25,10 @@ class ControlPanePresenter(PresenterTemplate):
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 
+    def plot_default(self):
+        name = self._filter._log.get_new_log_name([])
+        return self._plot.new_plot([name], self._filter._log._logs)
+
     def make_plot(self, time_data, log_data, state):
         """
         This methods adds filters to the plot.
@@ -36,6 +40,8 @@ class ControlPanePresenter(PresenterTemplate):
         :returns: an updated figure
         """
         names = [row['sample_log-table'] for row in log_data]
+        if len(names) == 0:
+            names = [self._filter._log.get_new_log_name([])]
         self._plot.new_plot(names, self._filter._log._logs)
         return self.add_time_filters(time_data, state)
 

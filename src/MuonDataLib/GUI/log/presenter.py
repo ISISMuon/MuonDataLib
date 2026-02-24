@@ -29,6 +29,7 @@ class LogPresenter(TablePresenter):
         log = Column('change_btn_' + LOG_TABLE, '', 'button')
         log.set_icon(icon='bi bi-graph-up me-2', class_name='btn btn-primary')
         sample = Column('sample_' + LOG_TABLE, 'selected', 'text')
+        sample.set_uneditable()
 
         self._plot = PlotAreaPresenter('log')
 
