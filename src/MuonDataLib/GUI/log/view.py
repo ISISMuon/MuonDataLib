@@ -17,8 +17,9 @@ class LogView(TableView):
         GUI.
         """
 
+        # set up the selection and stats (text area)
         text = html.Div([html.H4('Sample log:'),
-                         dcc.Dropdown(['Temp', 'B', 'Current', 'flux'],
+                         dcc.Dropdown(['Temp'],
                                       'Temp',
                                       id='log_selection',
                                       clearable=False),
@@ -33,13 +34,14 @@ class LogView(TableView):
         # set width of the text area
         filter_width = 4
 
-        # setup the layout
+        # setup the layout (text area + plot area)
         tmp = dbc.Row([
                         dbc.Col(text, width=filter_width),
                         dbc.Col(presenter._plot.layout, width=12-filter_width)
                        ],
                        className="g-0", align='center')
 
+        # setup the ok and cancel buttons at bottom of the pop up
         btns = html.Div([dbc.Button('ok',
                                     color='secondary',
                                     id='log_ok',
@@ -52,6 +54,7 @@ class LogView(TableView):
                                     className='ms-md-2')])
 
         return html.Div([
+            # make pop up
             dbc.Modal(
                 [dbc.ModalHeader(dbc.ModalTitle('Sample log selection'),
                                  close_button=False),
@@ -60,9 +63,19 @@ class LogView(TableView):
                 id='log_selector',
                 size='xl',
                 is_open=False),
+            # setup normal table
             super().generate(presenter)])
 
     def set_callbacks(self, presenter):
+        """
+        Sets the callbacks for the GUI.
+        Have additional callbacks for:
+        - updating the data in the pop up
+        - closing the pop up
+        - setting the combo box options and value when
+        opening the pop up
+        :param presenter: the presenter object
+        """
         super().set_callbacks(presenter)
 
         callback([Output('log_plot', 'figure', allow_duplicate=True),
@@ -90,12 +103,24 @@ class LogView(TableView):
                  prevent_initial_call=True)(presenter.select_log)
 
     def set_add_callback(self, presenter):
+        """
+        This sets the add callback, it needs to be
+        different to the TableView version as we want
+        to have the pop up appear and not just add a row.
+        :param presenter: the presenter object
+        """
         callback(Output('log_selector', 'is_open', allow_duplicate=True),
                  Input(presenter.ID + '_add', 'n_clicks'),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.add)
 
     def set_btn_callback(self, presenter):
+        """
+        This sets the response of any button being pressed in the
+        table. This needs to be different because we have 2 buttons
+        in the sample log table (delete and to create the pop up)
+        :param presenter: the presenter object
+        """
         callback([Output(presenter.ID, "rowData", allow_duplicate=True),
                   Output('log_selector', 'is_open', allow_duplicate=True)],
                  Input(presenter.ID, "cellRendererData"),

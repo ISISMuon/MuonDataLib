@@ -26,17 +26,24 @@ class ControlPanePresenter(PresenterTemplate):
         self._view = ControlPaneView(self)
 
     def plot_default(self):
+        """
+        This method generates the default plot (for
+        after initial load). It will automatically
+        get the default sample log.
+        :returns: the figure object
+        """
         name = self._filter._log.get_new_log_name([])
         return self._plot.new_plot([name], self._filter._log._logs)
 
     def make_plot(self, time_data, log_data, state):
         """
-        This methods adds filters to the plot.
-        A filter is represented by removing the shaded
-        region from the plot. i.e. only the shaded
-        data is used in calculations.
-        :param data: the data from the filter table
-        :param state: if the filter is an exclude or include
+        This method creates a plot.
+        If no sample logs are selected, it will just plot a
+        default.
+        :param time_data: the data from the time filter table
+        :param log_data: the data from the sample log filter table.
+        Its also used to get which plots to make.
+        :param state: the state of the time filters (inc/exc)
         :returns: an updated figure
         """
         names = [row['sample_log-table'] for row in log_data]
@@ -46,6 +53,15 @@ class ControlPanePresenter(PresenterTemplate):
         return self.add_time_filters(time_data, state)
 
     def add_time_filters(self, time_data, state):
+        """
+        This methods adds filters to the plot.
+        A filter is represented by removing the shaded
+        region from the plot. i.e. only the shaded
+        data is used in calculations.
+        :param data: the data from the filter table
+        :param state: if the filter is an exclude or include
+        :returns: an updated figure
+        """
         if len(time_data) == 0 and state == 'Exclude':
             self._plot.add_shaded_region(self._plot._min, self._plot._max)
             return self._plot.fig

@@ -58,7 +58,6 @@ class LoadBarPresenter(PresenterTemplate):
         and creates a MuonDataLib object
         """
         self._data = load_events(name, 64)
-        #  self._data = load_events(name, 960)
 
     @property
     def get_data(self):

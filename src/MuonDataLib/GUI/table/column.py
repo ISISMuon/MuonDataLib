@@ -21,19 +21,32 @@ class Column(object):
             self.ID = ID
             self.name = name
             self.dtype = dtype
+            self._editable = True
+            # set default range for numeric data
             self._min = 0
             self._max = 1000
+            # set default button values (delete)
             self._icon = 'bi bi-trash me-2'
             self._className = 'btn btn-danger'
-            self._editable = True
         else:
             raise ValueError(f"Unkown column dtype {dtype}."
                              "Options are 'text', 'numeric' and 'button'.")
 
     def set_uneditable(self):
+        """
+        A method to make the column uneditable
+        """
         self._editable = False
 
     def set_icon(self, icon, class_name):
+        """
+        A method to set the column's button to a
+        custom one.
+        :param icon: the code for the button image
+        see https://icons.getbootstrap.com/
+        :param class_name: the class name
+        for the button (sets colour)
+        """
         self._icon = icon
         self._className = class_name
 

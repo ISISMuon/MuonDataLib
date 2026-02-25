@@ -25,7 +25,6 @@ class TableView(ViewTemplate):
                        class_name='bi-plus-lg',
                        disabled=True),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
-            dcc.Store(data=False, id=presenter.ID + '_row_value'),
             dag.AgGrid(id=presenter.ID,
                        columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
@@ -49,12 +48,24 @@ class TableView(ViewTemplate):
         self.set_add_callback(presenter)
 
     def set_btn_callback(self, presenter):
+        """
+        A callback for pressing the button within the table.
+        This is so we can easily overwrite it if there are
+        multiple buttons in the table. As its not possible to
+        distinguish between the signals.
+        :param presenter: the presenter object
+        """
         callback(Output(presenter.ID, "rowData", allow_duplicate=True),
                  Input(presenter.ID, "cellRendererData"),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.delete_row)
 
     def set_add_callback(self, presenter):
+        """
+        Sets a callback for the add button. This is so we
+        can overwrite it if we need to.
+        :param presenter: the presenter object
+        """
         callback(Output(presenter.ID, 'rowData'),
                  Input(presenter.ID + '_add', 'n_clicks'),
                  State(presenter.ID, 'virtualRowData'),
