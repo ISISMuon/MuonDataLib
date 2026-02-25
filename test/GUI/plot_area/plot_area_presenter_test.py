@@ -6,9 +6,13 @@ from MuonDataLib.test_helpers.unit_test import TestHelper
 class PlotAreaPresenterTest(TestHelper):
 
     def setUp(self):
-        self.presenter = PlotAreaPresenter()
-        # just add a plot
-        self.presenter.plot([0], [1], [2], [2])
+        self.presenter = PlotAreaPresenter('plot_test')
+        # just add a plot with 2 subplots
+        self.presenter.plot(['test', 'data'],
+                             [[0, 2],
+                              [0, 2]],
+                             [[4, 5],
+                              [2, 4]])
         # clear the shapes
         self.presenter.fig.layout.shapes = []
 

@@ -67,7 +67,18 @@ class PlotAreaPresenter(PresenterTemplate):
         :param logs: the sample logs object
         :returns the figure object
         """
-        N = len(names)
+        x_list = []
+        y_list = []
+        for name in names:
+            log_data = logs.get_sample_log(name)
+            x, y = log_data.get_original_values()
+            x_list.append(x)
+            y_list.append(y)
+        return self.plot(names, x_list, y_list)
+
+    def plot(self, labels, x_list, y_list, x_title='time'):
+
+        N = len(labels)
 
         if N == 0:
             return self.fig
@@ -75,7 +86,7 @@ class PlotAreaPresenter(PresenterTemplate):
         # only stack vertically
         self.fig = make_subplots(rows=N,
                                  cols=1,
-                                 x_title='time',
+                                 x_title=x_title,
                                  shared_xaxes=True,
                                  vertical_spacing=0.02,
                                  start_cell='top-left')
@@ -83,13 +94,12 @@ class PlotAreaPresenter(PresenterTemplate):
         self.fig.update_layout(height=self._height)
 
         # add data to the subplots
-        for i, name in enumerate(names):
+        for i, name in enumerate(labels):
+            x = x_list[i]
             # plot lines as this is much faster than points
-            log_data = logs.get_sample_log(name)
-            x, y = log_data.get_original_values()
             self.fig.add_trace(plotly.graph_objects.Scatter(
                         x=x,
-                        y=y,
+                        y=y_list[i],
                         name=name,
                         mode='lines'
                         ),

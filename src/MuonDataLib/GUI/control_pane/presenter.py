@@ -62,6 +62,7 @@ class ControlPanePresenter(PresenterTemplate):
         :param state: if the filter is an exclude or include
         :returns: an updated figure
         """
+        self._plot.fig.layout.shapes = []
         if len(time_data) == 0 and state == 'Exclude':
             self._plot.add_shaded_region(self._plot._min, self._plot._max)
             return self._plot.fig

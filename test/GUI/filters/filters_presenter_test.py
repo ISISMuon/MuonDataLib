@@ -35,12 +35,20 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(len(self.presenter.headers), 3)
 
     def test_set_data(self):
-        data = mock.Mock()
-        data.get_frame_start_times = mock.Mock(return_value=[1, 2, 6])
+        class MockData(object):
+            def __init__(self):
+                self._dict = {'logs': 'log data'}
+
+            def get_frame_start_times(self):
+                return [1, 2, 6]
+
+        data = MockData()
+
         self.presenter._time.set_time_range = mock.Mock()
 
         self.presenter.set_data(data)
         self.presenter._time.set_time_range.assert_called_with(1, 6 + 32e-6)
+        self.assertEqual(self.presenter._log._logs, 'log data')
 
     def cf_filters(self, result, expect):
         self.assertEqual(len(result), 3)

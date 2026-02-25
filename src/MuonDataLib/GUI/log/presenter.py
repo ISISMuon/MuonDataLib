@@ -209,5 +209,5 @@ class LogPresenter(TablePresenter):
         :returns: a default dict
         """
         return {'Delete_' + self.ID: '',
-                self.name_col: self.get_next_row_name,
+                self.name_col: 'log_' + self.get_next_row_name,
                 'sample_log-table': name}

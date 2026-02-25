@@ -81,19 +81,15 @@ class MainAppPresenterTest(TestHelper):
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
 
-        app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
-                                                    np.array([-1., 0., 1.])))
         result = app.load_nxs(CURRENT + FILE, [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], '')
+        self.assertEqual(result[3], False)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], '')
 
-        self.assertMockOnce(app.plot, [[1, 2, 3],
-                                       [-1, 0, 1],
-                                       [1, 2, 3],
-                                       [-1, 0, 1]])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_nxs_fails(self):
 
@@ -106,15 +102,13 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4],
+        self.assertEqual(result[3], True)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
-        self.assertMockOnce(app.plot, [[],
-                                       [],
-                                       [],
-                                       []])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_nxs_none(self):
         app = MainAppPresenter(dummy_open)
@@ -126,34 +120,28 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], '')
+        self.assertEqual(result[3], True)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], '')
 
-        self.assertMockOnce(app.plot, [[],
-                                       [],
-                                       [],
-                                       []])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_nxs_with_filters(self):
 
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
 
-        app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
-                                                    np.array([-1., 0., 1.])))
         filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
         result = app.load_nxs(CURRENT + FILE, filters, DEBUG)
         self.assertEqual(result[0], 'plot')
         # should clear the filters
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], '')
+        self.assertEqual(result[3], False)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], '')
 
-        self.assertMockOnce(app.plot, [[1, 2, 3],
-                                       [-1, 0, 1],
-                                       [1, 2, 3],
-                                       [-1, 0, 1]])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_nxs_fails_with_filters(self):
 
@@ -167,15 +155,13 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4],
+        self.assertEqual(result[3], True)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
-        self.assertMockOnce(app.plot, [[],
-                                       [],
-                                       [],
-                                       []])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_nxs_none_with_filters(self):
         app = MainAppPresenter(dummy_open)
@@ -188,13 +174,11 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], '')
+        self.assertEqual(result[3], True)
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], '')
 
-        self.assertMockOnce(app.plot, [[],
-                                       [],
-                                       [],
-                                       []])
+        self.assertMockOnce(app.plot, [])
 
     def test_load_filter_time_fails(self):
         app = MainAppPresenter(dummy_open)
