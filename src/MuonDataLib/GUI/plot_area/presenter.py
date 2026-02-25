@@ -77,7 +77,15 @@ class PlotAreaPresenter(PresenterTemplate):
         return self.plot(names, x_list, y_list)
 
     def plot(self, labels, x_list, y_list, x_title='time'):
-
+        """
+        A method to plot a list of data as a vertically
+        stacked figure. All of the list must match
+        i.e. be in the same order.
+        :param labels: the list of labels for the data
+        :param x_list: a list of x values (list of lists)
+        :param y_list: a list of y values (list of lists)
+        :returns: the figure object
+        """
         N = len(labels)
 
         if N == 0:
