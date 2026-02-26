@@ -19,7 +19,7 @@ dependencies:
     - dash-ag-grid==32.3.4
     - dash_bootstrap_components
     - sphinx-rtd-theme
-    - pyqt5
-    - pyqtwebengine
+    - pyqt6
+    - PyQt6-WebEngine
     - dash_daq
 

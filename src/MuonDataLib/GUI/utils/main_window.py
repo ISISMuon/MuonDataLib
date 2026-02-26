@@ -1,15 +1,15 @@
 from MuonDataLib.GUI.utils.worker import Worker
 from MuonDataLib.GUI.load_bar.view import CURRENT
 
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
-from PyQt5.QtWidgets import QWidget
-from PyQt5.QtCore import QThreadPool
-import PyQt5.QtCore as QtCore
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QUrl
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtCore import QThreadPool
+import PyQt6.QtCore as QtCore
+from PyQt6.QtWidgets import QVBoxLayout
 from time import sleep
 
-from PyQt5.QtWidgets import QMainWindow, QFileDialog
+from PyQt6.QtWidgets import QMainWindow, QFileDialog
 
 from dash import ctx
 

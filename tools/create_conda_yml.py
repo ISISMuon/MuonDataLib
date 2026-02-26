@@ -14,7 +14,7 @@ def get_input():
     parser = argparse.ArgumentParser()
     parser.add_argument('version',
                         help='the Python version'
-                        ' (3.8, 3.9, 3.10, 3.11)', type=str)
+                        ' (3.10, 3.11, 3.12, 3.13, 3.14)', type=str)
     args = parser.parse_args()
 
     if args.version not in versions:
@@ -57,8 +57,8 @@ def create_default(version):
                 'dash[testing, ag-grid]': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
-                'pyqt5': '',
-                'pyqtwebengine': '',
+                'pyqt6': '',
+                'PyQt6-WebEngine': '',
                 'dash_daq': '',
                 }
 
