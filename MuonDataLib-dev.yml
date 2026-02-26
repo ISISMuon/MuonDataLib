@@ -1,4 +1,4 @@
-name: MuonDataLib-dev
+name: moomoo
 
 channels:
   - conda-forge
@@ -15,7 +15,8 @@ dependencies:
   - selenium
   - pip:
     - readthedocs-sphinx-ext
-    - dash[testing, ag-grid]
+    - dash[testing]
+    - dash-ag-grid=32.3.4
     - dash_bootstrap_components
     - sphinx-rtd-theme
     - pyqt5
