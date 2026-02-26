@@ -3,9 +3,11 @@ name: Build and upload to PyPI
 on:
   push:
     branches:
+    - 'main'
+  pull_request:
+    branches:
       - 'main'
-    pull_request:
-      - 'main'
+  release:
 
 permissions:
   contents: write
