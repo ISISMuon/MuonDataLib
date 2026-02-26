@@ -64,8 +64,8 @@ def create_default(version):
     default_yml['channels'] = 'conda-forge'
     default_yml['dependencies'] = {'python': '=' + version + '.*',
                                    'numpy': '',
-                                   'pySide6': '= 6.10.2',
-                                   'plotly': '= 6.0.1',
+                                   'pySide6': '',
+                                   'plotly': '',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',
                                    'sphinx': '',

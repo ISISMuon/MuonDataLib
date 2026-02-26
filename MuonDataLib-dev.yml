@@ -6,8 +6,8 @@ channels:
 dependencies:
   - python =3.11.*
   - numpy
-  - plotly = 6.0.1
-  - PySide6 = 6.10.2
+  - plotly
+  - PySide6
   - pytest
   - pre-commit >=2.15
   - sphinx
@@ -17,7 +17,7 @@ dependencies:
   - pip:
     - readthedocs-sphinx-ext
     - dash[testing]
-    - dash-ag-grid==32.3.4
+    - dash-ag-grid
     - dash_bootstrap_components
     - sphinx-rtd-theme
     - dash_daq
