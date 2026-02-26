@@ -1,15 +1,15 @@
 from MuonDataLib.GUI.utils.worker import Worker
 from MuonDataLib.GUI.load_bar.view import CURRENT
 
-from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtCore import QUrl
-from PyQt6.QtWidgets import QWidget
-from PyQt6.QtCore import QThreadPool
-import PyQt6.QtCore as QtCore
-from PyQt6.QtWidgets import QVBoxLayout
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtCore import QUrl
+from PySide6.QtWidgets import QWidget
+from PySide6.QtCore import QThreadPool
+import PySide6.QtCore as QtCore
+from PySide6.QtWidgets import QVBoxLayout
 from time import sleep
 
-from PyQt6.QtWidgets import QMainWindow, QFileDialog
+from PySide6.QtWidgets import QMainWindow, QFileDialog
 
 from dash import ctx
 
@@ -58,8 +58,8 @@ class MainDashWindow(BasicMainDashWindow):
     This includes some pyqt for file
     browsing
     """
-    open_file_signal = QtCore.pyqtSignal(str)
-    save_file_signal = QtCore.pyqtSignal(str)
+    open_file_signal = QtCore.Signal(str)
+    save_file_signal = QtCore.Signal(str)
 
     def set_window(self, dash_app):
         """
@@ -87,7 +87,7 @@ class MainDashWindow(BasicMainDashWindow):
         self.save_file_signal.connect(self.save_file_slot)
         self.file = None
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def open_file_slot(self, extension):
         file_dialog = QFileDialog(self)
         file_dialog.setWindowTitle("Open File")
@@ -132,7 +132,7 @@ class MainDashWindow(BasicMainDashWindow):
             sleep(.01)
         return self.file
 
-    @QtCore.pyqtSlot(str)
+    @QtCore.Slot(str)
     def save_file_slot(self, file_extension):
         file_dialog = QFileDialog(self)
         file_dialog.setWindowTitle("Save File")

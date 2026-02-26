@@ -57,8 +57,6 @@ def create_default(version):
                 'dash[testing, ag-grid]': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
-                'pyqt6': '',
-                'PyQt6-WebEngine': '',
                 'dash_daq': '',
                 }
 
@@ -66,7 +64,8 @@ def create_default(version):
     default_yml['channels'] = 'conda-forge'
     default_yml['dependencies'] = {'python': '=' + version + '.*',
                                    'numpy': '',
-                                   'plotly': '',
+                                   'pySide6': '',
+                                   'plotly': '= 6.0.1',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',
                                    'sphinx': '',

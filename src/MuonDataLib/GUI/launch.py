@@ -1,5 +1,5 @@
 import sys
-from PyQt6 import QtWidgets
+from PySide6 import QtWidgets
 
 
 def launch_dash(dash_app, window):
