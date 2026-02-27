@@ -2,9 +2,12 @@
 requires = ['cython', 'numpy', 'setuptools']
 build-backend = 'setuptools.build_meta'
 
+[project.entry-points.array_api]
+numpy = 'numpy.array_api'
+
 [tool.setuptools]
 package-dir = {"" = "src"}
-ext-modules = [{name="MuonDataLib.cython_ext.base_sample_logs", sources=["src/MuonDataLib/cython_ext/base_sample_logs.pyx"]},
+ext-modules = [{include_dirs=[numpy.get_name="MuonDataLib.cython_ext.base_sample_logs", sources=["src/MuonDataLib/cython_ext/base_sample_logs.pyx"]},
 	       {name="MuonDataLib.cython_ext.event_data", sources=["src/MuonDataLib/cython_ext/event_data.pyx"]},
                {name="MuonDataLib.cython_ext.events_cache", sources=["src/MuonDataLib/cython_ext/events_cache.pyx"]},
                {name="MuonDataLib.cython_ext.load_events", sources=["src/MuonDataLib/cython_ext/load_events.pyx"]},
