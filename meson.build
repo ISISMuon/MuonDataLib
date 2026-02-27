@@ -16,16 +16,11 @@ if cy.version().version_compare('>=3.1.0')
   base_cython_args += ['-Xfreethreading_compatible=True']
 endif
 
-_numpy_abs = run_command(py3, ['-c',
-               'import os; os.chdir('..'); import numpy; print(os.path.abspath(numpy.get_include() + '../../..'))'],
-                         check: true).stdout().strip()
 
-npymath_path = _numpy_abs / '_core' / 'lib'
-npy_include_path = _numpy_abs / '_core' / 'include'
-npyrandom_path = _numpy_abs / 'random' / 'lib'
-npymath_lib = cc.find_library('npymath', dirs: npymath_path)
-npyrandom_lib = cc.find_library('npyrandom', dirs: npyrandom_path)
-
+incdir_numpy = run_command(py,
+    ['-c', 'import numpy; print(numpy.get_include())'],
+    check : true
+  ).stdout().strip()
 
 ext_modules = [{'name': 'MuonDataLib.cython_ext.base_sample_logs', 'sources': ['src/MuonDataLib/cython_ext/base_sample_logs.pyx']},
 	       {'name': 'MuonDataLib.cython_ext.event_data', 'sources': ['src/MuonDataLib/cython_ext/event_data.pyx']},
@@ -41,8 +36,7 @@ foreach mod : ext_modules
       mod['name'],
       mod['sources'],
       install: false,
-      include_directories: [npy_include_path],
-      dependencies: [npyrandom_lib, npymath_lib],
+      include_directories: [incdir_numpy],
       cython_args: base_cython_args,
   )
 endforeach
