@@ -17,7 +17,7 @@ if cy.version().version_compare('>=3.1.0')
 endif
 
 _numpy_abs = run_command(py3, ['-c',
-               'import os; os.chdir(".."); import numpy; print(os.path.abspath(numpy.get_include() + "../../.."))'],
+               'import os; os.chdir('..'); import numpy; print(os.path.abspath(numpy.get_include() + '../../..'))'],
                          check: true).stdout().strip()
 
 npymath_path = _numpy_abs / '_core' / 'lib'
@@ -27,13 +27,13 @@ npymath_lib = cc.find_library('npymath', dirs: npymath_path)
 npyrandom_lib = cc.find_library('npyrandom', dirs: npyrandom_path)
 
 
-ext_modules = [{'name': "MuonDataLib.cython_ext.base_sample_logs", 'sources': ["src/MuonDataLib/cython_ext/base_sample_logs.pyx"]},
-	       {'name': "MuonDataLib.cython_ext.event_data", 'sources': ["src/MuonDataLib/cython_ext/event_data.pyx"]},
-               {'name': "MuonDataLib.cython_ext.events_cache", 'sources': ["src/MuonDataLib/cython_ext/events_cache.pyx"]},
-               {'name': "MuonDataLib.cython_ext.load_events", 'sources': ["src/MuonDataLib/cython_ext/load_events.pyx"]},
-               {'name': "MuonDataLib.cython_ext.stats", 'sources': ["src/MuonDataLib/cython_ext/stats.pyx"]},
-               {'name': "MuonDataLib.cython_ext.filter", 'sources': ["src/MuonDataLib/cython_ext/filter.pyx"]},
-               {'name': "MuonDataLib.cython_ext.utils", 'sources': ["src/MuonDataLib/cython_ext/utils.pyx"]}
+ext_modules = [{'name': 'MuonDataLib.cython_ext.base_sample_logs', 'sources': ['src/MuonDataLib/cython_ext/base_sample_logs.pyx']},
+	       {'name': 'MuonDataLib.cython_ext.event_data', 'sources': ['src/MuonDataLib/cython_ext/event_data.pyx']},
+               {'name': 'MuonDataLib.cython_ext.events_cache', 'sources': ['src/MuonDataLib/cython_ext/events_cache.pyx']},
+               {'name': 'MuonDataLib.cython_ext.load_events', 'sources': ['src/MuonDataLib/cython_ext/load_events.pyx']},
+               {'name': 'MuonDataLib.cython_ext.stats', 'sources': ['src/MuonDataLib/cython_ext/stats.pyx']},
+               {'name': 'MuonDataLib.cython_ext.filter', 'sources': ['src/MuonDataLib/cython_ext/filter.pyx']},
+               {'name': 'MuonDataLib.cython_ext.utils', 'sources': ['src/MuonDataLib/cython_ext/utils.pyx']}
 	       ]
 
 foreach mod : ext_modules
