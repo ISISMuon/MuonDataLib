@@ -30,6 +30,7 @@ jobs:
           name: pyproject
           path: |
             ./pyproject.toml
+            ./setup.py
 
   build:
     name: Build wheels on ${{ matrix.os }}
@@ -48,17 +49,20 @@ jobs:
           name: pyproject
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v3.3.1
+        uses: pypa/cibuildwheel@v2.16.5
         env:
           # List of platforms to build on (incl. Python version)
-          CIBW_BUILD: cp3{10,11,12,13,14}-manylinux_x86_64 cp3{10,11,12,13,14}-macosx_x86_64 cp3{10,11,12,13,14}-macosx_arm64 cp3{10,11,12,13,14}-win_amd64
-          CIBW_BEFORE_TEST: "pip install h5py --only-binary ':all:'"
+          CIBW_BUILD: >
+            cp3{9,10,11,12,13}-manylinux_x86_64
+            cp3{9,10,11,12,13}-macosx_x86_64
+            cp3{9,10,11,12,13}-macosx_arm64
+            cp3{9,10,11,12,13}-win_amd64
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
           # Install test dependencies and run tests
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: >
-            pytest {project}/test -k "not load_and_save_test"
+            pytest {project}/test
       - uses: actions/upload-artifact@v4
         with:
           name: cibw-wheels-${{ matrix.os }}
@@ -76,8 +80,8 @@ jobs:
 
       - name: Build sdist
         run: |
-          pip install numpy Cython pipx
-          python -m pipx run build --sdist
+          pip install numpy Cython
+          python setup.py sdist
       - uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
