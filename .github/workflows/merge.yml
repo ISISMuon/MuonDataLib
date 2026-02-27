@@ -60,7 +60,7 @@ jobs:
           CIBW_BEFORE_BUILD: >
              pip install numpy Cython
           # Install test dependencies and run tests
-          CIBW_TEST_REQUIRES: pytest -k 'not load_and_save_test'
+          CIBW_TEST_REQUIRES: pytest -k "not load_and_save_test"
           CIBW_TEST_COMMAND: >
             pytest {project}/test
       - uses: actions/upload-artifact@v4
