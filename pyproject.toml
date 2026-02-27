@@ -4,26 +4,14 @@ build-backend = 'setuptools.build_meta'
 
 [tool.setuptools]
 package-dir = {"" = "src"}
-ext-modules = [{name="MuonDataLib.cython_ext.base_sample_logs",
-                sources=["src/MuonDataLib/cython_ext/base_sample_logs.pyx"]},
-		{name="MuonDataLib.cython_ext.event_data",
-		sources=["src/MuonDataLib/cython_ext/event_data.pyx"],},
-		{name="MuonDataLib.cython_ext.events_cache",
-                sources=["src/MuonDataLib/cython_ext/events_cache.pyx"],},
-                {name="MuonDataLib.cython_ext.load_events",
-                sources=["src/MuonDataLib/cython_ext/load_events.pyx"],
-                },
-                {name="MuonDataLib.cython_ext.stats",
-                sources=["src/MuonDataLib/cython_ext/stats.pyx"]
-                },
-                {name="MuonDataLib.cython_ext.filter",
-                sources=["src/MuonDataLib/cython_ext/filter.pyx"]
-                },
-                {name="MuonDataLib.cython_ext.utils",
-                sources=["src/MuonDataLib/cython_ext/utils.pyx"]
-                },
- 
-]
+ext-modules = [{name="MuonDataLib.cython_ext.base_sample_logs", sources=["src/MuonDataLib/cython_ext/base_sample_logs.pyx"]},
+	       {name="MuonDataLib.cython_ext.event_data", sources=["src/MuonDataLib/cython_ext/event_data.pyx"]},
+               {name="MuonDataLib.cython_ext.events_cache", sources=["src/MuonDataLib/cython_ext/events_cache.pyx"]},
+               {name="MuonDataLib.cython_ext.load_events", sources=["src/MuonDataLib/cython_ext/load_events.pyx"]},
+               {name="MuonDataLib.cython_ext.stats", sources=["src/MuonDataLib/cython_ext/stats.pyx"]},
+               {name="MuonDataLib.cython_ext.filter", sources=["src/MuonDataLib/cython_ext/filter.pyx"]},
+               {name="MuonDataLib.cython_ext.utils", sources=["src/MuonDataLib/cython_ext/utils.pyx"]}
+	       ]
 
 
 [tool.setuptools.packages.find]
