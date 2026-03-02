@@ -1,13 +1,8 @@
 name: Build and upload to PyPI
 
 on:
-  push:
-    branches:
-    - 'main'
-  pull_request:
-    branches:
-      - 'main'
-  release:
+  pull_request_review:
+    types: [submitted]
 
 permissions:
   contents: write
@@ -15,7 +10,8 @@ permissions:
 jobs:
   update_version:
     name: update version
-    runs-on: ubuntu-latest
+    if: github.event.review.state == 'approved'
+    runs-on: ubuntu-slim
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -23,7 +19,7 @@ jobs:
           fetch-depth: "1"
       - name: Update version on merge
         run:  |
-            python tools/version.py "beta"
+            python tools/version.py "minor"
       - name: Store changes
         uses: actions/upload-artifact@v4
         with:
