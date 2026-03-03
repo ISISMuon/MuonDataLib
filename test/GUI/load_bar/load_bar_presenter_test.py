@@ -47,6 +47,15 @@ class LoadBarPresenterTest(TestHelper):
         self.load.load_nxs(FILE)
         self.assertEqual(self.load._data, data_mock())
 
+    def test_set_file(self):
+        self.assertEqual(self.load.name, '')
+        self.load.set_file("test.nxs")
+        self.assertEqual(self.load.name, 'test.nxs')
+
+    def test_file(self):
+        self.load.set_file("test.nxs")
+        self.assertEqual(self.load.file, 'test.nxs')
+
 
 if __name__ == '__main__':
     unittest.main()

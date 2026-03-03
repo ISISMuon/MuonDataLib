@@ -1,5 +1,5 @@
-from PyQt5.QtCore import QRunnable
-from PyQt5.QtCore import pyqtSlot as Slot
+from PySide6.QtCore import QRunnable
+from PySide6.QtCore import Slot
 import signal
 import os
 
@@ -26,7 +26,7 @@ class Worker(QRunnable):
         self.port = port
         self.host = host
 
-    @Slot()  # QtCore.Slot
+    @Slot()
     def run(self):
         """
         Runs the dash app. Due to the nature of Dash

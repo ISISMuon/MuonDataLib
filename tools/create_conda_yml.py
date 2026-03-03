@@ -3,7 +3,7 @@ import sys
 from conda_dict_to_yml import write_conda_yml_from_dict
 
 
-versions = ['3.8', '3.9', '3.10', '3.11', '3.12']
+versions = ['3.10', '3.11', '3.12', '3.13', '3.14']
 
 
 def get_input():
@@ -14,7 +14,7 @@ def get_input():
     parser = argparse.ArgumentParser()
     parser.add_argument('version',
                         help='the Python version'
-                        ' (3.8, 3.9, 3.10, 3.11)', type=str)
+                        ' (3.10, 3.11, 3.12, 3.13, 3.14)', type=str)
     args = parser.parse_args()
 
     if args.version not in versions:
@@ -54,11 +54,9 @@ def create_default(version):
     # dash_daq is on condor, but it doesnt install correctly on
     # readthedocs, so using pip instead.
     pip_dict = {'readthedocs-sphinx-ext': '',
-                'dash[testing]': '',
+                'dash[testing, ag-grid]': '',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
-                'pyqt5': '',
-                'pyqtwebengine': '',
                 'dash_daq': '',
                 }
 
@@ -66,6 +64,7 @@ def create_default(version):
     default_yml['channels'] = 'conda-forge'
     default_yml['dependencies'] = {'python': '=' + version + '.*',
                                    'numpy': '',
+                                   'pySide6': '',
                                    'plotly': '',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',

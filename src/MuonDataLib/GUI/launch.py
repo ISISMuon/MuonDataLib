@@ -1,5 +1,5 @@
 import sys
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 
 def launch_dash(dash_app, window):
@@ -14,4 +14,4 @@ def launch_dash(dash_app, window):
     mainWin = window(dash_app)
     mainWin.show()
 
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
