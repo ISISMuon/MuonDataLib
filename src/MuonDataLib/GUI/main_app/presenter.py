@@ -203,6 +203,7 @@ class MainAppPresenter(object):
             self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
+            self.control.clear()
             return (self.plot(),
                     [],
                     True,

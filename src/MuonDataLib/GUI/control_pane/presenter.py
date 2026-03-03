@@ -25,6 +25,22 @@ class ControlPanePresenter(PresenterTemplate):
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 
+    def clear(self):
+        """
+        Clears the stored data when a bad file is
+        loaded.
+        """
+        self._filter._data = None
+        self._filter._log._logs = None
+
+    def empty(self):
+        """
+        A method to return an empty plot, for loading
+        bad file after a good one.
+        :returns: an empty plot
+        """
+            return self._plot.plot([''], [[1]], [[1]])
+
     def plot_default(self):
         """
         This method generates the default plot (for
@@ -32,6 +48,9 @@ class ControlPanePresenter(PresenterTemplate):
         get the default sample log.
         :returns: the figure object
         """
+        if self._filter._data is None:
+            return self.empty()
+
         name = self._filter._log.get_new_log_name([])
         return self._plot.new_plot([name], self._filter._log._logs)
 
@@ -46,6 +65,9 @@ class ControlPanePresenter(PresenterTemplate):
         :param state: the state of the time filters (inc/exc)
         :returns: an updated figure
         """
+        if self._filter._data is None:
+            return self.empty()
+
         names = [row['sample_log-table'] for row in log_data]
         if len(names) == 0:
             names = [self._filter._log.get_new_log_name([])]

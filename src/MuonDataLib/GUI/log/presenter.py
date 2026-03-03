@@ -117,6 +117,8 @@ class LogPresenter(TablePresenter):
         :param data: the sample log table data
         :returns: the next name to be used
         """
+        if self._logs is None:
+            return ''
         names = self.get_available_logs(data)
         for default in self._defaults:
             if default in names:
