@@ -35,11 +35,9 @@ class LogView(TableView):
         filter_width = 4
 
         # setup the layout (text area + plot area)
-        tmp = dbc.Row([
-                        dbc.Col(text, width=filter_width),
-                        dbc.Col(presenter._plot.layout, width=12-filter_width)
-                       ],
-                       className="g-0", align='center')
+        tmp = dbc.Row([dbc.Col(text, width=filter_width),
+                       dbc.Col(presenter._plot.layout, width=12-filter_width)],
+                      className="g-0", align='center')
 
         # setup the ok and cancel buttons at bottom of the pop up
         btns = html.Div([dbc.Button('ok',
@@ -82,10 +80,9 @@ class LogView(TableView):
                   Output('log_max', 'children'),
                   Output('log_mean', 'children'),
                   Output('log_min', 'children'),
-                  Output('log_std', 'children'),
-                  ],
-                  Input('log_selection', 'value'),
-                  prevent_initial_call=True)(presenter.show_log_data)
+                  Output('log_std', 'children'),],
+                 Input('log_selection', 'value'),
+                 prevent_initial_call=True)(presenter.show_log_data)
 
         callback([Output('log_selector', 'is_open'),
                   Output(presenter.ID, 'rowData')],

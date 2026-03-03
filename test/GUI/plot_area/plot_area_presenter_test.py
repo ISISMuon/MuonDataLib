@@ -12,10 +12,8 @@ class PlotAreaPresenterTest(TestHelper):
         self.presenter = PlotAreaPresenter('plot_test')
         # just add a plot with 2 subplots
         self.presenter.plot(['test', 'data'],
-                             [[0, 2],
-                              [0, 2]],
-                             [[4, 5],
-                              [2, 4]])
+                            [[0, 2], [0, 2]],
+                            [[4, 5], [2, 4]])
         # clear the shapes
         self.presenter.fig.layout.shapes = []
 
