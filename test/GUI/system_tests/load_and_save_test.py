@@ -56,6 +56,7 @@ def test_load_nxs_error(dash_duo):
 
     dash_duo.find_element('#Load').click()
 
+    dash_duo.wait_for_page()
     # check that the error alert has appeared with correct msg
     assert (dash_duo.find_element('#error').is_enabled)
     msg = "An error occurred: The file bad_file.txt cannot be read"
