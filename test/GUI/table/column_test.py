@@ -25,6 +25,32 @@ class ColumnTest(TestHelper):
             return
         self.fail('A bool dtype should not be allowed')
 
+    def test_set_icon(self):
+        col = Column('unit', 'test', 'button')
+        self.assertEqual(col._icon, 'bi bi-trash me-2')
+        self.assertEqual(col._className, 'btn btn-danger')
+
+        col.set_icon('tick', 'primary')
+        self.assertEqual(col._icon, 'tick')
+        self.assertEqual(col._className, 'primary')
+
+        data = col.get_column_dict
+        self.assertEqual(data['cellRendererParams']['Icon'],
+                         'tick')
+        self.assertEqual(data['cellRendererParams']['className'],
+                         'primary')
+
+    def test_set_uneditable(self):
+        for dtype in VALID:
+            with self.subTest(dtpye=dtype):
+                col = Column('unit', 'test', dtype)
+                data = col.get_column_dict
+                self.assertEqual(data['editable'], dtype != 'button')
+
+                col.set_uneditable()
+                data = col.get_column_dict
+                self.assertEqual(data['editable'], False)
+
     def test_set_range(self):
         for dtype in VALID:
             with self.subTest(dtpye=dtype):

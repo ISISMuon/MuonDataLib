@@ -76,6 +76,24 @@ class PlotAreaPresenter(PresenterTemplate):
             y_list.append(y)
         return self.plot(names, x_list, y_list)
 
+    def add_trace(self, x, y, name, row, col):
+        """
+        A simple wrapper for the plotly scatter
+        method. This is done to make mocking easier
+        :param x: the x data
+        :param y: the y data
+        :param name: the label for the data
+        :param row: the subplot row to place the data into
+        :param col: the subplot col to place the data into
+        """
+        self.fig.add_trace(plotly.graph_objects.Scatter(
+                    x=x,
+                    y=y,
+                    name=name,
+                    mode='lines'
+                    ),
+                          row, col)
+
     def plot(self, labels, x_list, y_list, x_title='time'):
         """
         A method to plot a list of data as a vertically
@@ -105,13 +123,11 @@ class PlotAreaPresenter(PresenterTemplate):
         for i, name in enumerate(labels):
             x = x_list[i]
             # plot lines as this is much faster than points
-            self.fig.add_trace(plotly.graph_objects.Scatter(
-                        x=x,
-                        y=y_list[i],
-                        name=name,
-                        mode='lines'
-                        ),
-                              i + 1, 1)
+            self.add_trace(x,
+                           y_list[i],
+                           name,
+                           i + 1,
+                           1)
             if self._min > np.min(x):
                 self._min = np.min(x)
 

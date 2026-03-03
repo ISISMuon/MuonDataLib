@@ -64,7 +64,6 @@ class TestHelper(unittest.TestCase):
         """
         mock.assert_called_once()
         args = mock.call_args[0]
-
         self.assertEqual(len(expected_args),
                          len(args))
         for k in range(len(args)):

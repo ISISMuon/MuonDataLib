@@ -43,6 +43,65 @@ class ControlPanePresenterTest(TestHelper):
     def get_fig(self):
         return self.presenter._plot.fig
 
+    @property
+    def logs(self):
+        return self.data._dict['logs']
+
+    def test_plot_default(self):
+        self.presenter._filter._log.get_new_log_name = mock.Mock()
+        self.presenter._filter._log.get_new_log_name.return_value = 'I'
+        self.presenter._plot.new_plot = mock.Mock()
+        mock_logs = mock.Mock()
+        self.presenter._filter._log._logs = mock_logs
+
+        self.presenter.plot_default()
+        self.presenter._plot.new_plot.assert_called_once_with(['I'],
+                                                              mock_logs)
+
+    def test_make_plot_empty(self):
+        self.presenter._plot.new_plot = mock.Mock()
+        self.presenter.add_time_filters = mock.Mock()
+
+        self.presenter.make_plot([], [], 'Exclude')
+
+        self.presenter._plot.new_plot  .assert_called_once_with(['Temp'],
+                                                                self.logs)
+        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+
+    def test_make_plot_one_log(self):
+        self.presenter._plot.new_plot = mock.Mock()
+        self.presenter.add_time_filters = mock.Mock()
+
+        self.presenter.make_plot([], [{'sample_log-table': 'B'}], 'Exclude')
+
+        self.presenter._plot.new_plot  .assert_called_once_with(['B'],
+                                                                self.logs)
+        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+
+    def test_make_plot_two_logs(self):
+        self.presenter._plot.new_plot = mock.Mock()
+        self.presenter.add_time_filters = mock.Mock()
+
+        self.presenter.make_plot([], [{'sample_log-table': 'B'},
+                                      {'sample_log-table': 'I'}], 'Exclude')
+
+        self.presenter._plot.new_plot  .assert_called_once_with(['B', 'I'],
+                                                                self.logs)
+        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+
+    def test_make_plot_two_logs_and_time(self):
+        self.presenter._plot.new_plot = mock.Mock()
+        self.presenter.add_time_filters = mock.Mock()
+
+        self.presenter.make_plot([{'time': 1}], [{'sample_log-table': 'B'},
+                                                 {'sample_log-table': 'I'}],
+                                 'Exclude')
+
+        self.presenter._plot.new_plot  .assert_called_once_with(['B', 'I'],
+                                                                self.logs)
+        self.presenter.add_time_filters.assert_called_once_with([{'time': 1}],
+                                                                'Exclude')
+
     def test_add_filter_include(self):
         # by default should have 2 shapes that cover both plots
         self.check_shapes([[0, 4, 0, 1],
