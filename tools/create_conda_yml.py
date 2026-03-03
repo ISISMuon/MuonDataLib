@@ -14,7 +14,7 @@ def get_input():
     parser = argparse.ArgumentParser()
     parser.add_argument('version',
                         help='the Python version'
-                        ' (3.8, 3.9, 3.10, 3.11)', type=str)
+                        ' (3.10, 3.11, 3.12, 3.13, 3.14)', type=str)
     args = parser.parse_args()
 
     if args.version not in versions:
@@ -58,8 +58,6 @@ def create_default(version):
                 'dash-ag-grid': '==32.3.4',
                 'dash_bootstrap_components': '',
                 'sphinx-rtd-theme': '',
-                'pyqt5': '',
-                'pyqtwebengine': '',
                 'dash_daq': '',
                 }
 
@@ -67,6 +65,7 @@ def create_default(version):
     default_yml['channels'] = 'conda-forge'
     default_yml['dependencies'] = {'python': '=' + version + '.*',
                                    'numpy': '',
+                                   'pySide6': '',
                                    'plotly': '',
                                    'pytest': '',
                                    'pre-commit': '>=2.15',

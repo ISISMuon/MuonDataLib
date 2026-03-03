@@ -2,7 +2,7 @@ from setuptools import find_packages, setup, Extension
 import numpy
 
 
-version = "0.9.2b11"
+version = "0.10.0b0"
 
 
 PACKAGE_NAME = 'MuonDataLib'
@@ -40,9 +40,9 @@ extensions = [
               ]
 setup(
     name=PACKAGE_NAME,
-    requires=['numpy', 'cython', 'plotly'],
-    setup_requires=['numpy', 'cython', 'plotly'],
-    install_requires=['numpy', 'cython', 'plotly'],
+    requires=['numpy', 'cython'],
+    setup_requires=['numpy', 'cython'],
+    install_requires=['numpy', 'cython'],
     packages=find_packages(where='src'),
     ext_modules=extensions,
     version=version,
