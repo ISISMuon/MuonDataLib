@@ -147,6 +147,7 @@ class MainAppPresenterTest(TestHelper):
 
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
+        app.control.clear = mock.Mock()
         app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
                                                     np.array([-1., 0., 1.])))
         bad_file = 'HIFI0.nxs'
@@ -162,6 +163,7 @@ class MainAppPresenterTest(TestHelper):
                          'The file HIFI0.nxs cannot be read')
 
         self.assertMockOnce(app.plot, [])
+        app.control.clear.assert_called_once_with()
 
     def test_load_nxs_none_with_filters(self):
         app = MainAppPresenter(dummy_open)

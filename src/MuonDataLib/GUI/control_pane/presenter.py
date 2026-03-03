@@ -39,7 +39,7 @@ class ControlPanePresenter(PresenterTemplate):
         bad file after a good one.
         :returns: an empty plot
         """
-            return self._plot.plot([''], [[1]], [[1]])
+        return self._plot.plot([''], [[1]], [[1]])
 
     def plot_default(self):
         """

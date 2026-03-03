@@ -47,6 +47,23 @@ class ControlPanePresenterTest(TestHelper):
     def logs(self):
         return self.data._dict['logs']
 
+    def test_clear(self):
+        self.presenter._filter._log._logs = 'logs'
+        self.presenter._filter._data = 'data'
+
+        self.presenter.clear()
+        self.assertEqual(self.presenter._filter._log._logs, None)
+        self.assertEqual(self.presenter._filter._data, None)
+
+    def test_empty(self):
+        self.presenter._plot.plot = mock.Mock()
+        self.presenter.empty()
+
+        self.assertMockOnce(self.presenter._plot.plot,
+                            [[''],
+                             [[1]],
+                             [[1]]])
+
     def test_plot_default(self):
         self.presenter._filter._log.get_new_log_name = mock.Mock()
         self.presenter._filter._log.get_new_log_name.return_value = 'I'
@@ -58,7 +75,27 @@ class ControlPanePresenterTest(TestHelper):
         self.presenter._plot.new_plot.assert_called_once_with(['I'],
                                                               mock_logs)
 
-    def test_make_plot_empty(self):
+    def test_plot_default_empty(self):
+        self.presenter._plot.plot = mock.Mock()
+        self.presenter.clear()
+
+        self.presenter.plot_default()
+        self.assertMockOnce(self.presenter._plot.plot,
+                            [[''],
+                             [[1]],
+                             [[1]]])
+
+    def test_make_plot_empty_data(self):
+        self.presenter._plot.plot = mock.Mock()
+        self.presenter.clear()
+
+        self.presenter.make_plot([], [], 'Exclude')
+        self.assertMockOnce(self.presenter._plot.plot,
+                            [[''],
+                             [[1]],
+                             [[1]]])
+
+    def test_make_plot_empty_filters(self):
         self.presenter._plot.new_plot = mock.Mock()
         self.presenter.add_time_filters = mock.Mock()
 
