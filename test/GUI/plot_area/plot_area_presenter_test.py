@@ -1,8 +1,8 @@
 import unittest
 from unittest import mock
-from MuonDataLib.cython_ext.base_sample_logs import BaseSampleLogs
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
+from MuonDataLib.test_helpers.utils import get_sample_logs
 import numpy as np
 
 
@@ -55,11 +55,7 @@ class PlotAreaPresenterTest(TestHelper):
                          -1000)
 
     def test_new_plot_1(self):
-        logs = BaseSampleLogs()
-        x_data = np.linspace(1, 4, 4)
-        logs.add_sample_log('Temp', x_data, x_data*.1 - 2)
-        logs.add_sample_log('B', x_data, x_data/2.)
-        logs.add_sample_log('I', x_data, x_data)
+        logs = get_sample_logs()
 
         self.presenter.plot = mock.Mock()
 
@@ -70,11 +66,7 @@ class PlotAreaPresenterTest(TestHelper):
                              [x_data*.1 - 2]])
 
     def test_new_plot_2(self):
-        logs = BaseSampleLogs()
-        x_data = np.linspace(1, 4, 4)
-        logs.add_sample_log('Temp', x_data, x_data*.1 - 2)
-        logs.add_sample_log('B', x_data, x_data/2.)
-        logs.add_sample_log('I', x_data, x_data)
+        logs = get_sample_logs()
 
         self.presenter.plot = mock.Mock()
 
