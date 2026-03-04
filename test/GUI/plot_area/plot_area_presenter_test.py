@@ -57,6 +57,7 @@ class PlotAreaPresenterTest(TestHelper):
     def test_new_plot_1(self):
         logs = get_sample_logs()
 
+        x_data, _ = logs.get_sample_log('Temp').get_values()
         self.presenter.plot = mock.Mock()
 
         _ = self.presenter.new_plot(['Temp'], logs)
@@ -67,7 +68,7 @@ class PlotAreaPresenterTest(TestHelper):
 
     def test_new_plot_2(self):
         logs = get_sample_logs()
-
+        x_data, _ = logs.get_sample_log('Temp').get_values()
         self.presenter.plot = mock.Mock()
 
         _ = self.presenter.new_plot(['Temp', 'I'], logs)
