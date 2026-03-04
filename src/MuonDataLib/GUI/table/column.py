@@ -22,6 +22,8 @@ class Column(object):
             self.name = name
             self.dtype = dtype
             self._editable = True
+            self._con = None
+            self._hide = False
             # set default range for numeric data
             self._min = 0
             self._max = 1000
@@ -65,6 +67,12 @@ class Column(object):
         else:
             raise RuntimeError('Cannot set col range for non-numeric dtype')
 
+    def set_condition(self, condition):
+        self._con = condition
+
+    def hide(self):
+        self._hide = True
+
     @property
     def get_column_dict(self):
         """
@@ -75,7 +83,8 @@ class Column(object):
         col = {'field': self.ID,
                'headerName': self.name,
                'width': 100,
-               'editable': self._editable}
+               'editable': self._editable,
+               'hide': self._hide}
         if self.dtype == 'text':
             col['cellEditor'] = 'agLargeTextCellEditor'
             col['cellEditorPopup'] = False
@@ -91,6 +100,9 @@ class Column(object):
             col['cellRenderer'] = 'Button'
             col['cellRendererParams'] = {'Icon': self._icon,
                                          'className': self._className}
+
+        if self._con is not None:
+            col['cellStyle'] = self._con
         return col
 
     @property
@@ -101,6 +113,53 @@ class Column(object):
         """
         if self.dtype == 'numeric':
             return True
+        return False
+
+
+class DropDownColumn(Column):
+    """
+    A simple class for creating columns for
+    a dash data ag-table. This stores the extra
+    information (e.g. dropdowns, validation,
+    conditional formating).
+    """
+    def __init__(self, ID, name, options):
+        """
+        Create the details for the column.
+        The min and max are only for the numeric
+        data type and provide the limits
+        for the values that can be entered.
+        :param ID: the ID for the column
+        :param name: the displayed name in the
+        column.
+        :param dtype: the data type for the column
+        (allowed values; text, numeric, button)
+        """
+        self.ID = ID
+        self.name = name
+        self._options = options
+
+    @property
+    def get_column_dict(self):
+        """
+        Thos method generates a dict
+        for the config of the column.
+        :returns: the dict of the config
+        """
+        col = {'field': self.ID,
+               'headerName': self.name,
+               "cellEditor": "agSelectCellEditor",
+               "cellEditorParams": {"values": ["above", "between", "below"]},
+               'singleClickEdit': True,
+               'width': 100}
+        return col
+
+    @property
+    def is_numeric(self):
+        """
+        Checks if a cell is numeric
+        :returns: a bool for if its numeric.
+        """
         return False
 
 

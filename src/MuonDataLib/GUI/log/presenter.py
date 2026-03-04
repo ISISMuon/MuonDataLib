@@ -1,6 +1,9 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.log.view import LogView
-from MuonDataLib.GUI.table.column import Column, TableGroup, TableColumns
+from MuonDataLib.GUI.table.column import (DropDownColumn,
+                                          Column,
+                                          TableGroup,
+                                          TableColumns)
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 import numpy as np
 
@@ -42,8 +45,34 @@ class LogPresenter(TablePresenter):
         sample = Column('sample_' + LOG_TABLE, 'selected', 'text')
         sample.set_uneditable()
 
+        filter_selector = DropDownColumn('filter_' + LOG_TABLE, '',
+                                         ['above', 'between', 'below'])
+        magic = Column('magic', 'selected', 'text')
+        magic.hide()
+        y_min = Column('y_min', 'min', 'numeric')
+        y_max = Column('y_max', 'max', 'numeric')
+        y_min.set_condition({
+            # Set of rules
+            "styleConditions": [
+
+                {
+                    "condition": "params.data.magic == 'below'",
+                    "style": {"backgroundColor": "lightsalmon"},
+                },
+                {
+                    "condition": "params.data.magic == 'above'",
+                    "style": {"backgroundColor": "lightcoral"},
+                },
+            ],
+            "defaultStyle": {"backgroundColor": "mediumaquamarine"},
+            })
         cols = TableColumns([TableGroup([name]),
-                             TableGroup([log, sample], 'Sample logs')],
+                             TableGroup([log, sample], 'Sample logs'),
+                             TableGroup([filter_selector,
+                                         magic,
+                                         y_min,
+                                         y_max],
+                                        'Filter')],
                             inc_delete_row=True,
                             btn_ID=LOG_TABLE)
 
@@ -64,6 +93,14 @@ class LogPresenter(TablePresenter):
         :param logs: the sample logs object
         """
         self._logs = logs
+
+    def validate(self, info, data):
+        data, err = super().validate(info, data)
+
+        row = info[0]['rowIndex']
+        value = info[0]['data']['filter_' + LOG_TABLE]
+        data[row]['magic'] = value
+        return data, err
 
     def btn_pressed(self, info, data):
         """
@@ -212,4 +249,8 @@ class LogPresenter(TablePresenter):
         """
         return {'Delete_' + self.ID: '',
                 self.name_col: 'log_' + self.get_next_row_name,
-                'sample_log-table': name}
+                'sample_log-table': name,
+                'filter_' + LOG_TABLE: 'between',
+                'magic': 'between',
+                'y_min': 0,
+                'y_max': 5}
