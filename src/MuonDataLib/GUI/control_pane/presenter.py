@@ -21,11 +21,60 @@ class ControlPanePresenter(PresenterTemplate):
         This creates the presenter object for the
         widget.
         """
-        self._plot = PlotAreaPresenter()
+        self._plot = PlotAreaPresenter('main')
         self._filter = FilterPresenter()
         self._view = ControlPaneView(self)
 
-    def add_filter(self, data, state):
+    def clear(self):
+        """
+        Clears the stored data when a bad file is
+        loaded.
+        """
+        self._filter._data = None
+        self._filter._log._logs = None
+
+    def empty(self):
+        """
+        A method to return an empty plot, for loading
+        bad file after a good one.
+        :returns: an empty plot
+        """
+        return self._plot.plot([''], [[1]], [[1]])
+
+    def plot_default(self):
+        """
+        This method generates the default plot (for
+        after initial load). It will automatically
+        get the default sample log.
+        :returns: the figure object
+        """
+        if self._filter._data is None:
+            return self.empty()
+
+        name = self._filter._log.get_new_log_name([])
+        return self._plot.new_plot([name], self._filter._log._logs)
+
+    def make_plot(self, time_data, log_data, state):
+        """
+        This method creates a plot.
+        If no sample logs are selected, it will just plot a
+        default.
+        :param time_data: the data from the time filter table
+        :param log_data: the data from the sample log filter table.
+        Its also used to get which plots to make.
+        :param state: the state of the time filters (inc/exc)
+        :returns: an updated figure
+        """
+        if self._filter._data is None:
+            return self.empty()
+
+        names = [row['sample_log-table'] for row in log_data]
+        if len(names) == 0:
+            names = [self._filter._log.get_new_log_name([])]
+        self._plot.new_plot(names, self._filter._log._logs)
+        return self.add_time_filters(time_data, state)
+
+    def add_time_filters(self, time_data, state):
         """
         This methods adds filters to the plot.
         A filter is represented by removing the shaded
@@ -35,10 +84,8 @@ class ControlPanePresenter(PresenterTemplate):
         :param state: if the filter is an exclude or include
         :returns: an updated figure
         """
-        # clear the shaded regions
         self._plot.fig.layout.shapes = []
-
-        if len(data) == 0 and state == 'Exclude':
+        if len(time_data) == 0 and state == 'Exclude':
             self._plot.add_shaded_region(self._plot._min, self._plot._max)
             return self._plot.fig
 
@@ -46,11 +93,11 @@ class ControlPanePresenter(PresenterTemplate):
         end = []
         # add the filters back
         if state == 'Include':
-            for filter_details in data:
+            for filter_details in time_data:
                 span = self._filter._time.get_range(filter_details)
                 self._plot.add_shaded_region(*span)
         else:
-            for filter_details in data:
+            for filter_details in time_data:
                 tmp = self._filter._time.get_range(filter_details)
                 start.append(tmp[0])
                 end.append(tmp[1])

@@ -114,9 +114,10 @@ class MainApp(Dash):
                  prevent_initial_call=True)(self.presenter.load_filter)
 
         # Plots the data after it is loaded.
-        callback([Output('example_plot', 'figure'),
+        callback([Output('main_plot', 'figure'),
                   Output('time-table', 'rowData', allow_duplicate=True),
                   Output('time-table_add', 'disabled'),
+                  Output('log-table_add', 'disabled'),
                   Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),

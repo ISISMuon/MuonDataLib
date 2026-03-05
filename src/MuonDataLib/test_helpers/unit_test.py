@@ -49,6 +49,8 @@ class TestHelper(unittest.TestCase):
 
             if isinstance(array[j], (list, np.ndarray)):
                 self.assertArrays(array[j], ref[j])
+            elif isinstance(array[j], str):
+                self.assertEqual(array[j], ref[j])
             else:
                 msg = f'values do not match in array {array[j]}, {ref[j]}'
                 self.assertAlmostEqual(array[j], ref[j], 3, msg=msg)
@@ -64,7 +66,6 @@ class TestHelper(unittest.TestCase):
         """
         mock.assert_called_once()
         args = mock.call_args[0]
-
         self.assertEqual(len(expected_args),
                          len(args))
         for k in range(len(args)):

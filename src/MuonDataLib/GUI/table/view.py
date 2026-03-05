@@ -24,15 +24,13 @@ class TableView(ViewTemplate):
             dbc.Button(id=presenter.ID + '_add',
                        class_name='bi-plus-lg',
                        disabled=True),
-            html.H3(id='moo', children=""),
             dcc.Store(data=False, id=presenter.ID + '_changed_state'),
             dag.AgGrid(id=presenter.ID,
                        columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
                        defaultColDef={'editable': True,
                                       'suppressMovable': True}),
-            html.H3('hi', id="test_test"),
-            html.Div(id='table-dropdown-container')
+            html.Div(id=presenter.ID + '-dropdown-container')
             ])
 
     def set_callbacks(self, presenter):
@@ -40,18 +38,35 @@ class TableView(ViewTemplate):
         Set the callbacks for the GUI.
         :param presenter: the presenter for the GUI
         """
-        callback(Output(presenter.ID, 'rowData'),
-                 Input(presenter.ID + '_add', 'n_clicks'),
-                 State(presenter.ID, 'virtualRowData'),
-                 prevent_initial_call=True)(presenter.add)
-
         callback([Output(presenter.ID, 'rowData', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input(presenter.ID, 'cellValueChanged'),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.validate)
 
+        self.set_btn_callback(presenter)
+        self.set_add_callback(presenter)
+
+    def set_btn_callback(self, presenter):
+        """
+        A callback for pressing the button within the table.
+        This is so we can easily overwrite it if there are
+        multiple buttons in the table. As its not possible to
+        distinguish between the signals.
+        :param presenter: the presenter object
+        """
         callback(Output(presenter.ID, "rowData", allow_duplicate=True),
                  Input(presenter.ID, "cellRendererData"),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.delete_row)
+
+    def set_add_callback(self, presenter):
+        """
+        Sets a callback for the add button. This is so we
+        can overwrite it if we need to.
+        :param presenter: the presenter object
+        """
+        callback(Output(presenter.ID, 'rowData'),
+                 Input(presenter.ID + '_add', 'n_clicks'),
+                 State(presenter.ID, 'virtualRowData'),
+                 prevent_initial_call=True)(presenter.add)

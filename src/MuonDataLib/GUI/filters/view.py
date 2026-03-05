@@ -29,6 +29,9 @@ class FilterView(ViewTemplate):
                 dbc.AccordionItem(
                     [presenter._time.layout],
                     title="Time filters"),
+                dbc.AccordionItem(
+                    [presenter._log.layout],
+                    title="Sample Log filters"),
                 ],
                          start_collapsed=True),
             dbc.Button('Calculate',

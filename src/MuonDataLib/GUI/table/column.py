@@ -21,11 +21,34 @@ class Column(object):
             self.ID = ID
             self.name = name
             self.dtype = dtype
+            self._editable = True
+            # set default range for numeric data
             self._min = 0
             self._max = 1000
+            # set default button values (delete)
+            self._icon = 'bi bi-trash me-2'
+            self._className = 'btn btn-danger'
         else:
             raise ValueError(f"Unkown column dtype {dtype}."
                              "Options are 'text', 'numeric' and 'button'.")
+
+    def set_uneditable(self):
+        """
+        A method to make the column uneditable
+        """
+        self._editable = False
+
+    def set_icon(self, icon, class_name):
+        """
+        A method to set the column's button to a
+        custom one.
+        :param icon: the code for the button image
+        see https://icons.getbootstrap.com/
+        :param class_name: the class name
+        for the button (sets colour)
+        """
+        self._icon = icon
+        self._className = class_name
 
     def set_range(self, min_value, max_value):
         """
@@ -51,7 +74,8 @@ class Column(object):
         """
         col = {'field': self.ID,
                'headerName': self.name,
-               'width': 100}
+               'width': 100,
+               'editable': self._editable}
         if self.dtype == 'text':
             col['cellEditor'] = 'agLargeTextCellEditor'
             col['cellEditorPopup'] = False
@@ -65,8 +89,8 @@ class Column(object):
         elif self.dtype == 'button':
             col['editable'] = False
             col['cellRenderer'] = 'Button'
-            col['cellRendererParams'] = {'Icon': 'bi bi-trash me-2',
-                                         'className': 'btn btn-danger'}
+            col['cellRendererParams'] = {'Icon': self._icon,
+                                         'className': self._className}
         return col
 
     @property

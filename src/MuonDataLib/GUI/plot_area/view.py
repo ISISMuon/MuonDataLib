@@ -14,10 +14,10 @@ class PlotAreaView(ViewTemplate):
         :returns: the layout for the view.
         """
         return html.Div([
-            html.Div(dcc.Graph(id='example_plot',
+            html.Div(dcc.Graph(id=presenter.ID + '_plot',
                                clear_on_unhover=True),
                      style={'width': '100%',
                             'display': 'inline-block',
                             'padding': '0 20'}),
-            dcc.Tooltip(id='tooltip'),
+            dcc.Tooltip(id=presenter.ID + '_tooltip'),
                      ])

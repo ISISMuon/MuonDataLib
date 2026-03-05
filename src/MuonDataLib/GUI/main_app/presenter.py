@@ -161,17 +161,13 @@ class MainAppPresenter(object):
                                          [3, 6.1, 0.91],
                                          osc, seed=1)
 
-    def plot(self, x0, y0, x1, y1):
+    def plot(self):
         """
         A method to plot the sample log data.
         This exists to make some code cleaner
-        :param x0: the first set of x values
-        :param y0: the first set of y values
-        :param x1: the second set of x values
-        :param y1: the second set of y values
         :returns: the plot object
         """
-        return self.control._plot.plot(x0, y0, x1, y1)
+        return self.control.plot_default()
 
     def load_nxs(self, name, data, debug_state):
         """
@@ -180,17 +176,23 @@ class MainAppPresenter(object):
         the name of the file to open.
         :param data: the time filter table data
         :param debug_state: if debug mode is on or off.
-        :returns: the updated figure, the time filter table
-        data, if to enable the filter table, the filter table column names
-        and the alert message
+        :returns: yields:
+        - the updated figure
+        - the time filter table data
+        - if the time filter table is disabled
+        - if the sample log table is disabled
+        - the filter table column names
+        - the alert message
         """
         if name == self.load.file:
-            return self.control._plot.fig, data, self.control.headers, ''
+            return (self.control._plot.fig, data, True, True,
+                    self.control.headers, '')
         self.load.set_file(name)
 
         if 'None' in name:
-            return (self.plot([], [], [], []),
+            return (self.plot(),
                     [],
+                    True,
                     True,
                     self.control.headers,
                     '')
@@ -201,21 +203,16 @@ class MainAppPresenter(object):
             self.load.load_nxs(name[len(CURRENT):])
 
         except Exception as err:
-            return (self.plot([], [], [], []),
+            self.control.clear()
+            return (self.plot(),
                     [],
+                    True,
                     True,
                     self.control.headers,
                     f'An error occurred: {err}')
 
         data = self.load.get_data
         self.control.set_data(data)
-        # add fake sample log data
-        x, y = self.gen_fake_data(data)
-        data.add_sample_log("Test", x, y)
 
-        # this will be user defined later. For now lets just
-        # load the big data set we have made
-        log = data._get_sample_log("Test")
-        a, b = log.get_values()
-
-        return self.plot(a, b, x, y), [], False, self.control.headers, ''
+        return (self.plot(), [], False, False,
+                self.control.headers, '')

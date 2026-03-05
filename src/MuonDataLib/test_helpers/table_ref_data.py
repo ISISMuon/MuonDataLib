@@ -12,12 +12,14 @@ def expected_col_dict(dtype, ID='unit', name='test'):
         col['cellEditor'] = 'agLargeTextCellEditor'
         col['cellEditorPopup'] = False
         col['cellEditorParams'] = {'maxLength': 50}
+        col['editable'] = True
 
     elif dtype == 'numeric':
         col['cellEditor'] = 'agNumberCellEditor'
         col['cellEditorParams'] = {'min': 0,
                                    'max': 1000,
                                    'precision': 3}
+        col['editable'] = True
     elif dtype == 'button':
         col['editable'] = False
         col['cellRenderer'] = 'Button'

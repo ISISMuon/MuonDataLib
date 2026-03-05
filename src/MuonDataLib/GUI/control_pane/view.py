@@ -31,15 +31,16 @@ class ControlPaneView(ViewTemplate):
         Set the callbacks for the widget
         :param pressenter: the presenter for the widget
         """
-        callback(Output('example_plot', 'figure', allow_duplicate=True),
-                 Input('time-table', 'rowData'),
+        callback(Output('main_plot', 'figure', allow_duplicate=True),
+                 [Input('time-table', 'rowData'),
+                  Input('log-table', 'rowData')],
                  [State('dropdown-time', 'value')],
-                 prevent_initial_call=True)(presenter.add_filter)
+                 prevent_initial_call=True)(presenter.make_plot)
 
-        callback([Output('tooltip', 'show', allow_duplicate=True),
-                  Output('tooltip', 'bbox', allow_duplicate=True),
-                  Output('tooltip', 'children', allow_duplicate=True)],
-                 Input('example_plot', 'hoverData'),
+        callback([Output('main_tooltip', 'show', allow_duplicate=True),
+                  Output('main_tooltip', 'bbox', allow_duplicate=True),
+                  Output('main_tooltip', 'children', allow_duplicate=True)],
+                 Input('main_plot', 'hoverData'),
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'value')],
                  prevent_initial_call=True)(presenter.display_hover)

@@ -1,5 +1,6 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
+from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.filters.view import FilterView
 
 
@@ -16,6 +17,7 @@ class FilterPresenter(PresenterTemplate):
         - time filter table
         """
         self._time = TimePresenter()
+        self._log = LogPresenter()
         self._view = FilterView(self)
         self._data = None
         self._file_data = []
@@ -49,6 +51,7 @@ class FilterPresenter(PresenterTemplate):
         :param data: MuonEventData
         """
         self._data = data
+        self._log.set_logs(data._dict['logs'])
         times = self._data.get_frame_start_times()
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)

@@ -223,7 +223,6 @@ def read_raw_data_from_events(file):
     if exp_ID == '':
         warning('**EXPERIMENT IDENTIFIER**')
         exp_ID = 'raw ID: test'
-
     return ((tmp["IDF_version"][()],
              'pulsedTD',
              name[0],

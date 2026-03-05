@@ -226,6 +226,18 @@ class UnitTest(unittest.TestCase):
         with self.assertRaises(AssertionError):
             nexus.assertArrays(array, ref)
 
+    def test_assertArrays_string(self):
+        array = ['a', 'b']
+        ref = ['a', 'b']
+        nexus = TestHelper()
+        nexus.assertArrays(array, ref)
+
+    def test_assertArrays_string_recursion(self):
+        array = [['a', 'b']]
+        ref = [['a', 'b']]
+        nexus = TestHelper()
+        nexus.assertArrays(array, ref)
+
 
 if __name__ == '__main__':
     unittest.main()

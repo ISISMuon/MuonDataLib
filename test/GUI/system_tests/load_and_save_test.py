@@ -7,6 +7,7 @@ import os
 import h5py
 import numpy as np
 import sys
+import time
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -56,6 +57,7 @@ def test_load_nxs_error(dash_duo):
 
     dash_duo.find_element('#Load').click()
 
+    time.sleep(.1)
     # check that the error alert has appeared with correct msg
     assert (dash_duo.find_element('#error').is_enabled)
     msg = "An error occurred: The file bad_file.txt cannot be read"
