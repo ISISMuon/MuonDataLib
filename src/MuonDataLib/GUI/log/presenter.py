@@ -45,34 +45,46 @@ class LogPresenter(TablePresenter):
         sample = Column('sample_' + LOG_TABLE, 'selected', 'text')
         sample.set_uneditable()
 
-        filter_selector = DropDownColumn('filter_' + LOG_TABLE, '',
+        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type',
                                          ['above', 'between', 'below'])
-        magic = Column('magic', 'selected', 'text')
+        """
+        we need an extra magic col as we cannot get the value from the
+        dropdown in conditional formatting
+        """
+        magic = Column('magic', '', 'text')
         magic.hide()
-        y_min = Column('y_min', 'min', 'numeric')
-        y_max = Column('y_max', 'max', 'numeric')
-        y_min.set_condition({
-            # Set of rules
-            "styleConditions": [
 
-                {
-                    "condition": "params.data.magic == 'below'",
-                    "style": {"backgroundColor": "lightsalmon"},
-                },
-                {
-                    "condition": "params.data.magic == 'above'",
-                    "style": {"backgroundColor": "lightcoral"},
-                },
+        # these nees to conditional formatting
+        filter_start = Column('y0_' + LOG_TABLE, 'Filter start', 'numeric')
+        filter_end = Column('yN_' + LOG_TABLE, 'Filter stop', 'numeric')
+
+        filter_start.set_condition({"styleConditions": [
+            {"condition": "params.data.magic == 'below'",
+             "style": {"backgroundColor": "black"}},
             ],
-            "defaultStyle": {"backgroundColor": "mediumaquamarine"},
-            })
+            "defaultStyle": {"backgroundColor": "white"}
+                 })
+
+        filter_end.set_condition({"styleConditions": [
+            {"condition": "params.data.magic == 'above'",
+             "style": {"backgroundColor": "black"}},
+            ],
+            "defaultStyle": {"backgroundColor": "white"}
+                 })
+
+        y_min = Column('y_min', 'min', 'numeric')
+
+        y_max = Column('y_max', 'max', 'numeric')
+
         cols = TableColumns([TableGroup([name]),
                              TableGroup([log, sample], 'Sample logs'),
                              TableGroup([filter_selector,
+                                         filter_start,
+                                         filter_end,
                                          magic,
                                          y_min,
                                          y_max],
-                                        'Filter')],
+                                        'Filter Details')],
                             inc_delete_row=True,
                             btn_ID=LOG_TABLE)
 
@@ -251,6 +263,8 @@ class LogPresenter(TablePresenter):
                 self.name_col: 'log_' + self.get_next_row_name,
                 'sample_log-table': name,
                 'filter_' + LOG_TABLE: 'between',
+                'y0_' + LOG_TABLE: 0,
+                'yN_' + LOG_TABLE: 10,
                 'magic': 'between',
                 'y_min': 0,
                 'y_max': 5}
