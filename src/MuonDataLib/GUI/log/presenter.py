@@ -55,8 +55,8 @@ class LogPresenter(TablePresenter):
         magic.hide()
 
         # these nees to conditional formatting
-        filter_start = Column('y0_' + LOG_TABLE, 'Filter start', 'numeric')
-        filter_end = Column('yN_' + LOG_TABLE, 'Filter stop', 'numeric')
+        filter_start = Column('y0_' + LOG_TABLE, 'Keep data from', 'numeric')
+        filter_end = Column('yN_' + LOG_TABLE, 'Keep data to', 'numeric')
 
         filter_start.set_condition({"styleConditions": [
             {"condition": "params.data.magic == 'below'",

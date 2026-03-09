@@ -35,6 +35,21 @@ class PlotAreaPresenter(PresenterTemplate):
         self._min = 1000
         self._max = -1000
 
+    def add_rect(self, x0, y0, x1, y1, axis):
+        print("trestawst", f'x{axis}')
+        self.fig.add_shape(type='rect',
+                           xref=f'x{axis}',
+                           yref=f'y{axis}',
+                           x0=x0,
+                           y0=y0,
+                           x1=x1,
+                           y1=y1,
+                           fillcolor='RoyalBlue',
+                           opacity=0.3,
+                           layer='above',
+                           line={'color': 'black',
+                                 'width': 4})
+
     def add_shaded_region(self, start, stop):
         """
         Adds a shaded region to the plot.

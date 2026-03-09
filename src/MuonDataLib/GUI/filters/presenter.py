@@ -2,6 +2,7 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.filters.view import FilterView
+import numpy as np
 
 
 class FilterPresenter(PresenterTemplate):
@@ -96,18 +97,37 @@ class FilterPresenter(PresenterTemplate):
                                                       start)
             elif filter_type == 'below':
                 self._data.keep_data_sample_log_below(sample_log,
-                                                      stop])
+                                                      stop)
 
     def update_filters(self, time_filters, state, log_filters):
         # a bit heavyhanded, but guarantees that the filters can be applied
         self._data.clear_filters()
+        if len(time_filters) == 0 and len(log_filters) == 0:
+            return [], [], ''
         try:
             self.apply_filters(time_filters, state, log_filters)
         except RuntimeError as msg:
-            return str(msg)
-        result = self._data.get_filters_as_times()
-        for a in result:
-            print(a)
+            return [], [], str(msg)
+        start, stop = self._data.get_filters_as_times()
+        return start, stop, ''
+
+    def get_inc_filters(self, ex_start, ex_stop, row_log):
+        log = self._log._logs.get_sample_log(row_log['sample_log-table'])
+        x, y = log.get_original_values()
+
+        f_start = [x[0]]
+        f_stop = [ex_start[0]]
+
+        f_start.append(ex_stop[0])
+        for k in range(1, len(ex_stop)):
+            f_stop.append(ex_start[1])
+            f_start.append(ex_stop[1])
+
+        f_stop.append(x[-1])
+
+        print(f_start, ex_start)
+        print(f_stop, ex_stop)
+        return f_start, f_stop, np.min(y), np.max(y)
 
     def calculate(self, n_clicks, time_filters, state, log_filters):
         """
@@ -126,7 +146,6 @@ class FilterPresenter(PresenterTemplate):
         self.update_filters(time_filters,
                             state,
                             log_filters)
-
 
         # a bit heavyhanded, but guarantees that the filters can be applied
         self._data.clear_filters()

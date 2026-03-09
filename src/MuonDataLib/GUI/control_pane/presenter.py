@@ -72,7 +72,44 @@ class ControlPanePresenter(PresenterTemplate):
         if len(names) == 0:
             names = [self._filter._log.get_new_log_name([])]
         self._plot.new_plot(names, self._filter._log._logs)
-        return self.add_time_filters(time_data, state)
+        start, stop, msg = self._filter.update_filters(time_data,
+                                                         state,
+                                                         log_data)
+
+        self.add_filters(start, stop, log_data)
+
+        return self._plot.fig
+
+    def add_filters(self, start, stop, log_data):
+        if len(start) == 0:
+            self._plot.add_shaded_region(self._plot._min,
+                                         self._plot._max)
+            return
+        N = len(log_data) if len(log_data) > 0 else 1
+        axis = [str(k + 1) for k in range(N)]
+
+        #  first axis has no number, second is number 2
+        axis[0] = ''
+
+        """
+        Need to invert the shading i.e.
+        these are the exclude regions -
+        bug, get small shaded region at start and end with log filters
+        Need to get correct y values
+        Remove apply filters from calculate and save (doing it here instead)
+        """
+        # loop over plots (sample logs)
+        for k, ax in enumerate(axis):
+            # loop over filters
+            result = self._filter.get_inc_filters(start, stop, log_data[k])
+            inc_start, inc_stop, y_min, y_max = result
+            for k in range(len(inc_start)):
+                print(k, 'moo', ax, inc_start[k], inc_stop[k])
+                self._plot.add_rect(inc_start[k],
+                                    y_min,
+                                    inc_stop[k],
+                                    y_max,
+                                    ax)
 
     def add_time_filters(self, time_data, state):
         """
