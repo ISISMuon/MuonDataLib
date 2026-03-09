@@ -56,48 +56,82 @@ class FilterPresenter(PresenterTemplate):
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)
 
-    def apply_filters(self, filters, state):
+    def apply_filters(self, time_filters, state, log_filters):
         """
         A method to apply the filters to the
         muon event data object. This allows
         for the user to state if the time
         window is included or excluded.
-        :param filters: A list of filters (dicts)
+        :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
         """
-        if len(filters) == 0:
+        if len(time_filters) == 0 and len(log_filters) == 0:
             return
         elif state == 'Exclude':
-            for filter_details in filters:
+            for filter_details in time_filters:
                 self._data.remove_data_time_between(
                         filter_details['Name_time-table'],
                         filter_details['Start_time-table'],
                         filter_details['End_time-table'])
         else:
-            for filter_details in filters:
+            for filter_details in time_filters:
                 self._data.only_keep_data_time_between(
                         filter_details['Name_time-table'],
                         filter_details['Start_time-table'],
                         filter_details['End_time-table'])
 
-    def calculate(self, n_clicks, filters, state):
+        for filter_details in log_filters:
+
+            filter_type = filter_details['filter_log-table']
+            sample_log = filter_details['sample_log-table']
+            start = filter_details['y0_log-table']
+            stop = filter_details['yN_log-table']
+
+            if filter_type == 'between':
+                self._data.keep_data_sample_log_between(sample_log,
+                                                        start,
+                                                        stop)
+            elif filter_type == 'above':
+                self._data.keep_data_sample_log_above(sample_log,
+                                                      start)
+            elif filter_type == 'below':
+                self._data.keep_data_sample_log_below(sample_log,
+                                                      stop])
+
+    def update_filters(self, time_filters, state, log_filters):
+        # a bit heavyhanded, but guarantees that the filters can be applied
+        self._data.clear_filters()
+        try:
+            self.apply_filters(time_filters, state, log_filters)
+        except RuntimeError as msg:
+            return str(msg)
+        result = self._data.get_filters_as_times()
+        for a in result:
+            print(a)
+
+    def calculate(self, n_clicks, time_filters, state, log_filters):
         """
         A method to calculate the number of
         events that would be used to make
         the histogram.
         :param n_clicks: the number of button
         presses for the calculate button
-        :param filters: the list of time
+        :param time_filters: the list of time
         filters
         :param state: If to include or exclude the
         data.
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
+        self.update_filters(time_filters,
+                            state,
+                            log_filters)
+
+
         # a bit heavyhanded, but guarantees that the filters can be applied
         self._data.clear_filters()
         try:
-            self.apply_filters(filters, state)
+            self.apply_filters(time_filters, state, log_filters)
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram()

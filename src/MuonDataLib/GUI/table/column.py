@@ -25,8 +25,8 @@ class Column(object):
             self._con = None
             self._hide = False
             # set default range for numeric data
-            self._min = 0
-            self._max = 1000
+            self._min = -1e6
+            self._max = 1e6
             # set default button values (delete)
             self._icon = 'bi bi-trash me-2'
             self._className = 'btn btn-danger'

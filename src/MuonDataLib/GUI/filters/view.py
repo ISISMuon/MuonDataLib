@@ -50,7 +50,8 @@ class FilterView(ViewTemplate):
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('calc_btn', 'n_clicks'),
                  [State('time-table', 'rowData'),
-                  State('dropdown-time', 'value')],
+                  State('dropdown-time', 'value'),
+                  State('log-table', 'rowData')],
                  prevent_initial_call=True)(presenter.calculate)
 
         callback(Output('title_test', 'hidden'),

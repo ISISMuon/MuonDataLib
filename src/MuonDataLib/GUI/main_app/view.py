@@ -135,6 +135,7 @@ class MainApp(Dash):
                  Input('save_btn_dummy', 'children'),
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'values'),
+                  State('log-table', 'rowData'),
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 

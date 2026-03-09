@@ -149,6 +149,24 @@ class MuonEventData(MuonData):
         self._filter_keep_times()
         self._filter_logs()
 
+    def get_filters_as_times(self):
+        self._filters()
+        fi_s, fi_e, rm = self._events.get_exclude_windows()
+        times = self.get_frame_start_times()
+        start_times = np.asarray([times[t] for t in fi_s])
+        end_times = np.asarray([times[t] for t in fi_e])
+        """
+        cleans up the cache to stop trying to add multiple
+        filters of the same name
+        Could we remove this? - if we add/apply
+        filters as part of the table updates (a bit of
+        a pain for connecting to the plot)
+        then that step could be skipped when
+        calculating/saving histograms
+        """
+        self.clear_filters()
+        return start_times, end_times
+
     def histogram(self, resolution=0.016):
         """
         A method for constructing a histogram.

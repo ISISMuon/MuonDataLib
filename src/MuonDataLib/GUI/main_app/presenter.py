@@ -109,14 +109,14 @@ class MainAppPresenter(object):
             return False
         return True
 
-    def save_data(self, name, filters, time_mode, debug):
+    def save_data(self, name, time_filters, time_mode, log_filters, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
         event data.
         :param name: a string of the data type (json
         or nexus) and the name of the file to save to.
-        :param filters: the filters (list of dicts) to use
+        :param time_filters: the time filters (list of dicts) to use
         :param time_mode: If the time filters are to include
         or exclude the data
         :param debug: if debug mode is on or off.
@@ -133,7 +133,9 @@ class MainAppPresenter(object):
                 raise RuntimeError("Saving error")
 
             print("saving to ", file)
-            self.control._filter.apply_filters(filters, time_mode)
+            self.control._filter.apply_filters(time_filters,
+                                               time_mode,
+                                               log_filters)
             if dtype == "n":
                 data.save_histograms(file)
             elif dtype == 'j':
