@@ -161,4 +161,10 @@ class PlotAreaPresenter(PresenterTemplate):
                 self._max = np.max(x)
             self.fig.update_traces(hoverinfo='none')
             self.fig.update_yaxes(title_text=name, row=i+1, col=1)
+            # manually set y limits for subplots
+            diff = np.max(y_list[i]) - np.min(y_list[i])
+            dy = diff*0.03
+            self.fig.update_yaxes(range=[np.min(y_list[i]) - dy,
+                                         dy + np.max(y_list[i])],
+                                  row=i+1)
         return self.fig

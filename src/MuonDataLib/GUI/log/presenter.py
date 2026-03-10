@@ -1,3 +1,4 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.log.view import LogView
 from MuonDataLib.GUI.table.column import (DropDownColumn,
@@ -119,33 +120,65 @@ class LogPresenter(TablePresenter):
         need to add code to deal with above/below being
         able to set values below/above the other filter value
         """
+        f_type = row['magic']
+        y_min = row['y_min_' + LOG_TABLE]
+        y_max = row['y_max_' + LOG_TABLE]
 
         if col_name == 'y0_' + LOG_TABLE:
-            if new_value < row['y_min_' + LOG_TABLE]:
+            if new_value < y_min:
                 # check its within data range
                 msg = (f'The new filter value {new_value} '
                        f'is below the lowest y value '
                        f'{row["y_min_" + LOG_TABLE]} for the data.')
                 new_value = changed['oldValue']
-            elif new_value > row['yN_' + LOG_TABLE]:
+
+            elif f_type == 'above':
+                if new_value < y_max and new_value > row['yN_' + LOG_TABLE]:
+                    # only update if it would cause start > end
+                    data[changed['rowIndex']]['yN_' + LOG_TABLE] = y_max
+                elif new_value > y_max:
+                    msg = (f'The new filter value {new_value} '
+                           f'is above the max y value '
+                           f'{y_max}')
+                    new_value = changed['oldValue']
+
+            elif new_value > row['yN_' + LOG_TABLE] and f_type == 'between':
                 # check its below the max filter value
                 msg = (f'The new filter value {new_value} '
                        f'is above the upper filter value '
                        f'{row["yN_" + LOG_TABLE]}.')
                 new_value = changed['oldValue']
+
+            elif f_type == 'below' and new_value != y_min:
+                new_value = changed['oldValue']
+
         elif col_name == 'yN_' + LOG_TABLE:
-            if new_value > row['y_max_' + LOG_TABLE]:
+            if new_value > y_max:
                 # check its within data range
                 msg = (f'The new filter value {new_value} '
                        f'is above the largest y value '
                        f'{row["y_max_" + LOG_TABLE]} for the data.')
                 new_value = changed['oldValue']
-            elif new_value < row['y0_' + LOG_TABLE]:
+
+            elif f_type == 'below':
+                if new_value > y_min and new_value < row['y0_' + LOG_TABLE]:
+                    data[changed['rowIndex']]['y0_' + LOG_TABLE] = y_min
+                elif new_value < y_min:
+                    msg = (f'The new filter value {new_value} '
+                           f'is below the minimum value '
+                           f'{y_min}.')
+                    new_value = changed['oldValue']
+
+            elif new_value < row['y0_' + LOG_TABLE] and f_type == 'between':
                 # check its above min filter value
                 msg = (f'The new filter value {new_value} '
                        f'is below the lower filter value '
                        f'{row["y0_" + LOG_TABLE]}.')
                 new_value = changed['oldValue']
+
+            elif f_type == 'above' and new_value != y_max:
+                new_value = changed['oldValue']
+
         elif col_name == 'filter_' + LOG_TABLE:
             # update the filter type (for conditional formatting)
             new_value = change[0]['data']['filter_' + LOG_TABLE]
@@ -322,3 +355,45 @@ class LogPresenter(TablePresenter):
                 'magic': default_filter,
                 'y_min_' + LOG_TABLE: 0,
                 'y_max_' + LOG_TABLE: 5}
+
+    def load(self, file_data):
+        """
+        A method to load filters from a json file
+        :param file: the json dicts from the open file
+        :returns: a list of the row details
+        for the log table (exluding the remove button),
+        """
+        data = []
+        for key in file_data.keys():
+            start, end = file_data[key]
+
+            _, y = self._logs.get_sample_log(key).get_original_values()
+
+            y_min = np.min(y)
+            y_max = np.max(y)
+            y_0 = y_min
+            y_N = y_max
+            if start == NONE:
+                load_filter = 'below'
+                if y_min < end < y_max:
+                    y_N = end
+
+            elif end == NONE:
+                load_filter = 'above'
+                if start > y_min:
+                    y_0 = start
+
+            else:
+                load_filter = 'between'
+                y_0 = start
+                y_N = end
+            data.append({self.name_col: 'log_' + self.get_next_row_name,
+                         'sample_log-table': key,
+                         'filter_' + LOG_TABLE: load_filter,
+                         'y0_' + LOG_TABLE: y_0,
+                         'yN_' + LOG_TABLE: y_N,
+                         'magic': load_filter,
+                         'y_min_' + LOG_TABLE: y_min,
+                         'y_max_' + LOG_TABLE: y_max})
+
+        return data

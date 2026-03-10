@@ -270,5 +270,5 @@ class ControlPanePresenter(PresenterTemplate):
         """
         with open(name, 'r') as file:
             data = json.load(file)
-        data, state, cols = self._filter.load(data)
-        return data, state, cols
+        time_data, log_data, state, cols = self._filter.load(data)
+        return time_data, log_data, state, cols

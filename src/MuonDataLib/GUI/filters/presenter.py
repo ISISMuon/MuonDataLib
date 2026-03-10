@@ -21,7 +21,8 @@ class FilterPresenter(PresenterTemplate):
         self._log = LogPresenter()
         self._view = FilterView(self)
         self._data = None
-        self._file_data = []
+        self._time_file_data = []
+        self._log_file_data = []
 
     def show_file(self, name, data):
         """
@@ -34,7 +35,7 @@ class FilterPresenter(PresenterTemplate):
         :param data: the data from the file
         :returns: if to show the name in the GUI
         """
-        if self._file_data == data:
+        if self._time_file_data == data and self._log_file_data == data:
             return False
         return True
 
@@ -66,6 +67,8 @@ class FilterPresenter(PresenterTemplate):
         :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
         """
+        print("moooooo", time_filters)
+        print("moooooo", log_filters)
         if len(time_filters) == 0 and len(log_filters) == 0:
             return
         elif state == 'Exclude':
@@ -153,12 +156,6 @@ class FilterPresenter(PresenterTemplate):
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
-        self.update_filters(time_filters,
-                            state,
-                            log_filters)
-
-        # a bit heavyhanded, but guarantees that the filters can be applied
-        self._data.clear_filters()
         try:
             self.apply_filters(time_filters, state, log_filters)
         except RuntimeError as msg:
@@ -173,10 +170,13 @@ class FilterPresenter(PresenterTemplate):
         :param filters: the dict of the filters
         :returns: the filters and if to include/exclude
         """
-        data, state = self._time.load(filters['time_filters'])
-        self._file_data = data
+        time_data, state = self._time.load(filters['time_filters'])
+        self._time_file_data = time_data
         self._time.set_state(state)
-        return data, state, self.headers
+
+        log_data = self._log.load(filters['sample_log_filters'])
+        print(time_data, log_data)
+        return time_data, log_data, state, self.headers
 
     def update_N_events(self, update, current_str):
         """

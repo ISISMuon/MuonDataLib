@@ -106,6 +106,7 @@ class MainApp(Dash):
         # catching.
         callback([
                   Output('time-table', 'rowData', allow_duplicate=True),
+                  Output('log-table', 'rowData', allow_duplicate=True),
                   Output('dropdown-time', 'value', allow_duplicate=True),
                   Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
