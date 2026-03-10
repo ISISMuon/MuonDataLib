@@ -80,6 +80,26 @@ class ControlPanePresenter(PresenterTemplate):
 
         return self._plot.fig
 
+    def _loop_over_filters(self, func, inc_start, inc_stop, *kargs):
+        self._plot.add_vline(self._plot._min)
+        self._plot.add_vline(inc_start[0])
+        func(self._plot._min, inc_start[0], *kargs)
+
+        for k in range(1, len(inc_start)):
+            self._plot.add_vline(inc_stop[k-1])
+            self._plot.add_vline(inc_start[k])
+            func(inc_stop[k-1], inc_start[k], *kargs)
+
+        self._plot.add_vline(inc_stop[-1])
+        self._plot.add_vline(self._plot._max)
+        func(inc_stop[-1], self._plot._max, *kargs)
+
+    def wrap_add_shaded_region(self, x0, xN, *kargs):
+        self._plot.add_shaded_region(x0, xN)
+
+    def wrap_add_rect(self, x0, xN, y0, yN, ax):
+        self._plot.add_rect(x0, y0, xN, yN, ax)
+
     def add_filters(self, start, stop, log_data):
         if len(start) == 0:
             self._plot.add_shaded_region(self._plot._min,
@@ -92,22 +112,25 @@ class ControlPanePresenter(PresenterTemplate):
         axis[0] = ''
 
         """
-        Need to invert the shading i.e.
-        these are the exclude regions -
-        bug, get small shaded region at start and end with log filters
-        Need to get correct y values
         Remove apply filters from calculate and save (doing it here instead)
         """
+        inc_start, inc_stop = self._filter.get_inc_filters(start, stop)
+
+        if len(log_data) == 0:
+            self._loop_over_filters(self.wrap_add_shaded_region,
+                                    inc_start,
+                                    inc_stop)
+            return
+
         # loop over plots (sample logs)
         for k, ax in enumerate(axis):
-            # loop over filters
-            result = self._filter.get_inc_filters(start, stop, log_data[k])
-            inc_start, inc_stop, y_min, y_max = result
-            for k in range(len(inc_start)):
-                print(k, 'moo', ax, inc_start[k], inc_stop[k])
-                self._plot.add_rect(inc_start[k],
+            y_min, y_max = self._filter.get_log_y_range(log_data[k])
+            self._plot.add_hline(y_min)
+            self._plot.add_hline(y_max)
+            self._loop_over_filters(self.wrap_add_rect,
+                                    inc_start,
+                                    inc_stop,
                                     y_min,
-                                    inc_stop[k],
                                     y_max,
                                     ax)
 

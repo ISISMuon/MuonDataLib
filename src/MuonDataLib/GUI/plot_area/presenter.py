@@ -35,8 +35,19 @@ class PlotAreaPresenter(PresenterTemplate):
         self._min = 1000
         self._max = -1000
 
+    def add_hline(self, value):
+        self.fig.add_hline(y=value,
+                           line_width=2,
+                           line_dash='dash',
+                           line_color='green')
+
+    def add_vline(self, value):
+        self.fig.add_vline(x=value,
+                           line_width=2,
+                           line_dash='dash',
+                           line_color='green')
+
     def add_rect(self, x0, y0, x1, y1, axis):
-        print("trestawst", f'x{axis}')
         self.fig.add_shape(type='rect',
                            xref=f'x{axis}',
                            yref=f'y{axis}',

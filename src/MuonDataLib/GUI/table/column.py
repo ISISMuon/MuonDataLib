@@ -94,7 +94,7 @@ class Column(object):
             col['cellEditor'] = 'agNumberCellEditor'
             col['cellEditorParams'] = {'min': self._min,
                                        'max': self._max,
-                                       'precision': 3}
+                                       'precision': 5}
         elif self.dtype == 'button':
             col['editable'] = False
             col['cellRenderer'] = 'Button'

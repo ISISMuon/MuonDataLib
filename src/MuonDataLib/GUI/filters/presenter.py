@@ -111,23 +111,33 @@ class FilterPresenter(PresenterTemplate):
         start, stop = self._data.get_filters_as_times()
         return start, stop, ''
 
-    def get_inc_filters(self, ex_start, ex_stop, row_log):
+    def get_inc_filters(self, ex_start, ex_end):
+        f_start = [ex_start[0]]
+        f_end = []
+
+        for j in range(len(ex_start)-1):
+            if ex_start[j+1] > ex_end[j]:
+                f_end.append(ex_end[j])
+                f_start.append(ex_start[j+1])
+        f_end.append(ex_end[-1])
+
+        return f_start, f_end
+
+    def get_log_y_range(self, row_log):
         log = self._log._logs.get_sample_log(row_log['sample_log-table'])
         x, y = log.get_original_values()
 
-        f_start = [x[0]]
-        f_stop = [ex_start[0]]
+        f_type = row_log['magic']
+        if f_type == 'between':
+            return row_log['y0_log-table'], row_log['yN_log-table']
 
-        f_start.append(ex_stop[0])
-        for k in range(1, len(ex_stop)):
-            f_stop.append(ex_start[1])
-            f_start.append(ex_stop[1])
+        elif f_type == 'above':
+            return row_log['y0_log-table'], np.max(y)
 
-        f_stop.append(x[-1])
+        elif f_type == 'below':
+            return np.min(y), row_log['yN_log-table']
 
-        print(f_start, ex_start)
-        print(f_stop, ex_stop)
-        return f_start, f_stop, np.min(y), np.max(y)
+        return np.min(y), np.max(y)
 
     def calculate(self, n_clicks, time_filters, state, log_filters):
         """
