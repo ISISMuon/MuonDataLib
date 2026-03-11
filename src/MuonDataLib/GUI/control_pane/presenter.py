@@ -73,8 +73,8 @@ class ControlPanePresenter(PresenterTemplate):
             names = [self._filter._log.get_new_log_name([])]
         self._plot.new_plot(names, self._filter._log._logs)
         start, stop, msg = self._filter.update_filters(time_data,
-                                                         state,
-                                                         log_data)
+                                                       state,
+                                                       log_data)
 
         self.add_filters(start, stop, log_data)
 

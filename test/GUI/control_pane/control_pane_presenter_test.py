@@ -174,7 +174,7 @@ class ControlPanePresenterTest(TestHelper):
         self.presenter.make_plot([], self.log_table, 'Exclude')
 
         self.presenter._plot.new_plot.assert_called_once_with(['Temp', 'B'],
-                                                                self.logs)
+                                                              self.logs)
         self.presenter.add_filters.assert_called_once_with([],
                                                            'log',
                                                            self.log_table)
