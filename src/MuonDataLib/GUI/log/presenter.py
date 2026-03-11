@@ -351,10 +351,10 @@ class LogPresenter(TablePresenter):
                 'sample_log-table': name,
                 'filter_' + LOG_TABLE: default_filter,
                 'y0_' + LOG_TABLE: 0,
-                'yN_' + LOG_TABLE: 10,
+                'yN_' + LOG_TABLE: 1,
                 'magic': default_filter,
                 'y_min_' + LOG_TABLE: 0,
-                'y_max_' + LOG_TABLE: 5}
+                'y_max_' + LOG_TABLE: 1}
 
     def load(self, file_data):
         """

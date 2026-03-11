@@ -56,7 +56,9 @@ class FilterView(ViewTemplate):
 
         callback(Output('title_test', 'hidden'),
                  [Input('title_test', 'children'),
-                  Input('time-table', 'rowData')],
+                  Input('time-table', 'rowData'),
+                  Input('log-table', 'rowData'),
+                  ],
                  prevent_initial_call=True)(presenter.show_file)
 
         callback(Output('N_events', 'children', allow_duplicate=True),

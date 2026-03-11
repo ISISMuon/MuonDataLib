@@ -20,16 +20,49 @@ class FilterPresenterTest(TestHelper):
     def setUp(self):
         self.presenter = FilterPresenter()
 
-    def test_show_file_new(self):
-        data = mock.Mock()
+    def test_show_file_match(self):
         name = 'test.json'
-        self.assertTrue(self.presenter.show_file(name, data))
+        """
+        lets use fake values (should be dicts,
+        but just checks they match)
+        """
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
 
-    def test_show_file_same(self):
-        data = mock.Mock()
+        self.assertFalse(self.presenter.show_file(name, 'time', 'log'))
+
+    def test_show_file_time_match(self):
         name = 'test.json'
-        self.presenter._file_data = data
-        self.assertFalse(self.presenter.show_file(name, data))
+        """
+        lets use fake values (should be dicts,
+        but just checks they match)
+        """
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
+
+        self.assertTrue(self.presenter.show_file(name, 'time', 'new'))
+
+    def test_show_file_log_match(self):
+        name = 'test.json'
+        """
+        lets use fake values (should be dicts,
+        but it just checks the values match)
+        """
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
+
+        self.assertTrue(self.presenter.show_file(name, 'new', 'log'))
+
+    def test_show_file_no_match(self):
+        name = 'test.json'
+        """
+        lets use fake values (should be dicts,
+        but just checks they match)
+        """
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
+
+        self.assertTrue(self.presenter.show_file(name, 'unit', 'test'))
 
     def test_headers(self):
         self.assertEqual(len(self.presenter.headers), 3)
@@ -66,7 +99,8 @@ class FilterPresenterTest(TestHelper):
         filters = []
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
-                                     'Include')
+                                     'Include',
+                                     [])
         result = self.presenter._data.report_filters()
 
         expect = [0, {}, {}, {}]
@@ -82,7 +116,8 @@ class FilterPresenterTest(TestHelper):
 
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
-                                     'Include')
+                                     'Include',
+                                     [])
         result = self.presenter._data.report_filters()
 
         expect = [0,
@@ -102,9 +137,9 @@ class FilterPresenterTest(TestHelper):
 
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
-                                     'Exclude')
+                                     'Exclude',
+                                     [])
         result = self.presenter._data.report_filters()
-
         expect = [0,
                   {},
                   {},
@@ -115,58 +150,46 @@ class FilterPresenterTest(TestHelper):
 
     def test_calculate_no_filters(self):
         self.presenter._data = load_events(FILE, 64)
-        clear = mock.Mock()
-        self.presenter._data.clear_filters = clear
-        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude')
-        self.assertEqual(clear.call_count, 1)
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [])
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 64,147')
 
     def test_calculate_with_exclude_filter(self):
         self.presenter._data = load_events(FILE, 64)
-        clear = mock.Mock()
-        self.presenter._data.clear_filters = clear
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude')
-        self.assertEqual(clear.call_count, 1)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude', [])
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 57,653')
 
     def test_calculate_with_include_filter(self):
         self.presenter._data = load_events(FILE, 64)
-        clear = mock.Mock()
-        self.presenter._data.clear_filters = clear
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include')
-        self.assertEqual(clear.call_count, 1)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [])
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 5,037')
 
     def test_calculate_with_error(self):
-        def throw(filters, state):
+        def throw(filters, state, log):
             raise RuntimeError("mock throw")
 
         self.presenter._data = load_events(FILE, 64)
-        clear = mock.Mock()
-        self.presenter._data.clear_filters = clear
         self.presenter.apply_filters = mock.Mock(side_effect=throw)
         filters = [{'Name_t': 'unit', 'Start_t': 0.1, 'End_t': 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include')
-        self.assertEqual(clear.call_count, 1)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [])
         self.assertEqual(err_msg, 'mock throw')
         self.assertEqual(N_str.children,
                          'Number of events: 0')
 
     def test_load_include(self):
         filters = {'peak_property': {'Amplitudes': 1.2}}
-        filters['sample_log_filters'] = []
+        filters['sample_log_filters'] = {}
         filters['time_filters'] = {'keep_filters': {'unit': [1, 2],
                                                     'test': [3, 4]},
                                    'remove_filters': {}}
-        data, state, headers = self.presenter.load(filters)
+        data, logs, state, headers = self.presenter.load(filters)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'unit',
@@ -175,15 +198,16 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(data[1], {'Name' + TT: 'test',
                                    'Start' + TT: 3,
                                    'End' + TT: 4})
+        self.assertEqual(logs, [])
         self.assertEqual(len(headers), 3)
 
     def test_load_exclude(self):
         filters = {'peak_property': {'Amplitudes': 1.2}}
-        filters['sample_log_filters'] = []
+        filters['sample_log_filters'] = {}
         filters['time_filters'] = {'keep_filters': {},
                                    'remove_filters': {'more': [5, 6],
                                                       'tests': [7, 8]}}
-        data, state, headers = self.presenter.load(filters)
+        data, logs, state, headers = self.presenter.load(filters)
         self.assertEqual(state, 'Exclude')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'more',
@@ -192,6 +216,7 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(data[1], {'Name' + TT: 'tests',
                                    'Start' + TT: 7,
                                    'End' + TT: 8})
+        self.assertEqual(logs, [])
         self.assertEqual(len(headers), 3)
 
     def test_load_fail(self):

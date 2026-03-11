@@ -24,7 +24,7 @@ class FilterPresenter(PresenterTemplate):
         self._time_file_data = []
         self._log_file_data = []
 
-    def show_file(self, name, data):
+    def show_file(self, name, time_data, log_data):
         """
         If to display the name of the loaded
         filter file. This method chekcs
@@ -35,7 +35,8 @@ class FilterPresenter(PresenterTemplate):
         :param data: the data from the file
         :returns: if to show the name in the GUI
         """
-        if self._time_file_data == data and self._log_file_data == data:
+        if (self._time_file_data == time_data and
+                self._log_file_data == log_data):
             return False
         return True
 
@@ -67,8 +68,6 @@ class FilterPresenter(PresenterTemplate):
         :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
         """
-        print("moooooo", time_filters)
-        print("moooooo", log_filters)
         if len(time_filters) == 0 and len(log_filters) == 0:
             return
         elif state == 'Exclude':
@@ -175,7 +174,8 @@ class FilterPresenter(PresenterTemplate):
         self._time.set_state(state)
 
         log_data = self._log.load(filters['sample_log_filters'])
-        print(time_data, log_data)
+        self._log_file_data = log_data
+        print('loading....#', time_data, log_data)
         return time_data, log_data, state, self.headers
 
     def update_N_events(self, update, current_str):

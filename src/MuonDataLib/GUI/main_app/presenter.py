@@ -96,7 +96,7 @@ class MainAppPresenter(object):
             return time_data, log_data, state, cols, ''
         except Exception as err:
             cols = self.control.headers
-            return [], 'Exclude', cols, f'Load filter error: {err}'
+            return [], [], 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
         """
