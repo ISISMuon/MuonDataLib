@@ -351,12 +351,10 @@ cdef class Events:
         cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef double[:] f_start, f_end
-
-        if len(self.filter_start.keys())>0:
+        if len(self.filter_start.keys()) == 0:
             return [], [], []
         f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
         f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
-
         # calculate the frames that are excluded by the filter
         f_i_start, f_i_end = get_indices(frame_times,
                                          ns_to_s*np.asarray(f_start),

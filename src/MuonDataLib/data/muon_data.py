@@ -155,15 +155,7 @@ class MuonEventData(MuonData):
         times = self.get_frame_start_times()
         start_times = np.asarray([times[t] for t in fi_s])
         end_times = np.asarray([times[t] for t in fi_e])
-        """
-        cleans up the cache to stop trying to add multiple
-        filters of the same name
-        Could we remove this? - if we add/apply
-        filters as part of the table updates (a bit of
-        a pain for connecting to the plot)
-        then that step could be skipped when
-        calculating/saving histograms
-        """
+
         self.clear_filters()
         return start_times, end_times
 
