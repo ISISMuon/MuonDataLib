@@ -39,13 +39,13 @@ class PlotAreaPresenter(PresenterTemplate):
         self.fig.add_hline(y=value,
                            line_width=2,
                            line_dash='dash',
-                           line_color='green')
+                           line_color='gray')
 
     def add_vline(self, value):
         self.fig.add_vline(x=value,
                            line_width=2,
                            line_dash='dash',
-                           line_color='green')
+                           line_color='gray')
 
     def add_rect(self, x0, y0, x1, y1, axis):
         self.fig.add_shape(type='rect',
@@ -55,7 +55,7 @@ class PlotAreaPresenter(PresenterTemplate):
                            y0=y0,
                            x1=x1,
                            y1=y1,
-                           fillcolor='RoyalBlue',
+                           fillcolor='PaleGreen',
                            opacity=0.3,
                            layer='above',
                            line={'color': 'black',

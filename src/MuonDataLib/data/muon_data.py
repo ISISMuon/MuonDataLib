@@ -150,8 +150,15 @@ class MuonEventData(MuonData):
         self._filter_logs()
 
     def get_filters_as_times(self):
+        """
+        Gets the exclude filter's start and end
+        times in seconds.
+        :returns: the start times for the exclude
+        filters,
+        the end times for the exclude filters
+        """
         self._filters()
-        fi_s, fi_e, rm = self._events.get_exclude_windows()
+        fi_s, fi_e, _ = self._events.get_exclude_windows()
         times = self.get_frame_start_times()
         start_times = np.asarray([times[t] for t in fi_s])
         end_times = np.asarray([times[t] for t in fi_e])

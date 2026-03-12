@@ -58,7 +58,8 @@ class ControlPanePresenter(PresenterTemplate):
         """
         This method creates a plot.
         If no sample logs are selected, it will just plot a
-        default.
+        default. The plot will include shaded regions
+        for the data that is kept.
         :param time_data: the data from the time filter table
         :param log_data: the data from the sample log filter table.
         Its also used to get which plots to make.
@@ -80,43 +81,71 @@ class ControlPanePresenter(PresenterTemplate):
 
         return self._plot.fig
 
-    def _loop_over_filters(self, func, inc_start, inc_stop, *kargs):
-        self._plot.add_vline(self._plot._min)
-        self._plot.add_vline(inc_start[0])
-        func(self._plot._min, inc_start[0], *kargs)
+    def _loop_over_filters(self, func, f_start, f_stop, *kwargs):
+        """
+        This loops over the exclude filter start and end times
+        and creates the plot. Including shaded regions for
+        the data that is kept.
+        :param func: The plotting function to be used
+        :param f_start: the start times for the exclude filter
+        :param f_end: the end times for the exclude filter
+        :param kwargs: additional arguments for func
+        """
+        func(self._plot._min, f_start[0], *kwargs)
 
-        for k in range(1, len(inc_start)):
-            self._plot.add_vline(inc_stop[k-1])
-            self._plot.add_vline(inc_start[k])
-            func(inc_stop[k-1], inc_start[k], *kargs)
+        for k in range(1, len(f_start)):
+            func(f_stop[k-1], f_start[k], *kwargs)
 
-        self._plot.add_vline(inc_stop[-1])
-        self._plot.add_vline(self._plot._max)
-        func(inc_stop[-1], self._plot._max, *kargs)
+        func(f_stop[-1], self._plot._max, *kwargs)
 
     def wrap_add_shaded_region(self, x0, xN, *kargs):
+        """
+        A wrapper for adding a shaded region (only
+        time filters).
+        :param x0: the start x value
+        :param xN: the end x value
+        :param kwargs: extra arguments, not used
+        """
         self._plot.add_shaded_region(x0, xN)
 
     def wrap_add_rect(self, x0, xN, y0, yN, ax):
+        """
+        A wrapper for adding a shaded recrangle (if
+        using at least one log filter).
+        :param x0: the start x value
+        :param xN: the end x value
+        :param y0: the start y value
+        :param yN: the end y value
+        :param ax: the axis to add the rectangle to
+        """
         self._plot.add_rect(x0, y0, xN, yN, ax)
 
     def add_filters(self, start, stop, log_data):
+        """
+        This gets the filters for that data,
+        as defined by the tables, and plots
+        shaded regions corresponding to the
+        kept data.
+        :param start: the start times for the filters
+        :param end: the end times for the filters
+        :param log_data: the log values from
+        the sample log table.
+        """
         if len(start) == 0:
+            # no filters
             self._plot.add_shaded_region(self._plot._min,
                                          self._plot._max)
             return
+
         N = len(log_data) if len(log_data) > 0 else 1
         axis = [str(k + 1) for k in range(N)]
 
         #  first axis has no number, second is number 2
         axis[0] = ''
 
-        """
-        Remove apply filters from calculate and save (doing it here instead)
-        """
         inc_start, inc_stop = self._filter.get_inc_filters(start, stop)
-
         if len(log_data) == 0:
+            # If only have time filters
             self._loop_over_filters(self.wrap_add_shaded_region,
                                     inc_start,
                                     inc_stop)
@@ -265,7 +294,8 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the data, the state for the time filter (include/exclude)
+        :returns: the time table data, the log table data,
+        and the state for the time filter (include/exclude)
         and the column headers
         """
         with open(name, 'r') as file:
