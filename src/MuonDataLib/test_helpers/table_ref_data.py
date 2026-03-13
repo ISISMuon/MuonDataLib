@@ -7,7 +7,8 @@ VALID_DTYPES = ['text', 'numeric', 'button']
 def expected_col_dict(dtype, ID='unit', name='test'):
     col = {'field': ID,
            'headerName': name,
-           'width': 100}
+           'width': 100,
+           'hide': False}
     if dtype == 'text':
         col['cellEditor'] = 'agLargeTextCellEditor'
         col['cellEditorPopup'] = False
@@ -16,9 +17,9 @@ def expected_col_dict(dtype, ID='unit', name='test'):
 
     elif dtype == 'numeric':
         col['cellEditor'] = 'agNumberCellEditor'
-        col['cellEditorParams'] = {'min': 0,
-                                   'max': 1000,
-                                   'precision': 3}
+        col['cellEditorParams'] = {'min': -1000000,
+                                   'max': 1000000,
+                                   'precision': 5}
         col['editable'] = True
     elif dtype == 'button':
         col['editable'] = False

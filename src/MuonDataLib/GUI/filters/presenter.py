@@ -2,6 +2,7 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.filters.view import FilterView
+import numpy as np
 
 
 class FilterPresenter(PresenterTemplate):
@@ -20,9 +21,10 @@ class FilterPresenter(PresenterTemplate):
         self._log = LogPresenter()
         self._view = FilterView(self)
         self._data = None
-        self._file_data = []
+        self._time_file_data = []
+        self._log_file_data = []
 
-    def show_file(self, name, data):
+    def show_file(self, name, time_data, log_data):
         """
         If to display the name of the loaded
         filter file. This method chekcs
@@ -30,10 +32,14 @@ class FilterPresenter(PresenterTemplate):
         so if you alter it and then change it
         back the file name will reappear.
         :param name: the name of the file
-        :param data: the data from the file
+        :param time_data: the data from the
+        time filter table
+        :param log_data: the log data for the
+        log filter table
         :returns: if to show the name in the GUI
         """
-        if self._file_data == data:
+        if (self._time_file_data == time_data and
+                self._log_file_data == log_data):
             return False
         return True
 
@@ -56,48 +62,145 @@ class FilterPresenter(PresenterTemplate):
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)
 
-    def apply_filters(self, filters, state):
+    def apply_filters(self, time_filters, state, log_filters):
         """
         A method to apply the filters to the
         muon event data object. This allows
         for the user to state if the time
         window is included or excluded.
-        :param filters: A list of filters (dicts)
+        :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
+        :param log_filters: a list of log filters
         """
-        if len(filters) == 0:
+        if len(time_filters) == 0 and len(log_filters) == 0:
+            # if no filters, do nothing
             return
+
         elif state == 'Exclude':
-            for filter_details in filters:
+            # exclude time filters
+            for filter_details in time_filters:
                 self._data.remove_data_time_between(
                         filter_details['Name_time-table'],
                         filter_details['Start_time-table'],
                         filter_details['End_time-table'])
         else:
-            for filter_details in filters:
+            # include time filters
+            for filter_details in time_filters:
                 self._data.only_keep_data_time_between(
                         filter_details['Name_time-table'],
                         filter_details['Start_time-table'],
                         filter_details['End_time-table'])
 
-    def calculate(self, n_clicks, filters, state):
+        for filter_details in log_filters:
+            # loop over log filters
+            filter_type = filter_details['filter_log-table']
+            sample_log = filter_details['sample_log-table']
+            start = filter_details['y0_log-table']
+            stop = filter_details['yN_log-table']
+
+            if filter_type == 'between':
+                self._data.keep_data_sample_log_between(sample_log,
+                                                        start,
+                                                        stop)
+            elif filter_type == 'above':
+                self._data.keep_data_sample_log_above(sample_log,
+                                                      start)
+            elif filter_type == 'below':
+                self._data.keep_data_sample_log_below(sample_log,
+                                                      stop)
+
+    def update_filters(self, time_filters, state, log_filters):
+        """
+        Gets the updated start and stop times for the
+        exclude filters. The first step is a bit
+        heavy handed, but it makes sure that we
+        have no repeated names for the filters
+        by clearning all of them.
+        :param time_filters: the data from the time
+        filter table
+        :param state: the state (include or exclude)
+        for the time filter table
+        :param log_filters: the data from the sample
+        log filter table
+        :returns: a list of the exclude filter start times,
+        a list of the exclude filter end times,
+        an error message.
+        """
+        self._data.clear_filters()
+        if len(time_filters) == 0 and len(log_filters) == 0:
+            return [], [], ''
+        try:
+            self.apply_filters(time_filters, state, log_filters)
+        except RuntimeError as msg:
+            return [], [], str(msg)
+        start, stop = self._data.get_filters_as_times()
+        return start, stop, ''
+
+    def get_inc_filters(self, ex_start, ex_end):
+        """"
+        This converts the exclude filter times
+        into times for an inclusive filter. i.e.
+        these are the inverse of each other.
+        :param ex_start: the exclude start times
+        :param ex_end: the exclude end times
+        :returns: the start and end values
+        to keep data between (include filter).
+        """
+        f_start = [ex_start[0]]
+        f_end = []
+
+        for j in range(len(ex_start)-1):
+            if ex_start[j+1] > ex_end[j]:
+                f_end.append(ex_end[j])
+                f_start.append(ex_start[j+1])
+        f_end.append(ex_end[-1])
+
+        return f_start, f_end
+
+    def get_log_y_range(self, row_log):
+        """
+        Gets the min and max y values according to
+        the sample log filter table. e.g. if an above
+        filter it will give the threshold from the
+        table and the maximum y value.
+        :param row_log: a row from the log filter
+        table
+        :returns: the smallest and largest y values for
+        the filter
+        """
+        log = self._log._logs.get_sample_log(row_log['sample_log-table'])
+        x, y = log.get_original_values()
+
+        f_type = row_log['magic']
+        if f_type == 'between':
+            return row_log['y0_log-table'], row_log['yN_log-table']
+
+        elif f_type == 'above':
+            return row_log['y0_log-table'], np.max(y)
+
+        elif f_type == 'below':
+            return np.min(y), row_log['yN_log-table']
+
+        return np.min(y), np.max(y)
+
+    def calculate(self, n_clicks, time_filters, state, log_filters):
         """
         A method to calculate the number of
         events that would be used to make
         the histogram.
         :param n_clicks: the number of button
         presses for the calculate button
-        :param filters: the list of time
+        :param time_filters: the list of time
         filters
         :param state: If to include or exclude the
         data.
+        :param log_filters: the data from the
+        sample log filter table
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
-        # a bit heavyhanded, but guarantees that the filters can be applied
-        self._data.clear_filters()
         try:
-            self.apply_filters(filters, state)
+            self.apply_filters(time_filters, state, log_filters)
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram()
@@ -108,12 +211,18 @@ class FilterPresenter(PresenterTemplate):
         """
         Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
-        :returns: the filters and if to include/exclude
+        :returns: the time filters, the sample log
+        filters and if to include/exclude the time filters,
+        the time filter table headers
         """
-        data, state = self._time.load(filters['time_filters'])
-        self._file_data = data
+        time_data, state = self._time.load(filters['time_filters'])
+        self._time_file_data = time_data
         self._time.set_state(state)
-        return data, state, self.headers
+
+        log_data = self._log.load(filters['sample_log_filters'])
+        self._log_file_data = log_data
+        print('loading....#', time_data, log_data)
+        return time_data, log_data, state, self.headers
 
     def update_N_events(self, update, current_str):
         """

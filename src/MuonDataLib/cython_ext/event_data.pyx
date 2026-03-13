@@ -182,7 +182,7 @@ cdef class Events:
         """
         A method to inspect the data (e.g. Ampltiudes),
         which describes the properties of the event
-        peaks. 
+        peaks.
         :param name: the name of the property
         :returns: the histogram of the requested property,
         and the bin edges.
@@ -191,7 +191,7 @@ cdef class Events:
 
     def clear_thresholds(self):
         """
-        A method to reset all of the filters 
+        A method to reset all of the filters
         on the peak properties.
         """
         self.threshold = {"Amplitudes": 0.0}
@@ -199,8 +199,8 @@ cdef class Events:
 
     def set_threshold(self, str name, double value):
         """
-        A method to set the filter/threshold for 
-        a peak property. 
+        A method to set the filter/threshold for
+        a peak property.
         :param name: the name of the property
         :param value: the value for the threshold/filter.
         """
@@ -345,6 +345,45 @@ cdef class Events:
         _, frames = np.unique(self.periods, return_counts=True)
         return np.asarray(frames, dtype=np.int32)
 
+
+    def get_exclude_windows(self):
+        """
+        This is a method for gettin the
+        excluded times for the filters.
+        This includes a check for an empty filter.
+        :returns: the start times for the exluded data,
+        the end times for the excluded data,
+        the removed frames for each period.
+        """
+        if len(self.filter_start.keys()) == 0:
+            return [], [], []
+        return self._get_exclude_windows()
+
+    def _get_exclude_windows(self):
+        """
+        This is a method for gettin the
+        excluded times for the filters.
+        This includes a check for an empty filter.
+        :returns: the start times for the exluded data,
+        the end times for the excluded data,
+        the removed frames for each period.
+        """
+        cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
+        cdef int[:] f_i_start, f_i_end
+        cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
+        cdef double[:] f_start, f_end
+        f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
+        f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
+        # calculate the frames that are excluded by the filter
+        f_i_start, f_i_end = get_indices(frame_times,
+                                         ns_to_s*np.asarray(f_start),
+                                         ns_to_s*np.asarray(f_end),
+                                         'frame start time',
+                                         'seconds')
+        f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
+        return f_i_start, f_i_end, rm_frames
+
+
     def _get_filtered_data(self, frame_times):
         """
         A method to get the information about the applied filters.
@@ -359,21 +398,11 @@ cdef class Events:
         cdef int[:] IDs, f_i_start, f_i_end
         cdef int[:] periods
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-        cdef double[:] times, f_start, f_end, amps
+        cdef double[:] times, amps
 
         if len(self.filter_start.keys())>0:
-            # sort the filter data
-            f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
-            f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
+            f_i_start, f_i_end, rm_frames = self._get_exclude_windows()#rm_overlaps(f_i_start, f_i_end, self.periods)
 
-            # calculate the frames that are excluded by the filter
-            f_i_start, f_i_end = get_indices(frame_times,
-                                             ns_to_s*np.asarray(f_start),
-                                             ns_to_s*np.asarray(f_end),
-                                             'frame start time',
-                                             'seconds')
-            f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
-            # remove the filtered data from the event lists
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
             amps = good_values_double(f_i_start, f_i_end, self.start_index_list,

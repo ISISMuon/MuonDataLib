@@ -22,9 +22,11 @@ class Column(object):
             self.name = name
             self.dtype = dtype
             self._editable = True
+            self._con = None
+            self._hide = False
             # set default range for numeric data
-            self._min = 0
-            self._max = 1000
+            self._min = -1e6
+            self._max = 1e6
             # set default button values (delete)
             self._icon = 'bi bi-trash me-2'
             self._className = 'btn btn-danger'
@@ -65,6 +67,29 @@ class Column(object):
         else:
             raise RuntimeError('Cannot set col range for non-numeric dtype')
 
+    def set_condition(self, condition):
+        """
+        This sets conditions for the cells.
+        e.g.
+
+        {"styleConditions": [
+            {"condition": "params.data.magic == 'below'",
+             "style": {"backgroundColor": "black"}},
+            ],
+            "defaultStyle": {"backgroundColor": "white"}
+        }
+
+        :param condition: the condition to add to the cell.
+        Set to None to remove a condition.
+        """
+        self._con = condition
+
+    def hide(self):
+        """
+        hides the column
+        """
+        self._hide = True
+
     @property
     def get_column_dict(self):
         """
@@ -75,7 +100,8 @@ class Column(object):
         col = {'field': self.ID,
                'headerName': self.name,
                'width': 100,
-               'editable': self._editable}
+               'editable': self._editable,
+               'hide': self._hide}
         if self.dtype == 'text':
             col['cellEditor'] = 'agLargeTextCellEditor'
             col['cellEditorPopup'] = False
@@ -85,12 +111,15 @@ class Column(object):
             col['cellEditor'] = 'agNumberCellEditor'
             col['cellEditorParams'] = {'min': self._min,
                                        'max': self._max,
-                                       'precision': 3}
+                                       'precision': 5}
         elif self.dtype == 'button':
             col['editable'] = False
             col['cellRenderer'] = 'Button'
             col['cellRendererParams'] = {'Icon': self._icon,
                                          'className': self._className}
+
+        if self._con is not None:
+            col['cellStyle'] = self._con
         return col
 
     @property
@@ -101,6 +130,53 @@ class Column(object):
         """
         if self.dtype == 'numeric':
             return True
+        return False
+
+
+class DropDownColumn(Column):
+    """
+    A simple class for creating a dropdown
+    columns for a dash data ag-table.
+    This needs to be cleaned up along
+    with the above.
+    """
+    def __init__(self, ID, name, options):
+        """
+        Create the details for the column.
+        The min and max are only for the numeric
+        data type and provide the limits
+        for the values that can be entered.
+        :param ID: the ID for the column
+        :param name: the displayed name in the
+        column.
+        :param options: the options for the drop
+        down menu
+        """
+        self.ID = ID
+        self.name = name
+        self._options = options
+
+    @property
+    def get_column_dict(self):
+        """
+        This method generates a dict
+        for the config of the column.
+        :returns: the dict of the config
+        """
+        col = {'field': self.ID,
+               'headerName': self.name,
+               "cellEditor": "agSelectCellEditor",
+               "cellEditorParams": {"values": ["above", "between", "below"]},
+               'singleClickEdit': True,
+               'width': 100}
+        return col
+
+    @property
+    def is_numeric(self):
+        """
+        Checks if a cell is numeric
+        :returns: a bool for if its numeric.
+        """
         return False
 
 

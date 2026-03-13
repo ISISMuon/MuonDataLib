@@ -115,8 +115,8 @@ class TableColumnsTest(TestHelper):
                             self.assertEqual(col._max, 4.7)
                         else:
                             # if not numeric these never update (or used)
-                            self.assertEqual(col._min, 0)
-                            self.assertEqual(col._max, 1000.0)
+                            self.assertEqual(col._min, -1e6)
+                            self.assertEqual(col._max, 1e6)
 
     def test_get_column_dict(self):
         names = ['test', 'more']
