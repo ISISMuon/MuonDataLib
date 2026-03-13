@@ -36,18 +36,38 @@ class PlotAreaPresenter(PresenterTemplate):
         self._max = -1000
 
     def add_hline(self, value):
+        """
+        Adds a horizontal line at
+        value.
+        :param value: the y value to
+        place the line at
+        """
         self.fig.add_hline(y=value,
                            line_width=2,
                            line_dash='dash',
                            line_color='gray')
 
     def add_vline(self, value):
+        """
+        Adds a vertical line at
+        value.
+        :param value: the y value to
+        place the line at
+        """
         self.fig.add_vline(x=value,
                            line_width=2,
                            line_dash='dash',
                            line_color='gray')
 
     def add_rect(self, x0, y0, x1, y1, axis):
+        """
+        Adds a rectangle to a specific subplot.
+        :param x0: the x value for the bottom left corner
+        :param y0: the y value for the bottom left corner
+        :param x1: the x value for the top right corner
+        :param y1: the y value for the top right corner
+        :param axis: the subplot to add the rectanlge to
+        """
         self.fig.add_shape(type='rect',
                            xref=f'x{axis}',
                            yref=f'y{axis}',
@@ -162,9 +182,11 @@ class PlotAreaPresenter(PresenterTemplate):
             self.fig.update_traces(hoverinfo='none')
             self.fig.update_yaxes(title_text=name, row=i+1, col=1)
             # manually set y limits for subplots
-            diff = np.max(y_list[i]) - np.min(y_list[i])
-            dy = diff*0.03
-            self.fig.update_yaxes(range=[np.min(y_list[i]) - dy,
-                                         dy + np.max(y_list[i])],
+            y_min = np.min(y_list[i])
+            y_max = np.max(y_list[i])
+            # padding for the plot of 3% of the data range
+            dy = (y_max - y_min)*0.03
+            self.fig.update_yaxes(range=[y_min - dy,
+                                         y_max + dy],
                                   row=i+1)
         return self.fig

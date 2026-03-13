@@ -55,7 +55,6 @@ class LogPresenter(TablePresenter):
         magic = Column('magic', '', 'text')
         magic.hide()
 
-        # these nees to conditional formatting
         filter_start = Column('y0_' + LOG_TABLE, 'Keep data from', 'numeric')
         filter_end = Column('yN_' + LOG_TABLE, 'Keep data to', 'numeric')
 
@@ -73,6 +72,7 @@ class LogPresenter(TablePresenter):
             "defaultStyle": {"backgroundColor": "white"}
                  })
 
+        # want the min and max y values in the row data to make it easier.
         y_min = Column('y_min_' + LOG_TABLE, 'y min', 'numeric')
         y_min.hide()
         y_max = Column('y_max_' + LOG_TABLE, 'y max', 'numeric')
@@ -108,7 +108,17 @@ class LogPresenter(TablePresenter):
         self._logs = logs
 
     def validate_row(self, change, data):
-
+        """
+        This checks if the new row values are valid.
+        It will also keep the 'magic' column in sync
+        with the dropdown selection.
+        :param change: a dict of information on the
+        changed row
+        :param data: the data from the sample log
+        filter table.
+        :returns: the updated sample log table and
+        an error message
+        """
         changed = change[0]
         col_name = changed['colId']
         row = changed['data']
@@ -116,10 +126,6 @@ class LogPresenter(TablePresenter):
         msg = ''
         new_value = row[col_name]
 
-        """
-        need to add code to deal with above/below being
-        able to set values below/above the other filter value
-        """
         f_type = row['magic']
         y_min = row['y_min_' + LOG_TABLE]
         y_max = row['y_max_' + LOG_TABLE]
@@ -185,7 +191,6 @@ class LogPresenter(TablePresenter):
             col_name = 'magic'
 
         data[changed['rowIndex']][col_name] = new_value
-        # validate the filter range
 
         return data, msg
 
@@ -359,6 +364,9 @@ class LogPresenter(TablePresenter):
     def load(self, file_data):
         """
         A method to load filters from a json file
+        If the filter values are outside of the data
+        range, they will be updated to be within the
+        range of possible y values.
         :param file: the json dicts from the open file
         :returns: a list of the row details
         for the log table (exluding the remove button),

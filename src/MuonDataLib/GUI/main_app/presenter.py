@@ -82,6 +82,7 @@ class MainAppPresenter(object):
         :param name: The name of the filter file
         :param debug: If debug mode is on or off
         :returns: The list of rows for the time filter table,
+        the list of rows for the sample log filter table,
         the state of the time filters (include/exclude),
         the column headers
         and an error message (if it fails)
@@ -120,6 +121,8 @@ class MainAppPresenter(object):
         :param time_filters: the time filters (list of dicts) to use
         :param time_mode: If the time filters are to include
         or exclude the data
+        :param log_filters: the data from the sample log
+        filter table
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message

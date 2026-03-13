@@ -32,7 +32,10 @@ class FilterPresenter(PresenterTemplate):
         so if you alter it and then change it
         back the file name will reappear.
         :param name: the name of the file
-        :param data: the data from the file
+        :param time_data: the data from the
+        time filter table
+        :param log_data: the log data for the
+        log filter table
         :returns: if to show the name in the GUI
         """
         if (self._time_file_data == time_data and
@@ -67,16 +70,21 @@ class FilterPresenter(PresenterTemplate):
         window is included or excluded.
         :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
+        :param log_filters: a list of log filters
         """
         if len(time_filters) == 0 and len(log_filters) == 0:
+            # if no filters, do nothing
             return
+
         elif state == 'Exclude':
+            # exclude time filters
             for filter_details in time_filters:
                 self._data.remove_data_time_between(
                         filter_details['Name_time-table'],
                         filter_details['Start_time-table'],
                         filter_details['End_time-table'])
         else:
+            # include time filters
             for filter_details in time_filters:
                 self._data.only_keep_data_time_between(
                         filter_details['Name_time-table'],
@@ -84,7 +92,7 @@ class FilterPresenter(PresenterTemplate):
                         filter_details['End_time-table'])
 
         for filter_details in log_filters:
-
+            # loop over log filters
             filter_type = filter_details['filter_log-table']
             sample_log = filter_details['sample_log-table']
             start = filter_details['y0_log-table']
@@ -102,7 +110,22 @@ class FilterPresenter(PresenterTemplate):
                                                       stop)
 
     def update_filters(self, time_filters, state, log_filters):
-        # a bit heavyhanded, but guarantees that the filters can be applied
+        """
+        Gets the updated start and stop times for the
+        exclude filters. The first step is a bit
+        heavy handed, but it makes sure that we
+        have no repeated names for the filters
+        by clearning all of them.
+        :param time_filters: the data from the time
+        filter table
+        :param state: the state (include or exclude)
+        for the time filter table
+        :param log_filters: the data from the sample
+        log filter table
+        :returns: a list of the exclude filter start times,
+        a list of the exclude filter end times,
+        an error message.
+        """
         self._data.clear_filters()
         if len(time_filters) == 0 and len(log_filters) == 0:
             return [], [], ''
@@ -114,6 +137,15 @@ class FilterPresenter(PresenterTemplate):
         return start, stop, ''
 
     def get_inc_filters(self, ex_start, ex_end):
+        """"
+        This converts the exclude filter times
+        into times for an inclusive filter. i.e.
+        these are the inverse of each other.
+        :param ex_start: the exclude start times
+        :param ex_end: the exclude end times
+        :returns: the start and end values
+        to keep data between (include filter).
+        """
         f_start = [ex_start[0]]
         f_end = []
 
@@ -126,6 +158,16 @@ class FilterPresenter(PresenterTemplate):
         return f_start, f_end
 
     def get_log_y_range(self, row_log):
+        """
+        Gets the min and max y values according to
+        the sample log filter table. e.g. if an above
+        filter it will give the threshold from the
+        table and the maximum y value.
+        :param row_log: a row from the log filter
+        table
+        :returns: the smallest and largest y values for
+        the filter
+        """
         log = self._log._logs.get_sample_log(row_log['sample_log-table'])
         x, y = log.get_original_values()
 
@@ -152,6 +194,8 @@ class FilterPresenter(PresenterTemplate):
         filters
         :param state: If to include or exclude the
         data.
+        :param log_filters: the data from the
+        sample log filter table
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
@@ -167,7 +211,9 @@ class FilterPresenter(PresenterTemplate):
         """
         Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
-        :returns: the filters and if to include/exclude
+        :returns: the time filters, the sample log
+        filters and if to include/exclude the time filters,
+        the time filter table headers
         """
         time_data, state = self._time.load(filters['time_filters'])
         self._time_file_data = time_data

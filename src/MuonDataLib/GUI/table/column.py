@@ -68,9 +68,26 @@ class Column(object):
             raise RuntimeError('Cannot set col range for non-numeric dtype')
 
     def set_condition(self, condition):
+        """
+        This sets conditions for the cells.
+        e.g.
+
+        {"styleConditions": [
+            {"condition": "params.data.magic == 'below'",
+             "style": {"backgroundColor": "black"}},
+            ],
+            "defaultStyle": {"backgroundColor": "white"}
+        }
+
+        :param condition: the condition to add to the cell.
+        Set to None to remove a condition.
+        """
         self._con = condition
 
     def hide(self):
+        """
+        hides the column
+        """
         self._hide = True
 
     @property
@@ -118,10 +135,10 @@ class Column(object):
 
 class DropDownColumn(Column):
     """
-    A simple class for creating columns for
-    a dash data ag-table. This stores the extra
-    information (e.g. dropdowns, validation,
-    conditional formating).
+    A simple class for creating a dropdown
+    columns for a dash data ag-table.
+    This needs to be cleaned up along
+    with the above.
     """
     def __init__(self, ID, name, options):
         """
@@ -132,8 +149,8 @@ class DropDownColumn(Column):
         :param ID: the ID for the column
         :param name: the displayed name in the
         column.
-        :param dtype: the data type for the column
-        (allowed values; text, numeric, button)
+        :param options: the options for the drop
+        down menu
         """
         self.ID = ID
         self.name = name
@@ -142,7 +159,7 @@ class DropDownColumn(Column):
     @property
     def get_column_dict(self):
         """
-        Thos method generates a dict
+        This method generates a dict
         for the config of the column.
         :returns: the dict of the config
         """
