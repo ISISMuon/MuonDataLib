@@ -136,7 +136,7 @@ class FilterPresenter(PresenterTemplate):
         start, stop = self._data.get_filters_as_times()
         return start, stop, ''
 
-    def get_inc_filters(self, ex_start, ex_end):
+    def filters_rm_overlaps(self, ex_start, ex_end):
         """"
         This converts the exclude filter times
         into times for an inclusive filter. i.e.

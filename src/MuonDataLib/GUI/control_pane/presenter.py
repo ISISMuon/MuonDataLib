@@ -92,7 +92,6 @@ class ControlPanePresenter(PresenterTemplate):
         :param kwargs: additional arguments for func
         """
         func(self._plot._min, f_start[0], *kwargs)
-
         for k in range(1, len(f_start)):
             func(f_stop[k-1], f_start[k], *kwargs)
 
@@ -127,14 +126,16 @@ class ControlPanePresenter(PresenterTemplate):
         shaded regions corresponding to the
         kept data.
         :param start: the start times for the filters
+        (both time and log)
         :param end: the end times for the filters
+        (both time and log)
         :param log_data: the log values from
         the sample log table.
         """
         if len(start) == 0:
             # no filters
-            self._plot.add_shaded_region(self._plot._min,
-                                         self._plot._max)
+            self.wrap_add_shaded_region(self._plot._min,
+                                        self._plot._max)
             return
 
         N = len(log_data) if len(log_data) > 0 else 1
@@ -143,12 +144,17 @@ class ControlPanePresenter(PresenterTemplate):
         #  first axis has no number, second is number 2
         axis[0] = ''
 
-        inc_start, inc_stop = self._filter.get_inc_filters(start, stop)
+        if len(start) == 0:
+            # no filters
+            new_start = [self._plot._min]
+            new_stop = [self._plot._max]
+        else:
+            new_start, new_stop = self._filter.filters_rm_overlaps(start, stop)
         if len(log_data) == 0:
             # If only have time filters
             self._loop_over_filters(self.wrap_add_shaded_region,
-                                    inc_start,
-                                    inc_stop)
+                                    new_start,
+                                    new_stop)
             return
 
         # loop over plots (sample logs)
@@ -157,8 +163,8 @@ class ControlPanePresenter(PresenterTemplate):
             self._plot.add_hline(y_min)
             self._plot.add_hline(y_max)
             self._loop_over_filters(self.wrap_add_rect,
-                                    inc_start,
-                                    inc_stop,
+                                    new_start,
+                                    new_stop,
                                     y_min,
                                     y_max,
                                     ax)

@@ -72,7 +72,7 @@ class TestHelper(unittest.TestCase):
             self.assertArrays(args[k],
                               expected_args[k])
 
-    def check_shape(self, shape, k, x0, x1, y0, y1):
+    def check_shape(self, shape, k, x0, x1, y0, y1, ax):
         """
         A method to compare the vertical rectangles
         that have been added.
@@ -83,38 +83,60 @@ class TestHelper(unittest.TestCase):
         :param y0: the start y value
         :param y1: the end y value
         """
-        self.assertEqual(shape['fillcolor'], 'PaleGreen')
-        self.assertEqual(shape['layer'], 'above')
-        self.assertEqual(shape['line']['color'], 'black')
-        self.assertEqual(shape['line']['width'], 4)
-        self.assertEqual(shape['opacity'], 0.3)
-        self.assertEqual(shape['type'], 'rect')
-        self.assertEqual(shape['x0'], x0)
-        self.assertEqual(shape['x1'], x1)
-        self.assertEqual(shape['y0'], y0)
-        self.assertEqual(shape['y1'], y1)
-        if k == 0:
-            self.assertEqual(shape['xref'], 'x')
-            self.assertEqual(shape['yref'], 'y domain')
-        else:
-            self.assertEqual(shape['xref'], f'x{k+1}')
-            self.assertEqual(shape['yref'], f'y{k+1} domain')
+        self.assertEqual(shape.fillcolor, 'PaleGreen')
+        self.assertEqual(shape.layer, 'above')
+        self.assertEqual(shape.line['color'], 'black')
+        self.assertEqual(shape.line['width'], 4)
+        self.assertEqual(shape.opacity, 0.3)
+        self.assertEqual(shape.type, 'rect')
+        self.assertEqual(shape.x0, x0)
+        self.assertEqual(shape.x1, x1)
+        self.assertEqual(shape.y0, y0)
+        self.assertEqual(shape.y1, y1)
+        self.assertEqual(shape['xref'], ax)
 
-    def check_shapes(self, expected):
+    def check_line(self, shape, k, *kwargs):
+        self.assertEqual(shape['x0'], kwargs[0])
+        self.assertEqual(shape['x1'], kwargs[1])
+        self.assertEqual(shape['y0'], kwargs[2])
+        self.assertEqual(shape['y1'], kwargs[3])
+
+    def check_shapes(self, e_lines, e_rects):
         """
         Method to check the list of shapes currently applied
-         to the plots.
-         :param expected: the expected shapes
+        to the plots.
+        :param e_lines: the expected lines
+        :param e_rects: the expected rectangles
         """
         N_plots = 2
         fig = self.get_fig
         shapes = fig.layout.shapes
         n = 0
+        """
+        The rectangles are out of order
+        so we will manually just do the lines
+        and then the rectangle
+        """
+        rects = []
+        lines = []
 
-        for k in range(len(expected)):
+        for k in range(len(shapes)):
+            if shapes[k]['type'] == 'line':
+                lines.append(shapes[k])
+            else:
+                rects.append(shapes[k])
+        # factor 2 s we have 2 plots
+        self.assertEqual(len(lines), N_plots*len(e_lines))
+        for k in range(len(e_lines)):
             for j in range(N_plots):
-                self.check_shape(shapes[n], j, *expected[k])
+                shape = lines[n]
+                self.check_line(shape, j, *e_lines[k])
                 n += 1
+
+        self.assertEqual(len(rects), len(e_rects))
+        for k in range(len(e_rects)):
+            shape = rects[k]
+            self.check_line(shape, k, *e_rects[k])
 
     @property
     def get_fig(self):

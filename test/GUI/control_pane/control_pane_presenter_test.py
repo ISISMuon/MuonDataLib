@@ -17,6 +17,11 @@ from data_paths import FILTER  # noqa: E402
 TT = '_time-table'
 LT = '_log-table'
 
+DEFAULT_SHAPES = ([],
+                  [[0, 4, 0.0, 1., 'y'],
+                   [0, 4, 0.0, 1., 'y2'],
+                   ])
+
 
 class ControlPanePresenterTest(TestHelper):
 
@@ -210,9 +215,10 @@ class ControlPanePresenterTest(TestHelper):
                                                            self.log_table)
 
     def test_add_filter_include(self):
-        # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        """
+        by default includes log data
+        """
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([{'Name' + TT: 'unit',
                                           'Start' + TT: 0.2,
@@ -221,14 +227,16 @@ class ControlPanePresenterTest(TestHelper):
                                           'Start' + TT: 0.7,
                                           'End' + TT: 0.8}],
                                         'Include')
-        self.check_shapes([[0.2, 0.4, 0, 1],
-                           [0.7, 0.8, 0, 1],
-                           ])
+
+        self.check_shapes([],
+                          [[0.2, 0.4, 0, 1, 'y'],
+                           [0.2, 0.4, 0, 1, 'y2'],
+                           [0.7, 0.8, 0, 1, 'y'],
+                           [0.7, 0.8, 0, 1, 'y2']])
 
     def test_add_filter_exclude(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([{'Name' + TT: 'unit',
                                           'Start' + TT: 0.2,
@@ -237,30 +245,32 @@ class ControlPanePresenterTest(TestHelper):
                                           'Start' + TT: 0.7,
                                           'End' + TT: 0.8}],
                                         'Exclude')
-
-        self.check_shapes([[0.0, 0.2, 0, 1],
-                           [0.4, 0.7, 0, 1],
-                           [0.8, 4.0, 0, 1],
-                           ])
+        self.check_shapes([],
+                          [[0., 0.2, 0, 1, 'y'],
+                           [0., 0.2, 0, 1, 'y2'],
+                           [0.4, 0.7, 0, 1, 'y'],
+                           [0.4, 0.7, 0, 1, 'y2'],
+                           [0.8, 4., 0, 1, 'y'],
+                           [0.8, 4., 0, 1, 'y2']])
 
     def test_add_filter_include_empty(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([], 'Include')
 
-        self.check_shapes([])
+        self.check_shapes([], [])
 
     def test_add_filter_exclude_empty(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([],
                                         'Exclude')
 
-        self.check_shapes([[0, 4, 0, 1]])
+        self.check_shapes([],
+                          [[0, 4, 0, 1, 'x'],
+                           [0, 4, 0, 1, 'x1']])
 
     def test_apply_exc_data_empty(self):
         shade = mock.Mock()
@@ -466,7 +476,6 @@ class ControlPanePresenterTest(TestHelper):
         self.assertEqual(data[1], {'Name' + TT: 'second',
                                    'Start' + TT: 0.05,
                                    'End' + TT: 0.06})
-        print("hiiii", log_data)
         self.assertEqual(log_data,
                          [{'Name' + LT: 'log_default_1',
                            'sample' + LT: 'Temp',
@@ -479,6 +488,93 @@ class ControlPanePresenterTest(TestHelper):
 
         # this is the only bit that can change
         self.assertEqual(cols[2]['headerName'], 'Include Filter details')
+
+    def test_loop_over_filters(self):
+        func = mock.Mock()
+        f_start = [.1, .3, .5, .7]
+        f_end = [.2, .4, .6, .8]
+
+        self.presenter._loop_over_filters(func,
+                                          f_start,
+                                          f_end,
+                                          'not used')
+        args = func.call_args_list
+        self.assertEqual(func.call_count, 5)
+        # reverse order
+        expect = [[0, .1],
+                  [.2, .3],
+                  [.4, .5],
+                  [.6, .7],
+                  [.8, 4]]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 3)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+            self.assertEqual('not used', args[k][0][2])
+
+    def test_wrap_add_shaded_region(self):
+        self.presenter._plot.add_shaded_region = mock.Mock()
+        self.presenter.wrap_add_shaded_region(14, 79, 'not used')
+        self.presenter._plot.add_shaded_region.assert_called_once_with(14,
+                                                                       79)
+
+    def test_wrap_add_rect(self):
+        self.presenter._plot.add_rect = mock.Mock()
+        self.presenter.wrap_add_rect(4, 6, 3, 8, 'x1')
+        self.presenter._plot.add_rect.assert_called_once_with(4, 3, 6, 8, 'x1')
+
+    def test_add_filters_none(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+
+        self.presenter.add_filters([], [], [])
+        self.presenter.wrap_add_rect.assert_not_called()
+        self.presenter.wrap_add_shaded_region.assert_called_once_with(0., 4.)
+
+    def test_add_filters_time(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+        self.presenter.add_filters([1], [2], [])
+        self.presenter.wrap_add_rect.assert_not_called()
+
+        args = self.presenter.wrap_add_shaded_region.call_args_list
+        self.assertEqual(len(args), 2)
+        # reverse order
+        expect = [[0, 1],
+                  [2, 4]]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 2)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+
+    def test_add_filters_log(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+
+        self.presenter.add_filters([1], [2],
+                                   [{'Delete' + LT: '',
+                                     'Name_' + LT: 'log_B',
+                                     'sample' + LT: 'B',
+                                     'filter' + LT: 'above',
+                                     'y0' + LT: 0.9,
+                                     'yN' + LT: 1.,
+                                     'magic': 'above',
+                                     'y_min' + LT: 0.4,
+                                     'y_max' + LT: 1}])
+
+        self.presenter.wrap_add_shaded_region.assert_not_called()
+
+        args = self.presenter.wrap_add_rect.call_args_list
+        self.assertEqual(len(args), 2)
+        expect = [[0, 1, 0.9, 1., ''],
+                  [2, 4, 0.9, 1., '']]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 5)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+            self.assertEqual(expect[k][2], args[k][0][2])
+            self.assertEqual(expect[k][3], args[k][0][3])
+            self.assertEqual(expect[k][4], args[k][0][4])
 
 
 if __name__ == '__main__':

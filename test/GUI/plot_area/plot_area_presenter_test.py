@@ -29,17 +29,21 @@ class PlotAreaPresenterTest(TestHelper):
                          'plot_test')
 
     def test_shade_all(self):
-        self.check_shapes([])
+        self.check_shapes([], [])
 
         self.presenter.shade_all()
-        self.check_shapes([[0, 2., 0, 1],
+        self.check_shapes([],
+                          [[0, 2., 0, 1, 'x'],
+                           [0, 2., 0, 1, 'x2'],
                            ])
 
     def test_add_shaded_region(self):
-        self.check_shapes([])
+        self.check_shapes([], [])
 
         self.presenter.add_shaded_region(0.5, 0.8)
-        self.check_shapes([[0.5, 0.8, 0, 1],
+        self.check_shapes([],
+                          [[0.5, 0.8, 0, 1, 'x'],
+                           [0.5, 0.8, 0, 1, 'x2'],
                            ])
 
     def test_reset_plot_range(self):

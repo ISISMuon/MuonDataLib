@@ -383,7 +383,6 @@ cdef class Events:
         f_i_start, f_i_end, rm_frames = rm_overlaps(f_i_start, f_i_end, self.periods)
         return f_i_start, f_i_end, rm_frames
 
-
     def _get_filtered_data(self, frame_times):
         """
         A method to get the information about the applied filters.
