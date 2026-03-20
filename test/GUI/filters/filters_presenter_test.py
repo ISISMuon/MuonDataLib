@@ -300,7 +300,9 @@ class FilterPresenterTest(TestHelper):
         log = {'magic': 'between',
                'sample' + LT: 'Temp',
                'y0' + LT: 36,
-               'yN' + LT: 37}
+               'yN' + LT: 37,
+               'y_min' + LT: 35,
+               'y_max' + LT: 39}
 
         data = load_events(FILE, 64)
         self.presenter.set_data(data)
@@ -312,7 +314,9 @@ class FilterPresenterTest(TestHelper):
         log = {'magic': 'below',
                'sample' + LT: 'Temp',
                'y0' + LT: 36,
-               'yN' + LT: 37}
+               'yN' + LT: 37,
+               'y_min' + LT: 35,
+               'y_max' + LT: 39}
 
         data = load_events(FILE, 64)
         self.presenter.set_data(data)
@@ -324,7 +328,9 @@ class FilterPresenterTest(TestHelper):
         log = {'magic': 'above',
                'sample' + LT: 'Temp',
                'y0' + LT: 36,
-               'yN' + LT: 37}
+               'yN' + LT: 37,
+               'y_min' + LT: 35,
+               'y_max' + LT: 39}
 
         data = load_events(FILE, 64)
         self.presenter.set_data(data)
