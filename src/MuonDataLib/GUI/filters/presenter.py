@@ -2,7 +2,6 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.filters.view import FilterView
-import numpy as np
 
 
 class FilterPresenter(PresenterTemplate):
@@ -176,12 +175,12 @@ class FilterPresenter(PresenterTemplate):
             return row_log['y0_log-table'], row_log['yN_log-table']
 
         elif f_type == 'above':
-            return row_log['y0_log-table'], np.max(y)
+            return row_log['y0_log-table'], row_log['y_max_log-table']
 
         elif f_type == 'below':
-            return np.min(y), row_log['yN_log-table']
+            return row_log['y_min_log-table'], row_log['yN_log-table']
 
-        return np.min(y), np.max(y)
+        return row_log['y_min_log-table'], row_log['y_max_log-table']
 
     def calculate(self, n_clicks, time_filters, state, log_filters):
         """
