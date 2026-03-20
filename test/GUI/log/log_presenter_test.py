@@ -28,6 +28,16 @@ def make_log_table():
             ]
 
 
+def make_change(row, old, new, name):
+    return [{'rowIndex': 0,
+             'rowId': '0',
+             'data': row,
+             'oldValue': old,
+             'value': new,
+             'colId': name,
+             'timestamp': 1}]
+
+
 class LogPresenterTest(TestHelper):
 
     @mock.patch("MuonDataLib.GUI.log.presenter.LogView")
@@ -259,6 +269,95 @@ class LogPresenterTest(TestHelper):
         data.append(self.presenter.generate_default(data, 'B'))
         result = self.presenter.generate_default(data, 'I')
         self.assertData(result, 'log_default_2', 'I', 'between', 0, 1, 0, 1)
+
+    def test__validate_row(self):
+        """
+        for reference the default values are:
+        'y0_log-table': 0,
+        'yN_log-table': 1,
+        'y_min_log-table': -1,
+        'y_max_log-table': 3},
+
+        test_cases is [old, new, name, filter type,
+        value for other filter, name
+        of other filter, if an error message is expected
+        0: no error,
+        1: error,
+        2: no error, but different value is reset]
+        """
+        test_cases = [
+                      # test for y0
+                      # passes
+                      [0, .5, 'y0_log-table', 'between', 1, 'yN_log-table', 0],
+                      # below min value
+                      [0, -2, 'y0_log-table', 'between', 1, 'yN_log-table', 1],
+                      # above max value
+                      [0, 9, 'y0_log-table', 'between', 1, 'yN_log-table', 1],
+                      # above filter, between yN and max
+                      [0, 2., 'y0_log-table', 'above', 3, 'yN_log-table', 0],
+                      # check not updated if not used
+                      [1, 1.2, 'yN_log-table', 'below', 0, 'y0_log-table', 3],
+                      # tests for yN
+                      # passes
+                      [1, 1.3, 'yN_log-table', 'between', 0,
+                       'y0_log-table', 0],
+                      # below min value
+                      [1, -2, 'yN_log-table', 'between', 0, 'y0_log-table', 1],
+                      # above max value
+                      [1, 9, 'yN_log-table', 'between', 0, 'y0_log-table', 1],
+                      # below filter, between y0 and min
+                      [1, -.5, 'yN_log-table', 'below', -1, 'y0_log-table', 0],
+                      # check not updated if not used
+                      [0, -.5, 'y0_log-table', 'above', 1, 'yN_log-table', 0],
+                      ]
+        for case in test_cases:
+            with self.subTest(case=case):
+                # set up
+                table = make_log_table()
+                table[0]['y_min_log-table'] = -1
+                # make sure table has correct filter values
+                table[0]['magic'] = case[3]
+                table[0]['filter_log-table'] = case[3]
+                # table should have new value
+                table[0][case[2]] = case[1]
+                # make change dict
+                change = make_change(table[0],
+                                     case[0],
+                                     case[1],
+                                     case[2])
+
+                # run validation
+                data, msg = self.presenter.validate_row(change,
+                                                        table)
+                # check if the other limit is as expected
+                self.assertEqual(data[0][case[5]],
+                                 case[4])
+                # if no error
+                if case[-1] == 0:
+                    # success
+                    self.assertEqual(msg, '')
+                    self.assertEqual(data[0][case[2]],
+                                     case[1])
+
+                elif case[-1] == 1:
+                    # error and reset
+                    print(msg)
+                    # check an error is produced
+                    self.assertGreater(len(msg), 0)
+                    # check value is reverted
+                    self.assertEqual(data[0][case[2]],
+                                     case[0])
+
+                elif case[-1] == 2:
+                    # silently fixes unused filter
+                    # check an error is produced
+                    self.assertEqual(len(msg), 0)
+                    # check value is reverted
+                    self.assertEqual(data[0][case[5]],
+                                     case[4])
+                    # check keep new value
+                    self.assertEqual(data[0][case[2]],
+                                     case[1])
 
 
 if __name__ == '__main__':

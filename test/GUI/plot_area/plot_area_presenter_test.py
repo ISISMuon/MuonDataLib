@@ -46,6 +46,24 @@ class PlotAreaPresenterTest(TestHelper):
                            [0.5, 0.8, 0, 1, 'x2'],
                            ])
 
+    def test_add_hline(self):
+        self.check_shapes([], [])
+        self.presenter.add_hline(1.2)
+        self.check_shapes([[0, 1, 1.2, 1.2]],
+                          [])
+
+    def test_add_vline(self):
+        self.check_shapes([], [])
+        self.presenter.add_vline(1.2)
+        self.check_shapes([[1.2, 1.2, 0, 1]],
+                          [])
+
+    def test_add_rect(self):
+        self.check_shapes([], [])
+        self.presenter.add_rect(0.2, .3, .5, .6, axis=1)
+        self.check_shapes([],
+                          [[0.2, 0.5, .3, .6, 'x1']])
+
     def test_reset_plot_range(self):
         self.assertEqual(self.presenter._min,
                          0.0)

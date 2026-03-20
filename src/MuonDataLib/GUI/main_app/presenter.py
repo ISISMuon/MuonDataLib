@@ -199,6 +199,7 @@ class MainAppPresenter(object):
             return (self.plot(),
                     [],
                     True,
+                    [],
                     True,
                     self.control.headers,
                     '')
@@ -213,6 +214,7 @@ class MainAppPresenter(object):
             return (self.plot(),
                     [],
                     True,
+                    [],
                     True,
                     self.control.headers,
                     f'An error occurred: {err}')
@@ -220,5 +222,5 @@ class MainAppPresenter(object):
         data = self.load.get_data
         self.control.set_data(data)
 
-        return (self.plot(), [], False, False,
+        return (self.plot(), [], False, [], False,
                 self.control.headers, '')

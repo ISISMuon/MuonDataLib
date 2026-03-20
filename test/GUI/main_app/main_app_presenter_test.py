@@ -85,9 +85,10 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(result[3], False)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -102,9 +103,10 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5],
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -120,9 +122,10 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -137,9 +140,10 @@ class MainAppPresenterTest(TestHelper):
         # should clear the filters
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(result[3], False)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -156,9 +160,10 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5],
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -176,9 +181,10 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 

@@ -132,30 +132,33 @@ class LogPresenter(TablePresenter):
 
         if col_name == 'y0_' + LOG_TABLE:
             if new_value < y_min:
-                # check its within data range
+                # check its within data range, above min
                 msg = (f'The new filter value {new_value} '
                        f'is below the lowest y value '
                        f'{row["y_min_" + LOG_TABLE]} for the data.')
                 new_value = changed['oldValue']
+            elif new_value > y_max:
+                # check its within data range, above max
+                msg = (f'The new filter value {new_value} '
+                       f'is above the max y value '
+                       f'{y_max}')
+                new_value = changed['oldValue']
 
             elif f_type == 'above':
+                # check if need to update yN
                 if new_value < y_max and new_value > row['yN_' + LOG_TABLE]:
                     # only update if it would cause start > end
                     data[changed['rowIndex']]['yN_' + LOG_TABLE] = y_max
-                elif new_value > y_max:
-                    msg = (f'The new filter value {new_value} '
-                           f'is above the max y value '
-                           f'{y_max}')
-                    new_value = changed['oldValue']
 
             elif new_value > row['yN_' + LOG_TABLE] and f_type == 'between':
-                # check its below the max filter value
+                # check its below the max filter value if between
                 msg = (f'The new filter value {new_value} '
                        f'is above the upper filter value '
                        f'{row["yN_" + LOG_TABLE]}.')
                 new_value = changed['oldValue']
 
             elif f_type == 'below' and new_value != y_min:
+                # silently fix the value if not used
                 new_value = changed['oldValue']
 
         elif col_name == 'yN_' + LOG_TABLE:
