@@ -1,6 +1,10 @@
+from MuonDataLib.data.utils import NONE
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.log.view import LogView
-from MuonDataLib.GUI.table.column import Column, TableGroup, TableColumns
+from MuonDataLib.GUI.table.column import (DropDownColumn,
+                                          Column,
+                                          TableGroup,
+                                          TableColumns)
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 import numpy as np
 
@@ -42,8 +46,46 @@ class LogPresenter(TablePresenter):
         sample = Column('sample_' + LOG_TABLE, 'selected', 'text')
         sample.set_uneditable()
 
+        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type',
+                                         ['above', 'between', 'below'])
+        """
+        we need an extra magic col as we cannot get the value from the
+        dropdown in conditional formatting
+        """
+        magic = Column('magic', '', 'text')
+        magic.hide()
+
+        filter_start = Column('y0_' + LOG_TABLE, 'Keep data from', 'numeric')
+        filter_end = Column('yN_' + LOG_TABLE, 'Keep data to', 'numeric')
+
+        filter_start.set_condition({"styleConditions": [
+            {"condition": "params.data.magic == 'below'",
+             "style": {"backgroundColor": "black"}},
+            ],
+            "defaultStyle": {"backgroundColor": "white"}
+                 })
+
+        filter_end.set_condition({"styleConditions": [
+            {"condition": "params.data.magic == 'above'",
+             "style": {"backgroundColor": "black"}},
+            ],
+            "defaultStyle": {"backgroundColor": "white"}
+                 })
+
+        # want the min and max y values in the row data to make it easier.
+        y_min = Column('y_min_' + LOG_TABLE, 'y min', 'numeric')
+        y_min.hide()
+        y_max = Column('y_max_' + LOG_TABLE, 'y max', 'numeric')
+        y_max.hide()
         cols = TableColumns([TableGroup([name]),
-                             TableGroup([log, sample], 'Sample logs')],
+                             TableGroup([log, sample], 'Sample logs'),
+                             TableGroup([filter_selector,
+                                         filter_start,
+                                         filter_end,
+                                         magic,
+                                         y_min,
+                                         y_max],
+                                        'Filter Details')],
                             inc_delete_row=True,
                             btn_ID=LOG_TABLE)
 
@@ -64,6 +106,96 @@ class LogPresenter(TablePresenter):
         :param logs: the sample logs object
         """
         self._logs = logs
+
+    def validate_row(self, change, data):
+        """
+        This checks if the new row values are valid.
+        It will also keep the 'magic' column in sync
+        with the dropdown selection.
+        :param change: a dict of information on the
+        changed row
+        :param data: the data from the sample log
+        filter table.
+        :returns: the updated sample log table and
+        an error message
+        """
+        changed = change[0]
+        col_name = changed['colId']
+        row = changed['data']
+
+        msg = ''
+        new_value = row[col_name]
+
+        f_type = row['magic']
+        y_min = row['y_min_' + LOG_TABLE]
+        y_max = row['y_max_' + LOG_TABLE]
+
+        if col_name == 'y0_' + LOG_TABLE:
+            if new_value < y_min:
+                # check its within data range, above min
+                msg = (f'The new filter value {new_value} '
+                       f'is below the lowest y value '
+                       f'{row["y_min_" + LOG_TABLE]} for the data.')
+                new_value = changed['oldValue']
+            elif new_value > y_max:
+                # check its within data range, above max
+                msg = (f'The new filter value {new_value} '
+                       f'is above the max y value '
+                       f'{y_max}')
+                new_value = changed['oldValue']
+
+            elif f_type == 'above':
+                # check if need to update yN
+                if new_value < y_max and new_value > row['yN_' + LOG_TABLE]:
+                    # only update if it would cause start > end
+                    data[changed['rowIndex']]['yN_' + LOG_TABLE] = y_max
+
+            elif new_value > row['yN_' + LOG_TABLE] and f_type == 'between':
+                # check its below the max filter value if between
+                msg = (f'The new filter value {new_value} '
+                       f'is above the upper filter value '
+                       f'{row["yN_" + LOG_TABLE]}.')
+                new_value = changed['oldValue']
+
+            elif f_type == 'below' and new_value != y_min:
+                # silently fix the value if not used
+                new_value = changed['oldValue']
+
+        elif col_name == 'yN_' + LOG_TABLE:
+            if new_value > y_max:
+                # check its within data range
+                msg = (f'The new filter value {new_value} '
+                       f'is above the largest y value '
+                       f'{row["y_max_" + LOG_TABLE]} for the data.')
+                new_value = changed['oldValue']
+
+            elif f_type == 'below':
+                if new_value > y_min and new_value < row['y0_' + LOG_TABLE]:
+                    data[changed['rowIndex']]['y0_' + LOG_TABLE] = y_min
+                elif new_value < y_min:
+                    msg = (f'The new filter value {new_value} '
+                           f'is below the minimum value '
+                           f'{y_min}.')
+                    new_value = changed['oldValue']
+
+            elif new_value < row['y0_' + LOG_TABLE] and f_type == 'between':
+                # check its above min filter value
+                msg = (f'The new filter value {new_value} '
+                       f'is below the lower filter value '
+                       f'{row["y0_" + LOG_TABLE]}.')
+                new_value = changed['oldValue']
+
+            elif f_type == 'above' and new_value != y_max:
+                new_value = changed['oldValue']
+
+        elif col_name == 'filter_' + LOG_TABLE:
+            # update the filter type (for conditional formatting)
+            new_value = change[0]['data']['filter_' + LOG_TABLE]
+            col_name = 'magic'
+
+        data[changed['rowIndex']][col_name] = new_value
+
+        return data, msg
 
     def btn_pressed(self, info, data):
         """
@@ -182,15 +314,26 @@ class LogPresenter(TablePresenter):
         # was ok or cancel pressed?
         if self._ok_clicks < ok:
             # ok pressed
+            row = 0
             if self._replace is not None:
                 # replace/update row (i.e. graph button pressed)
                 data[self._replace]['sample_log-table'] = name
+                row = self._replace
             else:
                 # new row (i.e. from add button)
                 data.append(self.generate_default(data,
                                                   name))
+                row = len(data) - 1
             self._ok_clicks += 1
+            _, y = self._logs.get_sample_log(name).get_original_values()
 
+            value = np.min(y)
+            data[row]['y_min_' + LOG_TABLE] = value
+            data[row]['y0_' + LOG_TABLE] = value
+
+            value = np.max(y)
+            data[row]['y_max_' + LOG_TABLE] = np.max(y)
+            data[row]['yN_' + LOG_TABLE] = np.max(y)
         return False, data
 
     def add(self, n, data):
@@ -210,6 +353,58 @@ class LogPresenter(TablePresenter):
         Code to create some default values
         :returns: a default dict
         """
+        default_filter = 'between'
         return {'Delete_' + self.ID: '',
                 self.name_col: 'log_' + self.get_next_row_name,
-                'sample_log-table': name}
+                'sample_log-table': name,
+                'filter_' + LOG_TABLE: default_filter,
+                'y0_' + LOG_TABLE: 0,
+                'yN_' + LOG_TABLE: 1,
+                'magic': default_filter,
+                'y_min_' + LOG_TABLE: 0,
+                'y_max_' + LOG_TABLE: 1}
+
+    def load(self, file_data):
+        """
+        A method to load filters from a json file
+        If the filter values are outside of the data
+        range, they will be updated to be within the
+        range of possible y values.
+        :param file: the json dicts from the open file
+        :returns: a list of the row details
+        for the log table (exluding the remove button),
+        """
+        data = []
+        for key in file_data.keys():
+            start, end = file_data[key]
+
+            _, y = self._logs.get_sample_log(key).get_original_values()
+
+            y_min = np.min(y)
+            y_max = np.max(y)
+            y_0 = y_min
+            y_N = y_max
+            if start == NONE:
+                load_filter = 'below'
+                if y_min < end < y_max:
+                    y_N = end
+
+            elif end == NONE:
+                load_filter = 'above'
+                if start > y_min:
+                    y_0 = start
+
+            else:
+                load_filter = 'between'
+                y_0 = start
+                y_N = end
+            data.append({self.name_col: 'log_' + self.get_next_row_name,
+                         'sample_log-table': key,
+                         'filter_' + LOG_TABLE: load_filter,
+                         'y0_' + LOG_TABLE: y_0,
+                         'yN_' + LOG_TABLE: y_N,
+                         'magic': load_filter,
+                         'y_min_' + LOG_TABLE: y_min,
+                         'y_max_' + LOG_TABLE: y_max})
+
+        return data

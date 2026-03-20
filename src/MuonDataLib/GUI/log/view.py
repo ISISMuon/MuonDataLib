@@ -85,7 +85,7 @@ class LogView(TableView):
                  prevent_initial_call=True)(presenter.show_log_data)
 
         callback([Output('log_selector', 'is_open'),
-                  Output(presenter.ID, 'rowData')],
+                  Output(presenter.ID, 'rowData', allow_duplicate=True)],
                  [Input('log_ok', 'n_clicks'),
                   Input('log_cancel', 'n_clicks')],
                  [State('log_selection', 'value'),

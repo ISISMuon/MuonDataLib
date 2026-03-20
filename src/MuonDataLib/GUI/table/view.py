@@ -12,7 +12,6 @@ class TableView(ViewTemplate):
     table. This follows the MVP
     pattern.
     """
-
     def generate(self, presenter):
         """
         Creates the table widget's GUI.
@@ -29,7 +28,8 @@ class TableView(ViewTemplate):
                        columnDefs=presenter.cols.get_column_dict,
                        rowData=[],
                        defaultColDef={'editable': True,
-                                      'suppressMovable': True}),
+                                      'suppressMovable': True},
+                       ),
             html.Div(id=presenter.ID + '-dropdown-container')
             ])
 
@@ -66,7 +66,7 @@ class TableView(ViewTemplate):
         can overwrite it if we need to.
         :param presenter: the presenter object
         """
-        callback(Output(presenter.ID, 'rowData'),
+        callback(Output(presenter.ID, 'rowData', allow_duplicate=True),
                  Input(presenter.ID + '_add', 'n_clicks'),
                  State(presenter.ID, 'virtualRowData'),
                  prevent_initial_call=True)(presenter.add)

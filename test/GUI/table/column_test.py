@@ -14,8 +14,8 @@ class ColumnTest(TestHelper):
                 self.assertEqual(col.ID, 'unit')
                 self.assertEqual(col.name, 'test')
                 self.assertEqual(col.dtype, dtype)
-                self.assertEqual(col._min, 0)
-                self.assertEqual(col._max, 1000)
+                self.assertEqual(col._min, -1e6)
+                self.assertEqual(col._max, 1e6)
 
     def test_init_bad_dtype(self):
         try:

@@ -106,6 +106,7 @@ class MainApp(Dash):
         # catching.
         callback([
                   Output('time-table', 'rowData', allow_duplicate=True),
+                  Output('log-table', 'rowData', allow_duplicate=True),
                   Output('dropdown-time', 'value', allow_duplicate=True),
                   Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
@@ -117,6 +118,7 @@ class MainApp(Dash):
         callback([Output('main_plot', 'figure'),
                   Output('time-table', 'rowData', allow_duplicate=True),
                   Output('time-table_add', 'disabled'),
+                  Output('log-table', 'rowData', allow_duplicate=True),
                   Output('log-table_add', 'disabled'),
                   Output('time-table', 'columnDefs', allow_duplicate=True),
                   Output('error_msg', 'children', allow_duplicate=True)],
@@ -135,6 +137,7 @@ class MainApp(Dash):
                  Input('save_btn_dummy', 'children'),
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'values'),
+                  State('log-table', 'rowData'),
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 
