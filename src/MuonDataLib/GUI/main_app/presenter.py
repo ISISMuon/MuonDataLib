@@ -175,6 +175,9 @@ class MainAppPresenter(object):
         """
         return self.control.plot_default()
 
+    def plot_amps(self, data):
+        return self.control._filter._amp.plot(data)
+
     def load_nxs(self, name, data, debug_state):
         """
         Loads a muon event nexus file.
@@ -192,7 +195,7 @@ class MainAppPresenter(object):
         """
         if name == self.load.file:
             return (self.control._plot.fig, data, True, True,
-                    self.control.headers, '')
+                    self.control.headers, {}, '')
         self.load.set_file(name)
 
         if 'None' in name:
@@ -202,6 +205,7 @@ class MainAppPresenter(object):
                     [],
                     True,
                     self.control.headers,
+                    {},
                     '')
         try:
             if debug_state:
@@ -217,10 +221,11 @@ class MainAppPresenter(object):
                     [],
                     True,
                     self.control.headers,
+                    {},
                     f'An error occurred: {err}')
 
         data = self.load.get_data
         self.control.set_data(data)
 
         return (self.plot(), [], False, [], False,
-                self.control.headers, '')
+                self.control.headers, self.plot_amps(data), '')

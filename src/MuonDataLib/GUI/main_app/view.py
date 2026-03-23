@@ -121,6 +121,7 @@ class MainApp(Dash):
                   Output('log-table', 'rowData', allow_duplicate=True),
                   Output('log-table_add', 'disabled'),
                   Output('time-table', 'columnDefs', allow_duplicate=True),
+                  Output('amp_plot', 'figure'),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
                  [State('time-table', 'rowData'),

@@ -32,6 +32,9 @@ class FilterView(ViewTemplate):
                 dbc.AccordionItem(
                     [presenter._log.layout],
                     title="Sample Log filters"),
+                dbc.AccordionItem(
+                    [presenter._amp.layout],
+                    title="Amplitude filter"),
                 ],
                          start_collapsed=True),
             dbc.Button('Calculate',
