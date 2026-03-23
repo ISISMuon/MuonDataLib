@@ -124,6 +124,7 @@ class MainApp(Dash):
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('file_name', 'children'),
                  [State('time-table', 'rowData'),
+                  State('log-table', 'rowDara'),
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.load_nxs)
 
