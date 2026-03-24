@@ -93,11 +93,11 @@ class MainAppPresenter(object):
 
             filters = name[len(CURRENT):]
             result = self.control.read_filter(filters)
-            time_data, log_data, state, cols = result
-            return time_data, log_data, state, cols, ''
+            time_data, log_data, amp, state, cols = result
+            return time_data, log_data, amp, state, cols, ''
         except Exception as err:
             cols = self.control.headers
-            return [], [], 'Exclude', cols, f'Load filter error: {err}'
+            return [], [], 0, 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
         """
@@ -111,7 +111,8 @@ class MainAppPresenter(object):
             return False
         return True
 
-    def save_data(self, name, time_filters, time_mode, log_filters, debug):
+    def save_data(self, name, time_filters, time_mode,
+                  log_filters, amp_filters, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
@@ -139,7 +140,8 @@ class MainAppPresenter(object):
             print("saving to ", file)
             self.control._filter.apply_filters(time_filters,
                                                time_mode,
-                                               log_filters)
+                                               log_filters,
+                                               amp_filters)
             if dtype == "n":
                 data.save_histograms(file)
             elif dtype == 'j':

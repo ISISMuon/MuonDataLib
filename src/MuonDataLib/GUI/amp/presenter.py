@@ -1,7 +1,6 @@
 from MuonDataLib.GUI.table.presenter import PresenterTemplate
 from MuonDataLib.GUI.amp.view import AmplitudeView
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
-import numpy as np
 
 
 class AmpPresenter(PresenterTemplate):
@@ -20,9 +19,12 @@ class AmpPresenter(PresenterTemplate):
         self._plot = PlotAreaPresenter('amp')
         self._view = AmplitudeView(self)
 
+    def load(self, data):
+        return data['Amplitudes']
+
     def plot(self, data):
         hist, bins = data.get_peak_property_histogram('Amplitudes')
-        return self._plot.plot(['amplitudes'],
+        return self._plot.plot(['Counts'],
                                [(bins[:-1] + bins[1:])/2.],
                                [hist],
                                'Amplitude')

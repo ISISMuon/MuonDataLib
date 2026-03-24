@@ -54,13 +54,15 @@ class FilterView(ViewTemplate):
                  Input('calc_btn', 'n_clicks'),
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'value'),
-                  State('log-table', 'rowData')],
+                  State('log-table', 'rowData'),
+                  State('Amp', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
 
         callback(Output('title_test', 'hidden'),
                  [Input('title_test', 'children'),
                   Input('time-table', 'rowData'),
                   Input('log-table', 'rowData'),
+                  Input('Amp', 'value'),
                   ],
                  prevent_initial_call=True)(presenter.show_file)
 

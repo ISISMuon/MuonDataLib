@@ -54,7 +54,7 @@ class ControlPanePresenter(PresenterTemplate):
         name = self._filter._log.get_new_log_name([])
         return self._plot.new_plot([name], self._filter._log._logs)
 
-    def make_plot(self, time_data, log_data, state):
+    def make_plot(self, time_data, log_data, amp_data, state):
         """
         This method creates a plot.
         If no sample logs are selected, it will just plot a
@@ -75,7 +75,8 @@ class ControlPanePresenter(PresenterTemplate):
         self._plot.new_plot(names, self._filter._log._logs)
         start, stop, msg = self._filter.update_filters(time_data,
                                                        state,
-                                                       log_data)
+                                                       log_data,
+                                                       amp_data)
 
         self.add_filters(start, stop, log_data)
 
@@ -306,5 +307,5 @@ class ControlPanePresenter(PresenterTemplate):
         """
         with open(name, 'r') as file:
             data = json.load(file)
-        time_data, log_data, state, cols = self._filter.load(data)
-        return time_data, log_data, state, cols
+        time_data, log_data, amp, state, cols = self._filter.load(data)
+        return time_data, log_data, amp, state, cols
