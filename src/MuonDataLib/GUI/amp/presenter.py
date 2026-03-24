@@ -23,7 +23,7 @@ class AmpPresenter(PresenterTemplate):
         """
         Loads the amplitude data from
         a json file.
-        :para data: the dict containing the
+        :param data: the dict containing the
         amplitude
         :returns: the amplitude filter details
         """
@@ -31,7 +31,7 @@ class AmpPresenter(PresenterTemplate):
 
     def plot(self, data):
         """
-        Creates a plot of the amplitude height and counts. ]
+        Creates a plot of the amplitude height and counts.
         :param data: the MuonData object, with an amlitude filter
         :returns: the graph object for histogram
         """

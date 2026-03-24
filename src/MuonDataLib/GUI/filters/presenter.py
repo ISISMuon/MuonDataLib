@@ -39,7 +39,7 @@ class FilterPresenter(PresenterTemplate):
         :param log_data: the log data for the
         log filter table
         :param amp_data: The amplitude filter data
-        :returns: if the  the name in the GUI
+        :returns: if to hide the name in the GUI
         """
         if (self._time_file_data == time_data and
                 self._log_file_data == log_data and
