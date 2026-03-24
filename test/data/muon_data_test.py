@@ -1071,6 +1071,34 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         # check the event filters are now empty
         self.assertEqual(len(data._events.report_filters()), 0)
 
+    def test_get_filters_as_times_time_filter(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+
+        data.remove_data_time_between('first', 1, 1.2)
+        start_t, end_t = data.get_filters_as_times()
+        self.assertArrays(start_t, [0.994])
+        self.assertArrays(end_t, [1.194])
+
+    def test_get_filters_as_times_log_filter(self):
+        file = os.path.join(os.path.dirname(__file__),
+                            '..',
+                            'data_files',
+                            'HIFI00195790.nxs')
+        data = load_events(file, 64)
+
+        x = np.arange(1, 3.0, 0.1, dtype=np.double)
+        data.add_sample_log('Temp2', x,
+                            2*x)
+        data.keep_data_sample_log_between('Temp2', 1.3, 2.6)
+        data.remove_data_time_between('first', 1, 1.2)
+        start_t, end_t = data.get_filters_as_times()
+        self.assertArrays(start_t, [0.994])
+        self.assertArrays(end_t, [2.894])
+
 
 if __name__ == '__main__':
     unittest.main()

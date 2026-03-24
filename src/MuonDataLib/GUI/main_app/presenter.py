@@ -82,6 +82,7 @@ class MainAppPresenter(object):
         :param name: The name of the filter file
         :param debug: If debug mode is on or off
         :returns: The list of rows for the time filter table,
+        the list of rows for the sample log filter table,
         the state of the time filters (include/exclude),
         the column headers
         and an error message (if it fails)
@@ -91,11 +92,12 @@ class MainAppPresenter(object):
                 raise RuntimeError("Filter error")
 
             filters = name[len(CURRENT):]
-            data, state, cols = self.control.read_filter(filters)
-            return data, state, cols, ''
+            result = self.control.read_filter(filters)
+            time_data, log_data, state, cols = result
+            return time_data, log_data, state, cols, ''
         except Exception as err:
             cols = self.control.headers
-            return [], 'Exclude', cols, f'Load filter error: {err}'
+            return [], [], 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
         """
@@ -109,16 +111,18 @@ class MainAppPresenter(object):
             return False
         return True
 
-    def save_data(self, name, filters, time_mode, debug):
+    def save_data(self, name, time_filters, time_mode, log_filters, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
         event data.
         :param name: a string of the data type (json
         or nexus) and the name of the file to save to.
-        :param filters: the filters (list of dicts) to use
+        :param time_filters: the time filters (list of dicts) to use
         :param time_mode: If the time filters are to include
         or exclude the data
+        :param log_filters: the data from the sample log
+        filter table
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -133,7 +137,9 @@ class MainAppPresenter(object):
                 raise RuntimeError("Saving error")
 
             print("saving to ", file)
-            self.control._filter.apply_filters(filters, time_mode)
+            self.control._filter.apply_filters(time_filters,
+                                               time_mode,
+                                               log_filters)
             if dtype == "n":
                 data.save_histograms(file)
             elif dtype == 'j':
@@ -169,23 +175,29 @@ class MainAppPresenter(object):
         """
         return self.control.plot_default()
 
-    def load_nxs(self, name, data, debug_state):
+    def load_nxs(self, name, time_data,
+                 log_data, debug_state):
         """
         Loads a muon event nexus file.
         :param name: the 'CURRENT' text string and
         the name of the file to open.
-        :param data: the time filter table data
+        :param time_data: the time filter table data
+        :param log_data: the log filter table data
         :param debug_state: if debug mode is on or off.
         :returns: yields:
         - the updated figure
         - the time filter table data
         - if the time filter table is disabled
+        - the sample log table data
         - if the sample log table is disabled
         - the filter table column names
         - the alert message
         """
         if name == self.load.file:
-            return (self.control._plot.fig, data, True, True,
+            # same file
+            return (self.control._plot.fig,
+                    time_data, False,
+                    log_data, False,
                     self.control.headers, '')
         self.load.set_file(name)
 
@@ -193,6 +205,7 @@ class MainAppPresenter(object):
             return (self.plot(),
                     [],
                     True,
+                    [],
                     True,
                     self.control.headers,
                     '')
@@ -207,6 +220,7 @@ class MainAppPresenter(object):
             return (self.plot(),
                     [],
                     True,
+                    [],
                     True,
                     self.control.headers,
                     f'An error occurred: {err}')
@@ -214,5 +228,5 @@ class MainAppPresenter(object):
         data = self.load.get_data
         self.control.set_data(data)
 
-        return (self.plot(), [], False, False,
+        return (self.plot(), [], False, [], False,
                 self.control.headers, '')

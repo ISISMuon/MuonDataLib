@@ -17,6 +17,11 @@ from data_paths import FILTER  # noqa: E402
 TT = '_time-table'
 LT = '_log-table'
 
+DEFAULT_SHAPES = ([],
+                  [[0, 4, 0.0, 1., 'y'],
+                   [0, 4, 0.0, 1., 'y2'],
+                   ])
+
 
 class ControlPanePresenterTest(TestHelper):
 
@@ -34,10 +39,27 @@ class ControlPanePresenterTest(TestHelper):
 
         self.presenter = ControlPanePresenter()
         self.presenter.set_data(self.data)
-        # just add a plot
-        log_table = [{'sample_log-table': 'Temp'},
-                     {'sample_log-table': 'B'}]
-        self.presenter.make_plot([], log_table, 'Exclude')
+
+        self.log_table = [{'Delete' + LT: '',
+                           'Name' + LT: 'log_temp',
+                           'sample' + LT: 'Temp',
+                           'filter' + LT: 'between',
+                           'y0' + LT: 0.9,
+                           'yN' + LT: 0.8,
+                           'magic': 'between',
+                           'y_min' + LT: 0.7,
+                           'y_max' + LT: 1},
+                          {'Delete' + LT: '',
+                           'Name_' + LT: 'log_B',
+                           'sample' + LT: 'B',
+                           'filter' + LT: 'above',
+                           'y0' + LT: 0.6,
+                           'yN' + LT: 0.8,
+                           'magic': 'between',
+                           'y_min' + LT: 0.4,
+                           'y_max' + LT: 1}]
+
+        self.presenter.make_plot([], self.log_table, 'Exclude')
 
     @property
     def get_fig(self):
@@ -87,9 +109,17 @@ class ControlPanePresenterTest(TestHelper):
 
     def test_make_plot_empty_data(self):
         self.presenter._plot.plot = mock.Mock()
+        self.presenter.add_filters = mock.Mock()
+        """
+        These mock return values are not realistic,
+        but we just need to check they get passed correctly
+        """
+        self.presenter._filter.update_filters = mock.Mock()
         self.presenter.clear()
 
         self.presenter.make_plot([], [], 'Exclude')
+        self.presenter.add_filters.assert_not_called()
+
         self.assertMockOnce(self.presenter._plot.plot,
                             [[''],
                              [[1]],
@@ -97,52 +127,98 @@ class ControlPanePresenterTest(TestHelper):
 
     def test_make_plot_empty_filters(self):
         self.presenter._plot.new_plot = mock.Mock()
-        self.presenter.add_time_filters = mock.Mock()
-
+        self.presenter.add_filters = mock.Mock()
+        """
+        These mock return values are not realistic,
+        but we just need to check they get passed correctly
+        """
+        self.presenter._filter.update_filters = mock.Mock(return_value=([],
+                                                                        [],
+                                                                        ''))
         self.presenter.make_plot([], [], 'Exclude')
 
-        self.presenter._plot.new_plot  .assert_called_once_with(['Temp'],
-                                                                self.logs)
-        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+        self.presenter._plot.new_plot.assert_called_once_with(['Temp'],
+                                                              self.logs)
+        self.presenter.add_filters.assert_called_once_with([], [], [])
 
     def test_make_plot_one_log(self):
         self.presenter._plot.new_plot = mock.Mock()
-        self.presenter.add_time_filters = mock.Mock()
+        self.presenter.add_filters = mock.Mock()
+        """
+        These mock return values are not realistic,
+        but we just need to check they get passed correctly
+        """
+        mock_update_filters = mock.Mock(return_value=([],
+                                                      'log',
+                                                      ''))
+        self.presenter._filter.update_filters = mock_update_filters
 
-        self.presenter.make_plot([], [{'sample_log-table': 'B'}], 'Exclude')
+        self.presenter.make_plot([], [self.log_table[0]], 'Exclude')
 
-        self.presenter._plot.new_plot  .assert_called_once_with(['B'],
-                                                                self.logs)
-        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+        self.presenter._plot.new_plot.assert_called_once_with(['Temp'],
+                                                              self.logs)
+
+        mock_update_filters.assert_called_once_with([],
+                                                    'Exclude',
+                                                    [self.log_table[0]])
+        self.presenter.add_filters.assert_called_once_with([],
+                                                           'log',
+                                                           [self.log_table[0]])
 
     def test_make_plot_two_logs(self):
         self.presenter._plot.new_plot = mock.Mock()
-        self.presenter.add_time_filters = mock.Mock()
+        self.presenter.add_filters = mock.Mock()
+        """
+        These mock return values are not realistic,
+        but we just need to check they get passed correctly
+        """
+        mock_update_filters = mock.Mock(return_value=([], 'log', ''))
 
-        self.presenter.make_plot([], [{'sample_log-table': 'B'},
-                                      {'sample_log-table': 'I'}], 'Exclude')
+        self.presenter._filter.update_filters = mock_update_filters
 
-        self.presenter._plot.new_plot  .assert_called_once_with(['B', 'I'],
-                                                                self.logs)
-        self.presenter.add_time_filters.assert_called_once_with([], 'Exclude')
+        self.presenter.make_plot([], self.log_table, 'Exclude')
+
+        self.presenter._plot.new_plot.assert_called_once_with(['Temp', 'B'],
+                                                              self.logs)
+        self.presenter.add_filters.assert_called_once_with([],
+                                                           'log',
+                                                           self.log_table)
+        mock_update_filters.assert_called_once_with([],
+                                                    'Exclude',
+                                                    self.log_table)
 
     def test_make_plot_two_logs_and_time(self):
         self.presenter._plot.new_plot = mock.Mock()
-        self.presenter.add_time_filters = mock.Mock()
+        self.presenter.add_filters = mock.Mock()
+        """
+        These mock return values are not realistic,
+        but we just need to check they get passed correctly
+        """
+        mock_update_filters = mock.Mock(return_value=('time', 'log', ''))
+        self.presenter._filter.update_filters = mock_update_filters
 
-        self.presenter.make_plot([{'time': 1}], [{'sample_log-table': 'B'},
-                                                 {'sample_log-table': 'I'}],
+        time_data = [{'Name' + TT: 'time_Filter',
+                      'Start' + TT: 1,
+                      'End' + TT: 4}]
+
+        self.presenter.make_plot(time_data,
+                                 self.log_table,
                                  'Exclude')
 
-        self.presenter._plot.new_plot  .assert_called_once_with(['B', 'I'],
-                                                                self.logs)
-        self.presenter.add_time_filters.assert_called_once_with([{'time': 1}],
-                                                                'Exclude')
+        self.presenter._plot.new_plot.assert_called_once_with(['Temp', 'B'],
+                                                              self.logs)
+
+        mock_update_filters.assert_called_once_with(time_data,
+                                                    'Exclude',
+                                                    self.log_table)
+        self.presenter.add_filters.assert_called_once_with('time', 'log',
+                                                           self.log_table)
 
     def test_add_filter_include(self):
-        # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        """
+        by default includes log data
+        """
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([{'Name' + TT: 'unit',
                                           'Start' + TT: 0.2,
@@ -151,14 +227,16 @@ class ControlPanePresenterTest(TestHelper):
                                           'Start' + TT: 0.7,
                                           'End' + TT: 0.8}],
                                         'Include')
-        self.check_shapes([[0.2, 0.4, 0, 1],
-                           [0.7, 0.8, 0, 1],
-                           ])
+
+        self.check_shapes([],
+                          [[0.2, 0.4, 0, 1, 'y'],
+                           [0.2, 0.4, 0, 1, 'y2'],
+                           [0.7, 0.8, 0, 1, 'y'],
+                           [0.7, 0.8, 0, 1, 'y2']])
 
     def test_add_filter_exclude(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([{'Name' + TT: 'unit',
                                           'Start' + TT: 0.2,
@@ -167,30 +245,32 @@ class ControlPanePresenterTest(TestHelper):
                                           'Start' + TT: 0.7,
                                           'End' + TT: 0.8}],
                                         'Exclude')
-
-        self.check_shapes([[0.0, 0.2, 0, 1],
-                           [0.4, 0.7, 0, 1],
-                           [0.8, 4.0, 0, 1],
-                           ])
+        self.check_shapes([],
+                          [[0., 0.2, 0, 1, 'y'],
+                           [0., 0.2, 0, 1, 'y2'],
+                           [0.4, 0.7, 0, 1, 'y'],
+                           [0.4, 0.7, 0, 1, 'y2'],
+                           [0.8, 4., 0, 1, 'y'],
+                           [0.8, 4., 0, 1, 'y2']])
 
     def test_add_filter_include_empty(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([], 'Include')
 
-        self.check_shapes([])
+        self.check_shapes([], [])
 
     def test_add_filter_exclude_empty(self):
         # by default should have 2 shapes that cover both plots
-        self.check_shapes([[0, 4, 0, 1],
-                           ])
+        self.check_shapes(*DEFAULT_SHAPES)
 
         self.presenter.add_time_filters([],
                                         'Exclude')
 
-        self.check_shapes([[0, 4, 0, 1]])
+        self.check_shapes([],
+                          [[0, 4, 0, 1, 'x'],
+                           [0, 4, 0, 1, 'x1']])
 
     def test_apply_exc_data_empty(self):
         shade = mock.Mock()
@@ -387,7 +467,7 @@ class ControlPanePresenterTest(TestHelper):
         self.check_hover_text(result[2], expect)
 
     def test_read_filter(self):
-        data, state, cols = self.presenter.read_filter(FILTER)
+        data, log_data, state, cols = self.presenter.read_filter(FILTER)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'first',
@@ -396,8 +476,105 @@ class ControlPanePresenterTest(TestHelper):
         self.assertEqual(data[1], {'Name' + TT: 'second',
                                    'Start' + TT: 0.05,
                                    'End' + TT: 0.06})
+        self.assertEqual(log_data,
+                         [{'Name' + LT: 'log_default_1',
+                           'sample' + LT: 'Temp',
+                           'filter' + LT: 'between',
+                           'y0' + LT: 0.0044,
+                           'yN' + LT: 0.163,
+                           'magic': 'between',
+                           'y_min' + LT: 35.0,
+                           'y_max' + LT: 39.0}])
+
         # this is the only bit that can change
         self.assertEqual(cols[2]['headerName'], 'Include Filter details')
+
+    def test_loop_over_filters(self):
+        func = mock.Mock()
+        f_start = [.1, .3, .5, .7]
+        f_end = [.2, .4, .6, .8]
+
+        self.presenter._loop_over_filters(func,
+                                          f_start,
+                                          f_end,
+                                          'not used')
+        args = func.call_args_list
+        self.assertEqual(func.call_count, 5)
+        # reverse order
+        expect = [[0, .1],
+                  [.2, .3],
+                  [.4, .5],
+                  [.6, .7],
+                  [.8, 4]]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 3)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+            self.assertEqual('not used', args[k][0][2])
+
+    def test_wrap_add_shaded_region(self):
+        self.presenter._plot.add_shaded_region = mock.Mock()
+        self.presenter.wrap_add_shaded_region(14, 79, 'not used')
+        self.presenter._plot.add_shaded_region.assert_called_once_with(14,
+                                                                       79)
+
+    def test_wrap_add_rect(self):
+        self.presenter._plot.add_rect = mock.Mock()
+        self.presenter.wrap_add_rect(4, 6, 3, 8, 'x1')
+        self.presenter._plot.add_rect.assert_called_once_with(4, 3, 6, 8, 'x1')
+
+    def test_add_filters_none(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+
+        self.presenter.add_filters([], [], [])
+        self.presenter.wrap_add_rect.assert_not_called()
+        self.presenter.wrap_add_shaded_region.assert_called_once_with(0., 4.)
+
+    def test_add_filters_time(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+        self.presenter.add_filters([1], [2], [])
+        self.presenter.wrap_add_rect.assert_not_called()
+
+        args = self.presenter.wrap_add_shaded_region.call_args_list
+        self.assertEqual(len(args), 2)
+        # reverse order
+        expect = [[0, 1],
+                  [2, 4]]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 2)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+
+    def test_add_filters_log(self):
+        self.presenter.wrap_add_rect = mock.Mock()
+        self.presenter.wrap_add_shaded_region = mock.Mock()
+
+        self.presenter.add_filters([1], [2],
+                                   [{'Delete' + LT: '',
+                                     'Name_' + LT: 'log_B',
+                                     'sample' + LT: 'B',
+                                     'filter' + LT: 'above',
+                                     'y0' + LT: 0.9,
+                                     'yN' + LT: 1.,
+                                     'magic': 'above',
+                                     'y_min' + LT: 0.4,
+                                     'y_max' + LT: 1}])
+
+        self.presenter.wrap_add_shaded_region.assert_not_called()
+
+        args = self.presenter.wrap_add_rect.call_args_list
+        self.assertEqual(len(args), 2)
+        expect = [[0, 1, 0.9, 1., ''],
+                  [2, 4, 0.9, 1., '']]
+        for k in range(len(expect)):
+            self.assertEqual(len(args[k][0]), 5)
+            self.assertEqual(expect[k][0], args[k][0][0])
+            self.assertEqual(expect[k][1], args[k][0][1])
+            self.assertEqual(expect[k][2], args[k][0][2])
+            self.assertEqual(expect[k][3], args[k][0][3])
+            self.assertEqual(expect[k][4], args[k][0][4])
 
 
 if __name__ == '__main__':

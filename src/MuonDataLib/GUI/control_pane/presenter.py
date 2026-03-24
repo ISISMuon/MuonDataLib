@@ -58,7 +58,8 @@ class ControlPanePresenter(PresenterTemplate):
         """
         This method creates a plot.
         If no sample logs are selected, it will just plot a
-        default.
+        default. The plot will include shaded regions
+        for the data that is kept.
         :param time_data: the data from the time filter table
         :param log_data: the data from the sample log filter table.
         Its also used to get which plots to make.
@@ -72,7 +73,101 @@ class ControlPanePresenter(PresenterTemplate):
         if len(names) == 0:
             names = [self._filter._log.get_new_log_name([])]
         self._plot.new_plot(names, self._filter._log._logs)
-        return self.add_time_filters(time_data, state)
+        start, stop, msg = self._filter.update_filters(time_data,
+                                                       state,
+                                                       log_data)
+
+        self.add_filters(start, stop, log_data)
+
+        return self._plot.fig
+
+    def _loop_over_filters(self, func, f_start, f_stop, *kwargs):
+        """
+        This loops over the exclude filter start and end times
+        and creates the plot. Including shaded regions for
+        the data that is kept.
+        :param func: The plotting function to be used
+        :param f_start: the start times for the exclude filter
+        :param f_end: the end times for the exclude filter
+        :param kwargs: additional arguments for func
+        """
+        func(self._plot._min, f_start[0], *kwargs)
+        for k in range(1, len(f_start)):
+            func(f_stop[k-1], f_start[k], *kwargs)
+
+        func(f_stop[-1], self._plot._max, *kwargs)
+
+    def wrap_add_shaded_region(self, x0, xN, *kargs):
+        """
+        A wrapper for adding a shaded region (only
+        time filters).
+        :param x0: the start x value
+        :param xN: the end x value
+        :param kwargs: extra arguments, not used
+        """
+        self._plot.add_shaded_region(x0, xN)
+
+    def wrap_add_rect(self, x0, xN, y0, yN, ax):
+        """
+        A wrapper for adding a shaded recrangle (if
+        using at least one log filter).
+        :param x0: the start x value
+        :param xN: the end x value
+        :param y0: the start y value
+        :param yN: the end y value
+        :param ax: the axis to add the rectangle to
+        """
+        self._plot.add_rect(x0, y0, xN, yN, ax)
+
+    def add_filters(self, start, stop, log_data):
+        """
+        This gets the filters for that data,
+        as defined by the tables, and plots
+        shaded regions corresponding to the
+        kept data.
+        :param start: the start times for the filters
+        (both time and log)
+        :param end: the end times for the filters
+        (both time and log)
+        :param log_data: the log values from
+        the sample log table.
+        """
+        if len(start) == 0:
+            # no filters
+            self.wrap_add_shaded_region(self._plot._min,
+                                        self._plot._max)
+            return
+
+        N = len(log_data) if len(log_data) > 0 else 1
+        axis = [str(k + 1) for k in range(N)]
+
+        #  first axis has no number, second is number 2
+        axis[0] = ''
+
+        if len(start) == 0:
+            # no filters
+            new_start = [self._plot._min]
+            new_stop = [self._plot._max]
+        else:
+            new_start, new_stop = self._filter.filters_rm_overlaps(start, stop)
+        if len(log_data) == 0:
+            # If only have time filters
+            self._loop_over_filters(self.wrap_add_shaded_region,
+                                    new_start,
+                                    new_stop)
+            return
+
+        # loop over plots (sample logs)
+        for k, ax in enumerate(axis):
+            y_min, y_max = self._filter.get_log_y_range(log_data[k])
+            self._plot.add_hline(y_min)
+            self._plot.add_hline(y_max)
+            self._loop_over_filters(self.wrap_add_rect,
+                                    new_start,
+                                    new_stop,
+                                    y_min,
+                                    y_max,
+                                    ax)
 
     def add_time_filters(self, time_data, state):
         """
@@ -205,10 +300,11 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the data, the state for the time filter (include/exclude)
+        :returns: the time table data, the log table data,
+        and the state for the time filter (include/exclude)
         and the column headers
         """
         with open(name, 'r') as file:
             data = json.load(file)
-        data, state, cols = self._filter.load(data)
-        return data, state, cols
+        time_data, log_data, state, cols = self._filter.load(data)
+        return time_data, log_data, state, cols

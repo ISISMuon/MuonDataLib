@@ -356,6 +356,33 @@ class EventsTest(TestHelper):
             self.assertAlmostEqual(values[0]*1e-9, expected_start[j], 3)
             self.assertAlmostEqual(values[1]*1e-9, expected_end[j], 3)
 
+    def test_get_exclude_windows(self):
+        self._events.add_filter('test', 1.2, 1.7)
+        self._events.add_filter('unit', 2.4, 2.6)
+
+        results = self._events.get_exclude_windows()
+        f_start, f_end, rm_frames = results
+        self.assertArrays(np.asarray(f_start), [0, 1])
+        self.assertArrays(np.asarray(f_end), [0, 1])
+        self.assertArrays(rm_frames, [2])
+
+    def test_get_exclude_windows_no_filters(self):
+        results = self._events.get_exclude_windows()
+        f_start, f_end, rm_frames = results
+        self.assertArrays(np.asarray(f_start), [])
+        self.assertArrays(np.asarray(f_end), [])
+        self.assertArrays(rm_frames, [])
+
+    def test__get_exclude_windows(self):
+        self._events.add_filter('test', 1.2, 1.7)
+        self._events.add_filter('unit', 2.4, 2.6)
+
+        results = self._events._get_exclude_windows()
+        f_start, f_end, rm_frames = results
+        self.assertArrays(np.asarray(f_start), [0, 1])
+        self.assertArrays(np.asarray(f_end), [0, 1])
+        self.assertArrays(rm_frames, [2])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -81,13 +81,14 @@ class MainAppPresenterTest(TestHelper):
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
 
-        result = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(result[3], False)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -98,13 +99,14 @@ class MainAppPresenterTest(TestHelper):
         app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
                                                     np.array([-1., 0., 1.])))
         bad_file = 'HIFI0.nxs'
-        result = app.load_nxs(CURRENT + bad_file, [], DEBUG)
+        result = app.load_nxs(CURRENT + bad_file, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5],
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -116,13 +118,14 @@ class MainAppPresenterTest(TestHelper):
         app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
                                                     np.array([-1., 0., 1.])))
         bad_file = 'None'
-        result = app.load_nxs(CURRENT + bad_file, [], DEBUG)
+        result = app.load_nxs(CURRENT + bad_file, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -132,16 +135,56 @@ class MainAppPresenterTest(TestHelper):
         app.plot = mock.Mock(return_value='plot')
 
         filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
-        result = app.load_nxs(CURRENT + FILE, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         # should clear the filters
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
-        self.assertEqual(result[3], False)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
+
+    def test_load_nxs_with_filters_same_file(self):
+
+        app = MainAppPresenter(dummy_open)
+
+        result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
+        plot = result[0]
+
+        # add some filters after load
+        filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+        # load the same data again
+        result = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
+        self.assertEqual(result[0], plot)
+        # should clear the filters
+        self.assertEqual(result[1], filters)
+        self.assertEqual(result[2], False)
+        self.assertEqual(result[3], logs)
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
     def test_load_nxs_fails_with_filters(self):
 
@@ -152,13 +195,24 @@ class MainAppPresenterTest(TestHelper):
                                                     np.array([-1., 0., 1.])))
         bad_file = 'HIFI0.nxs'
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        result = app.load_nxs(CURRENT + bad_file, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + bad_file, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5],
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -172,30 +226,42 @@ class MainAppPresenterTest(TestHelper):
                                                     np.array([-1., 0., 1.])))
         bad_file = 'None'
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        result = app.load_nxs(CURRENT + bad_file, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + bad_file, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
-        self.assertEqual(result[3], True)
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], [])
+        self.assertEqual(result[4], True)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
 
         self.assertMockOnce(app.plot, [])
 
     def test_load_filter_time_fails(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + BADFILTER, DEBUG)
 
         self.assertEqual(result[0], [])
-        self.assertEqual(result[1], 'Exclude')
-        self.assertEqual(len(result[2]), 3)
-        self.assertEqual(result[3], 'Load filter error: Cannot have '
+        self.assertEqual(result[1], [])
+        self.assertEqual(result[2], 'Exclude')
+        self.assertEqual(len(result[3]), 3)
+        self.assertEqual(result[4], 'Load filter error: Cannot have '
                          'both include and exclude time filters')
 
     def test_load_filter(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + FILTER, DEBUG)
         self.assertEqual(result[0], [{'Name' + TT: 'first',
                                       'Start' + TT: 0.01,
@@ -204,52 +270,58 @@ class MainAppPresenterTest(TestHelper):
                                       'Start' + TT: 0.05,
                                       'End' + TT: 0.06},
                                      ])
-        self.assertEqual(result[1], 'Include')
-        self.assertEqual(len(result[2]), 3)
-        self.assertEqual(result[3], '')
+        self.assertEqual(result[1], [{'Name_log-table': 'log_default_1',
+                                      'filter_log-table': 'between',
+                                      'magic': 'between',
+                                      'sample_log-table': 'Temp',
+                                      'y0_log-table': 0.0044,
+                                      'yN_log-table': 0.163,
+                                      'y_max_log-table': np.float64(39.0),
+                                      'y_min_log-table': np.float64(35.0)
+                                      }])
+
+        self.assertEqual(result[2], 'Include')
+        self.assertEqual(len(result[3]), 3)
+        self.assertEqual(result[4], '')
 
     def test_load_filter_fail(self):
         bad_file = 'filters.json'
 
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + bad_file, DEBUG)
 
         self.assertEqual(result[0], [])
-        self.assertEqual(result[1], 'Exclude')
-        self.assertEqual(len(result[2]), 3)
-        self.assertEqual(result[3], "Load filter error: "
+        self.assertEqual(result[1], [])
+        self.assertEqual(result[2], 'Exclude')
+        self.assertEqual(len(result[3]), 3)
+        self.assertEqual(result[4], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
-
-    def test_load_filter_with_filter_table(self):
-        app = MainAppPresenter(dummy_open)
-        filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        _ = app.load_nxs(CURRENT + FILE, filters, DEBUG)
-        result = app.load_filter(CURRENT + FILTER, DEBUG)
-        self.assertEqual(result[0], [{'Name' + TT: 'first',
-                                      'Start' + TT: 0.01,
-                                      'End' + TT: 0.02},
-                                     {'Name' + TT: 'second',
-                                      'Start' + TT: 0.05,
-                                      'End' + TT: 0.06},
-                                     ])
-        self.assertEqual(result[1], 'Include')
-        self.assertEqual(len(result[2]), 3)
-        self.assertEqual(result[3], '')
 
     def test_load_filter_fail_with_filter_table(self):
         bad_file = 'filters.json'
 
         app = MainAppPresenter(dummy_open)
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        _ = app.load_nxs(CURRENT + FILE, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        _ = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
         result = app.load_filter(CURRENT + bad_file, DEBUG)
 
         self.assertEqual(result[0], [])
-        self.assertEqual(result[1], 'Exclude')
-        self.assertEqual(len(result[2]), 3)
-        self.assertEqual(result[3], "Load filter error: "
+        self.assertEqual(result[1], [])
+        self.assertEqual(result[2], 'Exclude')
+        self.assertEqual(len(result[3]), 3)
+        self.assertEqual(result[4], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 
@@ -270,10 +342,10 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
-        name, msg = app.save_data(dtype + file_name, [], 'Exclude', DEBUG)
+        name, msg = app.save_data(dtype + file_name, [], 'Exclude', [], DEBUG)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -292,11 +364,15 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 1.2, 'End' + TT: 200}]
-        name, msg = app.save_data(dtype + file_name, filters, 'Exclude', DEBUG)
+        name, msg = app.save_data(dtype + file_name,
+                                  filters,
+                                  'Exclude',
+                                  [],
+                                  DEBUG)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -315,12 +391,16 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 1.2, 'End' + TT: 100},
                    {'Name' + TT: 'test', 'Start' + TT: 150, 'End' + TT: 200}]
-        name, msg = app.save_data(dtype + file_name, filters, 'Include', DEBUG)
+        name, msg = app.save_data(dtype + file_name,
+                                  filters,
+                                  'Include',
+                                  [],
+                                  DEBUG)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -334,13 +414,13 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_json_Exclude(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
         filters = [{'Name' + TT: 'unit_test',
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
-        name, msg = app.save_data(dtype + file, filters, 'Exclude', DEBUG)
+        name, msg = app.save_data(dtype + file, filters, 'Exclude', [], DEBUG)
 
         with open('test.json') as f:
             result = json.load(f)
@@ -359,13 +439,13 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_json_Include(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
         filters = [{'Name' + TT: 'unit_test',
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
-        name, msg = app.save_data(dtype + file, filters, 'Include', DEBUG)
+        name, msg = app.save_data(dtype + file, filters, 'Include', [], DEBUG)
 
         with open('test.json') as f:
             result = json.load(f)
@@ -384,7 +464,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_filter_error(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
 
@@ -393,14 +473,14 @@ class MainAppPresenterTest(TestHelper):
 
         app.load._data.save_filters = mock.Mock(side_effect=throw)
 
-        name, msg = app.save_data(dtype + file, [], ' Exclude', DEBUG)
+        name, msg = app.save_data(dtype + file, [], ' Exclude', [], DEBUG)
         self.assertFalse(os.path.isfile(file))
         self.assertEqual(name, '')
         self.assertEqual(str(msg), 'Saving Error: save crash')
 
     def test_save_none(self):
         app = MainAppPresenter(dummy_open)
-        result = app.save_data('None', [], 'Exclude', DEBUG)
+        result = app.save_data('None', [], 'Exclude', [], DEBUG)
         self.assertEqual(result[0], '')
         self.assertEqual(result[1], '')
 
