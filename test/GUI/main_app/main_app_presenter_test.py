@@ -81,7 +81,7 @@ class MainAppPresenterTest(TestHelper):
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
 
-        result = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
@@ -99,7 +99,7 @@ class MainAppPresenterTest(TestHelper):
         app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
                                                     np.array([-1., 0., 1.])))
         bad_file = 'HIFI0.nxs'
-        result = app.load_nxs(CURRENT + bad_file, [], DEBUG)
+        result = app.load_nxs(CURRENT + bad_file, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
@@ -118,7 +118,7 @@ class MainAppPresenterTest(TestHelper):
         app.gen_fake_data = mock.Mock(return_value=(np.array([1., 2., 3.]),
                                                     np.array([-1., 0., 1.])))
         bad_file = 'None'
-        result = app.load_nxs(CURRENT + bad_file, [], DEBUG)
+        result = app.load_nxs(CURRENT + bad_file, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
@@ -135,7 +135,17 @@ class MainAppPresenterTest(TestHelper):
         app.plot = mock.Mock(return_value='plot')
 
         filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
-        result = app.load_nxs(CURRENT + FILE, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         # should clear the filters
         self.assertEqual(result[1], [])
@@ -148,6 +158,35 @@ class MainAppPresenterTest(TestHelper):
 
         self.assertMockOnce(app.plot, [])
 
+    def test_load_nxs_with_filters_same_file(self):
+
+        app = MainAppPresenter(dummy_open)
+
+        result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
+        plot = result[0]
+
+        # add some filters after load
+        filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+        # load the same data again
+        result = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
+        self.assertEqual(result[0], plot)
+        # should clear the filters
+        self.assertEqual(result[1], filters)
+        self.assertEqual(result[2], False)
+        self.assertEqual(result[3], logs)
+        self.assertEqual(result[4], False)
+        self.assertEqual(len(result[5]), 3)
+        self.assertEqual(result[6], '')
+
     def test_load_nxs_fails_with_filters(self):
 
         app = MainAppPresenter(dummy_open)
@@ -157,7 +196,17 @@ class MainAppPresenterTest(TestHelper):
                                                     np.array([-1., 0., 1.])))
         bad_file = 'HIFI0.nxs'
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        result = app.load_nxs(CURRENT + bad_file, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + bad_file, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
@@ -178,7 +227,17 @@ class MainAppPresenterTest(TestHelper):
                                                     np.array([-1., 0., 1.])))
         bad_file = 'None'
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        result = app.load_nxs(CURRENT + bad_file, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        result = app.load_nxs(CURRENT + bad_file, filters, logs, DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], True)
@@ -191,7 +250,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_load_filter_time_fails(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + BADFILTER, DEBUG)
 
         self.assertEqual(result[0], [])
@@ -203,7 +262,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_load_filter(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + FILTER, DEBUG)
         self.assertEqual(result[0], [{'Name' + TT: 'first',
                                       'Start' + TT: 0.01,
@@ -230,7 +289,7 @@ class MainAppPresenterTest(TestHelper):
         bad_file = 'filters.json'
 
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         result = app.load_filter(CURRENT + bad_file, DEBUG)
 
         self.assertEqual(result[0], [])
@@ -246,7 +305,17 @@ class MainAppPresenterTest(TestHelper):
 
         app = MainAppPresenter(dummy_open)
         filters = [{'Name': 'test', 'Start': 0, 'End': 1}]
-        _ = app.load_nxs(CURRENT + FILE, filters, DEBUG)
+        logs = [{'Delete_log-table': '',
+                 'Name_log-table': 'mag_field',
+                 'sample_log-table': 'B',
+                 'filter_log-table': 'between',
+                 'magic': 'between',
+                 'y0_log-table': 0,
+                 'yN_log-table': 1,
+                 'y_min_log-table': 0,
+                 'y_max_log-table': 3}]
+
+        _ = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
         result = app.load_filter(CURRENT + bad_file, DEBUG)
 
         self.assertEqual(result[0], [])
@@ -274,7 +343,7 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
         name, msg = app.save_data(dtype + file_name, [],
@@ -297,7 +366,7 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 1.2, 'End' + TT: 200}]
@@ -325,7 +394,7 @@ class MainAppPresenterTest(TestHelper):
         by other unit tests).
         """
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'n'
         file_name = 'test.nxs'
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 1.2, 'End' + TT: 100},
@@ -349,7 +418,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_json_Exclude(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
         filters = [{'Name' + TT: 'unit_test',
@@ -375,7 +444,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_json_Include(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
         filters = [{'Name' + TT: 'unit_test',
@@ -401,7 +470,7 @@ class MainAppPresenterTest(TestHelper):
 
     def test_save_filter_error(self):
         app = MainAppPresenter(dummy_open)
-        _ = app.load_nxs(CURRENT + FILE, [], DEBUG)
+        _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
         file = 'test.json'
 

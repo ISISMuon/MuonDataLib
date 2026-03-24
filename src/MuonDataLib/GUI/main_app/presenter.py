@@ -188,25 +188,31 @@ class MainAppPresenter(object):
         """
         return self.control._filter._amp.plot(data)
 
-    def load_nxs(self, name, data, amp, debug_state):
+    def load_nxs(self, name, time_data,
+                 log_data, debug_state):
         """
         Loads a muon event nexus file.
         :param name: the 'CURRENT' text string and
         the name of the file to open.
-        :param data: the time filter table data
+        :param time_data: the time filter table data
+        :param log_data: the log filter table data
         :param debug_state: if debug mode is on or off.
         :returns: yields:
         - the updated figure
         - the time filter table data
         - if the time filter table is disabled
+        - the sample log table data
         - if the sample log table is disabled
         - the filter table column names
         - the amplitude filter
         - the alert message
         """
         if name == self.load.file:
-            return (self.control._plot.fig, data, True, True,
-                    self.control.headers, amp '')
+            # same file
+            return (self.control._plot.fig,
+                    time_data, False,
+                    log_data, False,
+                    self.control.headers, '')
         self.load.set_file(name)
 
         if 'None' in name:
