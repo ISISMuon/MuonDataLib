@@ -38,7 +38,8 @@ class FilterPresenter(PresenterTemplate):
         time filter table
         :param log_data: the log data for the
         log filter table
-        :returns: if to show the name in the GUI
+        :param amp_data: The amplitude filter data
+        :returns: if the  the name in the GUI
         """
         if (self._time_file_data == time_data and
                 self._log_file_data == log_data and
@@ -130,6 +131,7 @@ class FilterPresenter(PresenterTemplate):
         for the time filter table
         :param log_filters: the data from the sample
         log filter table
+        :param apm_filters: the amplitude filter
         :returns: a list of the exclude filter start times,
         a list of the exclude filter end times,
         an error message.
@@ -205,9 +207,11 @@ class FilterPresenter(PresenterTemplate):
         data.
         :param log_filters: the data from the
         sample log filter table
+        :param amp_filter: the amplitude filter
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
+        self._data.clear_filters()
         try:
             self.apply_filters(time_filters, state, log_filters, amp_filter)
         except RuntimeError as msg:
@@ -221,8 +225,8 @@ class FilterPresenter(PresenterTemplate):
         Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
         :returns: the time filters, the sample log
-        filters and if to include/exclude the time filters,
-        the time filter table headers
+        filters, the amplitude filters, if to include/exclude the time filters,
+        and the table headers
         """
         time_data, state = self._time.load(filters['time_filters'])
         self._time_file_data = time_data

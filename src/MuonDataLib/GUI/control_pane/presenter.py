@@ -62,6 +62,7 @@ class ControlPanePresenter(PresenterTemplate):
         for the data that is kept.
         :param time_data: the data from the time filter table
         :param log_data: the data from the sample log filter table.
+        :param amp_data: the amplitudes from the sample log filter table.
         Its also used to get which plots to make.
         :param state: the state of the time filters (inc/exc)
         :returns: an updated figure
@@ -301,8 +302,8 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the time table data, the log table data,
-        and the state for the time filter (include/exclude)
+        :returns: the time table data, the log table data, time filter,
+        amplitude filter, the state for the time filter (include/exclude)
         and the column headers
         """
         with open(name, 'r') as file:

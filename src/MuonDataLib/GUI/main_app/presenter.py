@@ -83,6 +83,7 @@ class MainAppPresenter(object):
         :param debug: If debug mode is on or off
         :returns: The list of rows for the time filter table,
         the list of rows for the sample log filter table,
+        the amplitude filter,
         the state of the time filters (include/exclude),
         the column headers
         and an error message (if it fails)
@@ -124,6 +125,7 @@ class MainAppPresenter(object):
         or exclude the data
         :param log_filters: the data from the sample log
         filter table
+        :param amp_filters: the amplitude filters
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -178,9 +180,15 @@ class MainAppPresenter(object):
         return self.control.plot_default()
 
     def plot_amps(self, data):
+        """
+        Simple method to plot the amplitude
+        histogram
+        :param data: the amplitude filter data
+        :returns: the plot object
+        """
         return self.control._filter._amp.plot(data)
 
-    def load_nxs(self, name, data, debug_state):
+    def load_nxs(self, name, data, amp, debug_state):
         """
         Loads a muon event nexus file.
         :param name: the 'CURRENT' text string and
@@ -193,11 +201,12 @@ class MainAppPresenter(object):
         - if the time filter table is disabled
         - if the sample log table is disabled
         - the filter table column names
+        - the amplitude filter
         - the alert message
         """
         if name == self.load.file:
             return (self.control._plot.fig, data, True, True,
-                    self.control.headers, {}, '')
+                    self.control.headers, amp '')
         self.load.set_file(name)
 
         if 'None' in name:
