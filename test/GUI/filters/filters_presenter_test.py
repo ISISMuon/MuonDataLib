@@ -372,6 +372,13 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(N_str.children,
                          'Number of events: 64,147')
 
+    def test_calculate_amp_filter(self):
+        self.presenter._data = load_events(FILE, 64)
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 2500)
+        self.assertEqual(err_msg, '')
+        self.assertEqual(N_str.children,
+                         'Number of events: 7,944')
+
     def test_calculate_with_exclude_filter(self):
         self.presenter._data = load_events(FILE, 64)
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
