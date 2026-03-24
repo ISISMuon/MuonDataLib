@@ -80,7 +80,7 @@ class MainAppPresenterTest(TestHelper):
 
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
-
+        app.plot_amps = mock.Mock(return_value='amps')
         result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         self.assertEqual(result[0], 'plot')
         self.assertEqual(result[1], [])
@@ -88,7 +88,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], False)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6], '')
+        self.assertEqual(result[6], 'amps')
+        self.assertEqual(result[7], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -106,7 +107,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], True)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6],
+        self.assertEqual(result[6], {})
+        self.assertEqual(result[7],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -125,7 +127,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], True)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6], '')
+        self.assertEqual(result[6], {})
+        self.assertEqual(result[7], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -133,7 +136,7 @@ class MainAppPresenterTest(TestHelper):
 
         app = MainAppPresenter(dummy_open)
         app.plot = mock.Mock(return_value='plot')
-
+        app.plot_amps = mock.Mock(return_value='amps')
         filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
         logs = [{'Delete_log-table': '',
                  'Name_log-table': 'mag_field',
@@ -146,14 +149,13 @@ class MainAppPresenterTest(TestHelper):
                  'y_max_log-table': 3}]
 
         result = app.load_nxs(CURRENT + FILE, filters, logs, DEBUG)
-        self.assertEqual(result[0], 'plot')
         # should clear the filters
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], False)
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], False)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6], 0)
+        self.assertEqual(result[6], 'amps')
         self.assertEqual(result[7], '')
 
         self.assertMockOnce(app.plot, [])
@@ -164,6 +166,7 @@ class MainAppPresenterTest(TestHelper):
 
         result = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         plot = result[0]
+        amps = result[6]
 
         # add some filters after load
         filters = [{'Name' + TT: 'test', 'Start' + TT: 0, 'End' + TT: 1}]
@@ -185,7 +188,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], logs)
         self.assertEqual(result[4], False)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6], '')
+        self.assertEqual(result[6], amps)
+        self.assertEqual(result[7], '')
 
     def test_load_nxs_fails_with_filters(self):
 
@@ -213,7 +217,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], True)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6],
+        self.assertEqual(result[6], {})
+        self.assertEqual(result[7],
                          'An error occurred: '
                          'The file HIFI0.nxs cannot be read')
 
@@ -244,7 +249,8 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[3], [])
         self.assertEqual(result[4], True)
         self.assertEqual(len(result[5]), 3)
-        self.assertEqual(result[6], '')
+        self.assertEqual(result[6], {})
+        self.assertEqual(result[7], '')
 
         self.assertMockOnce(app.plot, [])
 
@@ -255,9 +261,10 @@ class MainAppPresenterTest(TestHelper):
 
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
-        self.assertEqual(result[2], 'Exclude')
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], 'Load filter error: Cannot have '
+        self.assertEqual(result[2], 0)
+        self.assertEqual(result[3], 'Exclude')
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], 'Load filter error: Cannot have '
                          'both include and exclude time filters')
 
     def test_load_filter(self):
@@ -281,9 +288,10 @@ class MainAppPresenterTest(TestHelper):
                                       'y_min_log-table': np.float64(35.0)
                                       }])
 
-        self.assertEqual(result[2], 'Include')
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], '')
+        self.assertEqual(result[2], 3.14)
+        self.assertEqual(result[3], 'Include')
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], '')
 
     def test_load_filter_fail(self):
         bad_file = 'filters.json'
@@ -294,9 +302,10 @@ class MainAppPresenterTest(TestHelper):
 
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
-        self.assertEqual(result[2], 'Exclude')
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], "Load filter error: "
+        self.assertEqual(result[2], 0)
+        self.assertEqual(result[3], 'Exclude')
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 
@@ -320,9 +329,10 @@ class MainAppPresenterTest(TestHelper):
 
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
-        self.assertEqual(result[2], 'Exclude')
-        self.assertEqual(len(result[3]), 3)
-        self.assertEqual(result[4], "Load filter error: "
+        self.assertEqual(result[2], 0)
+        self.assertEqual(result[3], 'Exclude')
+        self.assertEqual(len(result[4]), 3)
+        self.assertEqual(result[5], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 

@@ -204,7 +204,7 @@ class MainAppPresenter(object):
         - the sample log table data
         - if the sample log table is disabled
         - the filter table column names
-        - the amplitude filter
+        - plot of the amplitude histogram
         - the alert message
         """
         if name == self.load.file:
@@ -212,7 +212,9 @@ class MainAppPresenter(object):
             return (self.control._plot.fig,
                     time_data, False,
                     log_data, False,
-                    self.control.headers, '')
+                    self.control.headers,
+                    self.control._filter._amp._plot.fig,
+                    '')
         self.load.set_file(name)
 
         if 'None' in name:
