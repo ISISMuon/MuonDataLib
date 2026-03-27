@@ -30,8 +30,21 @@ class FilterPresenterTest(TestHelper):
         """
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
 
-        self.assertFalse(self.presenter.show_file(name, 'time', 'log'))
+        self.assertFalse(self.presenter.show_file(name, 'time', 'log', 2))
+
+    def test_show_file_match_amp_fails(self):
+        name = 'test.json'
+        """
+        lets use fake values (should be dicts,
+        but just checks they match)
+        """
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
+
+        self.assertTrue(self.presenter.show_file(name, 'time', 'log', 4))
 
     def test_show_file_time_match(self):
         name = 'test.json'
@@ -41,8 +54,9 @@ class FilterPresenterTest(TestHelper):
         """
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
 
-        self.assertTrue(self.presenter.show_file(name, 'time', 'new'))
+        self.assertTrue(self.presenter.show_file(name, 'time', 'new', 2))
 
     def test_show_file_log_match(self):
         name = 'test.json'
@@ -52,8 +66,9 @@ class FilterPresenterTest(TestHelper):
         """
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
 
-        self.assertTrue(self.presenter.show_file(name, 'new', 'log'))
+        self.assertTrue(self.presenter.show_file(name, 'new', 'log', 2))
 
     def test_show_file_no_match(self):
         name = 'test.json'
@@ -63,8 +78,9 @@ class FilterPresenterTest(TestHelper):
         """
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
 
-        self.assertTrue(self.presenter.show_file(name, 'unit', 'test'))
+        self.assertTrue(self.presenter.show_file(name, 'unit', 'test', 3))
 
     def test_headers(self):
         self.assertEqual(len(self.presenter.headers), 3)
@@ -102,7 +118,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
                                      'Include',
-                                     [])
+                                     [],
+                                     0)
         result = self.presenter._data.report_filters()
 
         expect = [0, {}, {}, {}]
@@ -119,7 +136,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
                                      'Include',
-                                     [])
+                                     [],
+                                     0)
         result = self.presenter._data.report_filters()
 
         expect = [0,
@@ -140,7 +158,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(filters,
                                      'Exclude',
-                                     [])
+                                     [],
+                                     0)
         result = self.presenter._data.report_filters()
         expect = [0,
                   {},
@@ -159,7 +178,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters([],
                                      'Exclude',
-                                     filters)
+                                     filters,
+                                     0)
         result = self.presenter._data.report_filters()
         expect = [0,
                   {'Temp': [1, 11]},
@@ -177,7 +197,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters([],
                                      'Exclude',
-                                     filters)
+                                     filters,
+                                     0)
         result = self.presenter._data.report_filters()
         expect = [0,
                   {'Temp': [4, -999]},
@@ -195,7 +216,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters([],
                                      'Exclude',
-                                     filters)
+                                     filters,
+                                     0)
         result = self.presenter._data.report_filters()
         expect = [0,
                   {'Temp': [-999, 7]},
@@ -220,7 +242,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters(times,
                                      'Exclude',
-                                     logs)
+                                     logs,
+                                     0)
         result = self.presenter._data.report_filters()
         expect = [0,
                   {'Temp': [2, 7]},
@@ -241,7 +264,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         start, stop, msg = self.presenter.update_filters(times,
                                                          'Exclude',
-                                                         {})
+                                                         {},
+                                                         0)
         self.assertEqual(msg, '')
         self.assertArrays(start, [0.994])
         self.assertArrays(stop, [1.194])
@@ -255,7 +279,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         start, stop, msg = self.presenter.update_filters([],
                                                          'Exclude',
-                                                         logs)
+                                                         logs,
+                                                         0)
         self.assertEqual(msg, '')
         self.assertArrays(start, [0.994])
         self.assertArrays(stop, [3.174])
@@ -264,7 +289,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         start, stop, msg = self.presenter.update_filters([],
                                                          'Exclude',
-                                                         [])
+                                                         [],
+                                                         0)
         self.assertEqual(msg, '')
         self.assertArrays(start, [])
         self.assertArrays(stop, [])
@@ -285,7 +311,8 @@ class FilterPresenterTest(TestHelper):
         self.presenter._data = load_events(FILE, 64)
         start, stop, msg = self.presenter.update_filters(times,
                                                          'Exclude',
-                                                         logs)
+                                                         logs,
+                                                         0)
         self.assertEqual(msg, '')
         self.assertArrays(start, [0.994])
         self.assertArrays(stop, [3.174])
@@ -340,15 +367,22 @@ class FilterPresenterTest(TestHelper):
 
     def test_calculate_no_filters(self):
         self.presenter._data = load_events(FILE, 64)
-        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [])
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 0)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 64,147')
 
+    def test_calculate_amp_filter(self):
+        self.presenter._data = load_events(FILE, 64)
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 2500)
+        self.assertEqual(err_msg, '')
+        self.assertEqual(N_str.children,
+                         'Number of events: 7,944')
+
     def test_calculate_with_exclude_filter(self):
         self.presenter._data = load_events(FILE, 64)
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude', [])
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude', [], 0)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 57,653')
@@ -356,7 +390,7 @@ class FilterPresenterTest(TestHelper):
     def test_calculate_with_include_filter(self):
         self.presenter._data = load_events(FILE, 64)
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [])
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 5,037')
@@ -368,19 +402,19 @@ class FilterPresenterTest(TestHelper):
                 'y0' + LT: 35.5,
                 'yN' + LT: 37}]
 
-        N_str, err_msg = self.presenter.calculate(1, [], 'Include', log)
+        N_str, err_msg = self.presenter.calculate(1, [], 'Include', log, 0)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 57,481')
 
     def test_calculate_with_error(self):
-        def throw(filters, state, log):
+        def throw(filters, state, log, amp):
             raise RuntimeError("mock throw")
 
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters = mock.Mock(side_effect=throw)
         filters = [{'Name_t': 'unit', 'Start_t': 0.1, 'End_t': 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [])
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0)
         self.assertEqual(err_msg, 'mock throw')
         self.assertEqual(N_str.children,
                          'Number of events: 0')
@@ -394,7 +428,7 @@ class FilterPresenterTest(TestHelper):
 
         _data = load_events(FILE, 64)
         self.presenter.set_data(_data)
-        data, logs, state, headers = self.presenter.load(filters)
+        data, logs, amps, state, headers = self.presenter.load(filters)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'unit',
@@ -412,6 +446,7 @@ class FilterPresenterTest(TestHelper):
                                  'y_max_log-table': np.float64(39.0),
                                  'y_min_log-table': np.float64(35.0)}
                                 ])
+        self.assertEqual(amps, 1.2)
         self.assertEqual(len(headers), 3)
 
     def test_load_exclude(self):
@@ -420,7 +455,7 @@ class FilterPresenterTest(TestHelper):
         filters['time_filters'] = {'keep_filters': {},
                                    'remove_filters': {'more': [5, 6],
                                                       'tests': [7, 8]}}
-        data, logs, state, headers = self.presenter.load(filters)
+        data, logs, amps, state, headers = self.presenter.load(filters)
         self.assertEqual(state, 'Exclude')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'more',
@@ -430,6 +465,7 @@ class FilterPresenterTest(TestHelper):
                                    'Start' + TT: 7,
                                    'End' + TT: 8})
         self.assertEqual(logs, [])
+        self.assertEqual(amps, 1.2)
         self.assertEqual(len(headers), 3)
 
     def test_load_fail(self):
@@ -440,7 +476,7 @@ class FilterPresenterTest(TestHelper):
                                    'remove_filters': {'more': [5, 6],
                                                       'tests': [7, 8]}}
         with self.assertRaises(RuntimeError):
-            data, state = self.presenter.load(filters)
+            _ = self.presenter.load(filters)
 
     def test_update_N_events_success(self):
         result = self.presenter.update_N_events(True, 'old')

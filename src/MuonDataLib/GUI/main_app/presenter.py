@@ -83,6 +83,7 @@ class MainAppPresenter(object):
         :param debug: If debug mode is on or off
         :returns: The list of rows for the time filter table,
         the list of rows for the sample log filter table,
+        the amplitude filter,
         the state of the time filters (include/exclude),
         the column headers
         and an error message (if it fails)
@@ -93,11 +94,11 @@ class MainAppPresenter(object):
 
             filters = name[len(CURRENT):]
             result = self.control.read_filter(filters)
-            time_data, log_data, state, cols = result
-            return time_data, log_data, state, cols, ''
+            time_data, log_data, amp, state, cols = result
+            return time_data, log_data, amp, state, cols, ''
         except Exception as err:
             cols = self.control.headers
-            return [], [], 'Exclude', cols, f'Load filter error: {err}'
+            return [], [], 0, 'Exclude', cols, f'Load filter error: {err}'
 
     def alert(self, text):
         """
@@ -111,7 +112,8 @@ class MainAppPresenter(object):
             return False
         return True
 
-    def save_data(self, name, time_filters, time_mode, log_filters, debug):
+    def save_data(self, name, time_filters, time_mode,
+                  log_filters, amp_filters, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
@@ -123,6 +125,7 @@ class MainAppPresenter(object):
         or exclude the data
         :param log_filters: the data from the sample log
         filter table
+        :param amp_filters: the amplitude filters
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -139,7 +142,8 @@ class MainAppPresenter(object):
             print("saving to ", file)
             self.control._filter.apply_filters(time_filters,
                                                time_mode,
-                                               log_filters)
+                                               log_filters,
+                                               amp_filters)
             if dtype == "n":
                 data.save_histograms(file)
             elif dtype == 'j':
@@ -175,6 +179,15 @@ class MainAppPresenter(object):
         """
         return self.control.plot_default()
 
+    def plot_amps(self, data):
+        """
+        Simple method to plot the amplitude
+        histogram
+        :param data: the amplitude filter data
+        :returns: the plot object
+        """
+        return self.control._filter._amp.plot(data)
+
     def load_nxs(self, name, time_data,
                  log_data, debug_state):
         """
@@ -191,6 +204,7 @@ class MainAppPresenter(object):
         - the sample log table data
         - if the sample log table is disabled
         - the filter table column names
+        - plot of the amplitude histogram
         - the alert message
         """
         if name == self.load.file:
@@ -198,7 +212,9 @@ class MainAppPresenter(object):
             return (self.control._plot.fig,
                     time_data, False,
                     log_data, False,
-                    self.control.headers, '')
+                    self.control.headers,
+                    self.control._filter._amp._plot.fig,
+                    '')
         self.load.set_file(name)
 
         if 'None' in name:
@@ -208,6 +224,7 @@ class MainAppPresenter(object):
                     [],
                     True,
                     self.control.headers,
+                    {},
                     '')
         try:
             if debug_state:
@@ -223,10 +240,11 @@ class MainAppPresenter(object):
                     [],
                     True,
                     self.control.headers,
+                    {},
                     f'An error occurred: {err}')
 
         data = self.load.get_data
         self.control.set_data(data)
 
         return (self.plot(), [], False, [], False,
-                self.control.headers, '')
+                self.control.headers, self.plot_amps(data), '')

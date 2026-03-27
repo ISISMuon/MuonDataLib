@@ -1,6 +1,7 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
+from MuonDataLib.GUI.amp.presenter import AmpPresenter
 from MuonDataLib.GUI.filters.view import FilterView
 
 
@@ -18,12 +19,14 @@ class FilterPresenter(PresenterTemplate):
         """
         self._time = TimePresenter()
         self._log = LogPresenter()
+        self._amp = AmpPresenter()
         self._view = FilterView(self)
         self._data = None
         self._time_file_data = []
         self._log_file_data = []
+        self._amp_file_data = 0
 
-    def show_file(self, name, time_data, log_data):
+    def show_file(self, name, time_data, log_data, amp_data):
         """
         If to display the name of the loaded
         filter file. This method chekcs
@@ -35,10 +38,12 @@ class FilterPresenter(PresenterTemplate):
         time filter table
         :param log_data: the log data for the
         log filter table
-        :returns: if to show the name in the GUI
+        :param amp_data: The amplitude filter data
+        :returns: if to hide the name in the GUI
         """
         if (self._time_file_data == time_data and
-                self._log_file_data == log_data):
+                self._log_file_data == log_data and
+                self._amp_file_data == float(amp_data)):
             return False
         return True
 
@@ -61,7 +66,7 @@ class FilterPresenter(PresenterTemplate):
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)
 
-    def apply_filters(self, time_filters, state, log_filters):
+    def apply_filters(self, time_filters, state, log_filters, amp_filters):
         """
         A method to apply the filters to the
         muon event data object. This allows
@@ -70,8 +75,11 @@ class FilterPresenter(PresenterTemplate):
         :param time_filters: A list of filters (dicts)
         :param state: If to include or exclude the data
         :param log_filters: a list of log filters
+        :param amp_filters: amplitude filter
         """
-        if len(time_filters) == 0 and len(log_filters) == 0:
+        if (len(time_filters) == 0 and
+                len(log_filters) == 0 and
+                amp_filters == 0):
             # if no filters, do nothing
             return
 
@@ -107,8 +115,10 @@ class FilterPresenter(PresenterTemplate):
             elif filter_type == 'below':
                 self._data.keep_data_sample_log_below(sample_log,
                                                       stop)
+        self._data.keep_data_peak_property_above("Amplitudes",
+                                                 float(amp_filters))
 
-    def update_filters(self, time_filters, state, log_filters):
+    def update_filters(self, time_filters, state, log_filters, amp_filters):
         """
         Gets the updated start and stop times for the
         exclude filters. The first step is a bit
@@ -121,6 +131,7 @@ class FilterPresenter(PresenterTemplate):
         for the time filter table
         :param log_filters: the data from the sample
         log filter table
+        :param apm_filters: the amplitude filter
         :returns: a list of the exclude filter start times,
         a list of the exclude filter end times,
         an error message.
@@ -129,7 +140,7 @@ class FilterPresenter(PresenterTemplate):
         if len(time_filters) == 0 and len(log_filters) == 0:
             return [], [], ''
         try:
-            self.apply_filters(time_filters, state, log_filters)
+            self.apply_filters(time_filters, state, log_filters, amp_filters)
         except RuntimeError as msg:
             return [], [], str(msg)
         start, stop = self._data.get_filters_as_times()
@@ -182,7 +193,8 @@ class FilterPresenter(PresenterTemplate):
 
         return row_log['y_min_log-table'], row_log['y_max_log-table']
 
-    def calculate(self, n_clicks, time_filters, state, log_filters):
+    def calculate(self, n_clicks, time_filters, state,
+                  log_filters, amp_filter):
         """
         A method to calculate the number of
         events that would be used to make
@@ -195,11 +207,13 @@ class FilterPresenter(PresenterTemplate):
         data.
         :param log_filters: the data from the
         sample log filter table
+        :param amp_filter: the amplitude filter
         :returns: The string to display the number
         of events, the error message (if there is one)
         """
+        self._data.clear_filters()
         try:
-            self.apply_filters(time_filters, state, log_filters)
+            self.apply_filters(time_filters, state, log_filters, amp_filter)
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram()
@@ -211,8 +225,8 @@ class FilterPresenter(PresenterTemplate):
         Loads the filters that have been reported from a json file
         :param filters: the dict of the filters
         :returns: the time filters, the sample log
-        filters and if to include/exclude the time filters,
-        the time filter table headers
+        filters, the amplitude filters, if to include/exclude the time filters,
+        and the table headers
         """
         time_data, state = self._time.load(filters['time_filters'])
         self._time_file_data = time_data
@@ -220,8 +234,11 @@ class FilterPresenter(PresenterTemplate):
 
         log_data = self._log.load(filters['sample_log_filters'])
         self._log_file_data = log_data
-        print('loading....#', time_data, log_data)
-        return time_data, log_data, state, self.headers
+
+        self._amp_file_data = self._amp.load(filters['peak_property'])
+
+        print('loading filters ....')
+        return time_data, log_data, self._amp_file_data, state, self.headers
 
     def update_N_events(self, update, current_str):
         """

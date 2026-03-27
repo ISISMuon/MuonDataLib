@@ -54,7 +54,7 @@ class ControlPanePresenter(PresenterTemplate):
         name = self._filter._log.get_new_log_name([])
         return self._plot.new_plot([name], self._filter._log._logs)
 
-    def make_plot(self, time_data, log_data, state):
+    def make_plot(self, time_data, log_data, amp_data, state):
         """
         This method creates a plot.
         If no sample logs are selected, it will just plot a
@@ -62,6 +62,7 @@ class ControlPanePresenter(PresenterTemplate):
         for the data that is kept.
         :param time_data: the data from the time filter table
         :param log_data: the data from the sample log filter table.
+        :param amp_data: the amplitudes from the sample log filter table.
         Its also used to get which plots to make.
         :param state: the state of the time filters (inc/exc)
         :returns: an updated figure
@@ -75,7 +76,8 @@ class ControlPanePresenter(PresenterTemplate):
         self._plot.new_plot(names, self._filter._log._logs)
         start, stop, msg = self._filter.update_filters(time_data,
                                                        state,
-                                                       log_data)
+                                                       log_data,
+                                                       amp_data)
 
         self.add_filters(start, stop, log_data)
 
@@ -300,11 +302,11 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the time table data, the log table data,
-        and the state for the time filter (include/exclude)
+        :returns: the time table data, the log table data, time filter,
+        amplitude filter, the state for the time filter (include/exclude)
         and the column headers
         """
         with open(name, 'r') as file:
             data = json.load(file)
-        time_data, log_data, state, cols = self._filter.load(data)
-        return time_data, log_data, state, cols
+        time_data, log_data, amp, state, cols = self._filter.load(data)
+        return time_data, log_data, amp, state, cols
