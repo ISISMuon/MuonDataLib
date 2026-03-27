@@ -166,7 +166,7 @@ class MuonEventData(MuonData):
         self.clear_filters()
         return start_times, end_times
 
-    def histogram(self, resolution=0.016):
+    def histogram(self, resolution=0.016, parallel=False):
         """
         A method for constructing a histogram.
         This will skip calculating the filters
@@ -184,7 +184,8 @@ class MuonEventData(MuonData):
 
         if is_cache_empty or self._cache.get_resolution() != resolution:
             return self._events.histogram(width=resolution,
-                                          cache=self._cache)
+                                          cache=self._cache,
+                                          parallel=parallel)
         return self._cache.get_histograms()
 
     def save_histograms(self, file_name, resolution=0.016):

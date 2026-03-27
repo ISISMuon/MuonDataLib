@@ -1,4 +1,5 @@
 from MuonDataLib.data.utils import NONE
+from MuonDataLib.test import make_numba2 as para_histogram
 from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
@@ -426,6 +427,7 @@ cdef class Events:
                   double max_time=32.768,
                   double width=0.016,
                   cache=None,
+                  parallel=False,
                   ):
         """
         Create a matrix of histograms from the event data
@@ -448,14 +450,25 @@ cdef class Events:
         cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
                                       dtype=np.int32)
 
-        hist, bins, N = make_histogram(times=times,
-                                       spec=IDs,
-                                       N_spec=self.N_spec,
-                                       periods=periods,
-                                       min_time=min_time,
-                                       max_time=max_time,
-                                       width=width,
-                                       weight=weight)
+        if parallel:
+            hist, bins, N = para_histogram(times=np.asarray(times),
+                                           spec=np.asarray(IDs),
+                                           N_spec=self.N_spec,
+                                           periods=np.asarray(periods),
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=np.array(weight)
+                                           )
+        else:
+            hist, bins, N = make_histogram(times=times,
+                                           spec=IDs,
+                                           N_spec=self.N_spec,
+                                           periods=periods,
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=weight)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
