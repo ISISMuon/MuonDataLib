@@ -21,3 +21,8 @@ description = 'Reading and writing for ISIS muon experiments.'
 readme = 'README.md'
 license = {text = 'BSD'}
 
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+extend-select = ["E", "W"]
