@@ -1,7 +1,9 @@
-from MuonDataLib.GUI.table.column import TableGroup, Column
+from MuonDataLib.GUI.table.column import (TableGroup,
+                                          TextColumn,
+                                          NumericColumn,
+                                          ButtonColumn)
 
-
-VALID_DTYPES = ['text', 'numeric', 'button']
+VALID_DTYPES = [TextColumn, NumericColumn, ButtonColumn]
 
 
 def expected_col_dict(dtype, ID='unit', name='test'):
@@ -9,19 +11,19 @@ def expected_col_dict(dtype, ID='unit', name='test'):
            'headerName': name,
            'width': 100,
            'hide': False}
-    if dtype == 'text':
+    if dtype == TextColumn:
         col['cellEditor'] = 'agLargeTextCellEditor'
         col['cellEditorPopup'] = False
         col['cellEditorParams'] = {'maxLength': 50}
         col['editable'] = True
 
-    elif dtype == 'numeric':
+    elif dtype == NumericColumn:
         col['cellEditor'] = 'agNumberCellEditor'
         col['cellEditorParams'] = {'min': -1000000,
                                    'max': 1000000,
                                    'precision': 5}
         col['editable'] = True
-    elif dtype == 'button':
+    elif dtype == ButtonColumn:
         col['editable'] = False
         col['cellRenderer'] = 'Button'
         col['cellRendererParams'] = {'Icon': 'bi bi-trash me-2',
@@ -29,24 +31,23 @@ def expected_col_dict(dtype, ID='unit', name='test'):
     return col
 
 
-COLS = [[Column('Unit', 'unit', dtype)] for dtype in VALID_DTYPES]
+COLS = [[dtype('Unit', 'unit')] for dtype in VALID_DTYPES]
 for dtype1 in VALID_DTYPES:
     for dtype2 in VALID_DTYPES:
-        COLS.append([Column('Unit', 'unit', dtype1),
-                     Column('Test', 'test', dtype2)])
+        COLS.append([dtype1('Unit', 'unit'),
+                     dtype2('Test', 'test')])
 
 TIME_TABLE = ''
-name = Column('Name_' + TIME_TABLE, 'Name', 'text')
-start = Column('Start_' + TIME_TABLE, 'Start', 'numeric')
-end = Column('End_' + TIME_TABLE, 'End', 'numeric')
+name = TextColumn('Name_' + TIME_TABLE, 'Name')
+start = NumericColumn('Start_' + TIME_TABLE, 'Start')
+end = NumericColumn('End_' + TIME_TABLE, 'End')
 
-COL_GROUPS = [[TableGroup([Column('Unit',
-                                  'unit',
-                                  dtype)])] for dtype in VALID_DTYPES]
+COL_GROUPS = [[TableGroup([dtype('Unit', 'unit')])]
+              for dtype in VALID_DTYPES]
 
 for dtype2 in VALID_DTYPES:
-    c1 = Column('Unit', 'unit', dtype1)
-    c2 = Column('Test', 'test', dtype2)
-    c3 = Column('More', 'more', 'text')
+    c1 = dtype1('Unit', 'unit')
+    c2 = dtype2('Test', 'test')
+    c3 = TextColumn('More', 'more')
     COL_GROUPS.append([TableGroup([c2, c3], 'group'),
                        TableGroup([c1])])
