@@ -166,14 +166,16 @@ class MuonEventData(MuonData):
         self.clear_filters()
         return start_times, end_times
 
-    def histogram(self, resolution=0.016):
+    def histogram(self, min_time=0., max_time=32.768, resolution=0.016):
         """
         A method for constructing a histogram.
         This will skip calculating the filters
         if the cache is occupied.
         If just the resolution has changed it will
         not alter the filtered values.
-        :param resolution: the resolution of the
+        :param min_time: the start time for the histogram
+        :param max_time: the end time for the histogram
+        :param resolution: the resolution (bin width) of the
         histogram
         :return: the histograms and bins
         """
@@ -183,18 +185,28 @@ class MuonEventData(MuonData):
             self._filters()
 
         if is_cache_empty or self._cache.get_resolution() != resolution:
-            return self._events.histogram(width=resolution,
+            return self._events.histogram(min_time=min_time,
+                                          max_time=max_time,
+                                          width=resolution,
                                           cache=self._cache)
         return self._cache.get_histograms()
 
-    def save_histograms(self, file_name, resolution=0.016):
+    def save_histograms(self, 
+                        file_name, 
+                        min_time=0.,
+                        max_time=32.768,
+                        resolution=0.016):
         """
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
+        :param min_time: the start time for the histogram
+        :param max_time: the end time for the histogram
         :param resolution: the resolution for the histogram
         """
-        hist, _ = self.histogram(resolution)
+        hist, _ = self.histogram(min_time=min_time,
+                                 max_time=max_time,
+                                 resolution=resolution)
         super().save_histograms(file_name)
 
     def clear_filters(self):
