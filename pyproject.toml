@@ -12,7 +12,7 @@ where = ["src"]
 [project]
 name = 'muondatalib'
 
-version = "0.13.0b1"
+version = "0.13.0b2"
 
 requires-python = ">=3.8"
 dependencies = ['numpy', 'h5py', 'plotly', 'cython', 'pyside6', 'dash[testing]', 'dash_daq', 'dash-ag-grid', 'dash_bootstrap_components']
