@@ -35,6 +35,9 @@ class FilterView(ViewTemplate):
                 dbc.AccordionItem(
                     [presenter._amp.layout],
                     title="Amplitude filter"),
+                dbc.AccordionItem(
+                    [presenter._hist_settings.layout],
+                    title="Histogram settings"),
                 ],
                          start_collapsed=True),
             dbc.Button('Calculate',
