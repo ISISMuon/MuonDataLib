@@ -178,7 +178,7 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
     dm = N_events - start_index[N_frames-1]
     good_periods[M:M + dm] = periods[len(periods)-1]
     M += dm
-    return good_periods[:M]
+    return _good_periods[:M]
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking

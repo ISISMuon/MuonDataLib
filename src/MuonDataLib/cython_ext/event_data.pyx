@@ -1,5 +1,5 @@
 from MuonDataLib.data.utils import NONE
-from MuonDataLib.test import make_numba2 as para_histogram
+from MuonDataLib.test import para_histogram
 from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
@@ -395,13 +395,13 @@ cdef class Events:
         the amplitudes of the kept events.
         """
 
-        cdef int[:] IDs, f_i_start, f_i_end
-        cdef int[:] periods
+        cdef cnp.ndarray[int, ndim=1] IDs, periods
+        cdef cnp.ndarray[double, ndim=1] times, amps
+        cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-        cdef double[:] times, amps
 
         if len(self.filter_start.keys())>0:
-            f_i_start, f_i_end, rm_frames = self._get_exclude_windows()#rm_overlaps(f_i_start, f_i_end, self.periods)
+            f_i_start, f_i_end, rm_frames = self._get_exclude_windows()
 
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -413,9 +413,9 @@ cdef class Events:
                                  "for the histograms. Aborting histogram generation.")
         else:
             # no filters
-            IDs = self.IDs
-            times = self.times
-            amps = self.peak_prop['Amplitudes']
+            IDs = np.asarray(self.IDs)
+            times = np.asarray(self.times)
+            amps = np.asarray(self.peak_prop['Amplitudes'])
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
@@ -439,26 +439,27 @@ cdef class Events:
         :param cache: the cache of event data histograms
         :returns: a matrix of histograms, bin edges
         """
-        cdef int[:] IDs, f_i_start, f_i_end, periods
+        cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames
-        cdef double[:] times
+        cdef cnp.ndarray[double, ndim=1] times
+        cdef cnp.ndarray[int, ndim=1] IDs, periods
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
 
-        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
-                                      dtype=np.int32)
+        cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
+                                                                 1., 0.), dtype=np.int32)
 
         if parallel:
-            hist, bins, N = para_histogram(times=np.asarray(times),
-                                           spec=np.asarray(IDs),
+            hist, bins, N = para_histogram(times=times,
+                                           spec=IDs,
                                            N_spec=self.N_spec,
-                                           periods=np.asarray(periods),
+                                           periods=periods,
                                            min_time=min_time,
                                            max_time=max_time,
                                            width=width,
-                                           weight=np.array(weight)
+                                           weight=weight
                                            )
         else:
             hist, bins, N = make_histogram(times=times,

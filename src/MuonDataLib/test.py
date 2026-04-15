@@ -9,6 +9,7 @@ import dask.array as da
 
 import numba
 from numba import uint32, int32, float32, float64, int64
+from numba import types
 import numpy as np
 
 
@@ -95,7 +96,7 @@ def make_hist(times,
                 result[p, i, :] = a.T.iloc[0].value_counts(bins=bins, sort=False)
     return result, bins, np.sum(result)
 
-def make_numba2(times, 
+def para_histogram(times, 
                spec,
                N_spec,
                periods,
@@ -120,8 +121,9 @@ def make_numba2(times,
     return result, bins, N
 
 
+#@numba.jit((float64[:], int32[:], int64, int32[:], int32[:], float64[:], float64, float64, float64, float64),
 @numba.jit((float64[:], int32[:], int64, int32[:], int32[:], float64[:], float64, float64, float64, float64),
-           parallel=True)
+           parallel=True, fastmath=True)
 def do_stuff2(
              times,
              spec,
@@ -146,4 +148,116 @@ def do_stuff2(
             result[p, det, j_bin] += w_k
             N += w_k
  
-    return result, N        
+    return result, N       
+
+
+string = types.unicode_type
+
+@numba.jit()#int32(float64[:], int64, int64, float64))
+def _binary_search(
+                    values,
+                    start,
+                    stop,
+                    target):
+
+    """
+    A simple recursive binary search. The expectation is that
+    values are sorted into ascending order. It returns the
+    index of the left bounding bin for the target value.
+
+    :param values: The list of ordered time values to search against
+    :param start: The lowest index to include in the search
+    :param stop: The largest index to include in the search
+    :param target: The value we want to search for
+    :returns: The index of the left bounding bin of the target
+    """
+    if stop - start == 1:
+        return start
+
+    elif stop > start:
+        mid_point = start + (stop - start) //2
+
+        if values[mid_point] == target:
+            return mid_point
+
+        elif values[mid_point] > target:
+            return _binary_search(values, start, mid_point, target)
+
+        else:
+            return _binary_search(values, mid_point, stop, target)
+    elif values[start] < target or values[stop] > target:
+        return -1
+    else:
+        return stop
+
+
+#from MuonDataLib.cython_ext.utils import binary_search
+@numba.jit(int32(float64[:], int64, int64, float64, string, string))
+def binary_search(  values,
+                    start,
+                    stop,
+                    target,
+                    name='value',
+                    unit=''):
+
+    """
+    A simple recursive binary search. The expectation is that
+    values are sorted into ascending order. It returns the
+    index of the left bounding bin for the target value.
+
+    This method adds a simple check before the main calculation.
+    :param values: The list of ordered time values to search against
+    :param start: The lowest index to include in the search
+    :param stop: The largest index to include in the search
+    :param target: The value we want to search for
+    :returns: The index of the left bounding bin of the target
+    """
+    if values[0] > target:
+        
+        print(f'The target {target} is before the first {name} {values[0]} {unit}. Difference is {values[0]-target} {unit}')
+
+
+    elif values[len(values)-1] < target:
+        i = len(values) - 1
+        print(f'The target {target} is after the last {name} {values[i]} {unit}. Difference is {target-values[i]} {unit}')
+
+
+    return _binary_search(values, start, stop, target)
+
+@numba.jit((float64[:], float64[:], float64[:], types.unicode_type, types.unicode_type), parallel=True)
+def get_p_indices(times, f_start, f_end,
+                  name='value', unit=''):
+    """
+    Method for calculating which frames filters belong to.
+    This assumes that all data is in order.
+    It uses a binary search to find the index of the left bound of the bin
+    containing the desired value. Since the filter times are in order
+    the next search can have a start value of equal to the index found for
+    the previous filter. Similarly the first end filter must be after the
+    start for the first filter.
+
+
+    :param times: the list of frame start times
+    :param f_start: a list of filter start times
+    :param f_end: a list of filter end times
+    :param name: the name of the thing we are filtering on
+    :param unit: the unit of the thing being filtered
+    :result: the list of start and end frame indices for the filters
+    """
+    N = len(f_start)
+    M = len(times)
+    j_start = np.zeros(N, dtype=np.int32)
+    j_end = np.zeros(N, dtype=np.int32)
+    start = 0
+
+    for j in range(N):
+        j_start[j] = binary_search(times, start, M, f_start[j], name, unit)
+        start = j_start[j]
+
+    # the first end filter must be after the first start filter
+    start = j_start[0]
+    for j in range(N):
+        j_end[j] = binary_search(times, start, M, f_end[j], name, unit)
+
+    return j_start, j_end
+
