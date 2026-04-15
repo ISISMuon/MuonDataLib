@@ -2,6 +2,7 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
+from MuonDataLib.GUI.histogram_settings.presenter import HistSettingsPresenter
 from MuonDataLib.GUI.filters.view import FilterView
 
 
@@ -20,6 +21,7 @@ class FilterPresenter(PresenterTemplate):
         self._time = TimePresenter()
         self._log = LogPresenter()
         self._amp = AmpPresenter()
+        self._hist_settings = HistSettingsPresenter()
         self._view = FilterView(self)
         self._data = None
         self._time_file_data = []

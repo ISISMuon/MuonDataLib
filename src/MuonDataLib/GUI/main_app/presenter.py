@@ -113,7 +113,8 @@ class MainAppPresenter(object):
         return True
 
     def save_data(self, name, time_filters, time_mode,
-                  log_filters, amp_filters, debug):
+                  log_filters, amp_filters,
+                  min_time, max_time, width, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
@@ -145,7 +146,10 @@ class MainAppPresenter(object):
                                                log_filters,
                                                amp_filters)
             if dtype == "n":
-                data.save_histograms(file)
+                data.save_histograms(file,
+                                     min_time=min_time,
+                                     max_time=max_time,
+                                     resolution=width)
             elif dtype == 'j':
                 data.save_filters(file)
             return file, ''

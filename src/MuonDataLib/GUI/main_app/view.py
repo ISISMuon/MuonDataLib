@@ -142,6 +142,10 @@ class MainApp(Dash):
                   State('dropdown-time', 'values'),
                   State('log-table', 'rowData'),
                   State('Amp', 'value'),
+                  # histogram settings
+                  State('min-time', 'value'),
+                  State('max-time', 'value'),
+                  State('width', 'value'),
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 
