@@ -160,7 +160,7 @@ class DropDownColumn(Column):
     This needs to be cleaned up along
     with the above.
     """
-    def __init__(self, ID, name, options):
+    def __init__(self, ID, name, options=None):
         """
         Create the details for the column.
         The min and max are only for the numeric

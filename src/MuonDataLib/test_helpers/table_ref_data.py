@@ -1,9 +1,10 @@
 from MuonDataLib.GUI.table.column import (TableGroup,
                                           TextColumn,
                                           NumericColumn,
-                                          ButtonColumn)
+                                          ButtonColumn,
+                                          DropDownColumn)
 
-VALID_DTYPES = [TextColumn, NumericColumn, ButtonColumn]
+VALID_DTYPES = [TextColumn, NumericColumn, ButtonColumn, DropDownColumn]
 
 
 def expected_col_dict(dtype, ID='unit', name='test'):
@@ -28,6 +29,11 @@ def expected_col_dict(dtype, ID='unit', name='test'):
         col['cellRenderer'] = 'Button'
         col['cellRendererParams'] = {'Icon': 'bi bi-trash me-2',
                                      'className': 'btn btn-danger'}
+    elif dtype == DropDownColumn:
+        col['cellEditor'] = "agSelectCellEditor"
+        col['cellEditorParams'] = {"values": ["above", "between", "below"]}
+        col['singleClickEdit'] = True
+        col['editable'] = True
     return col
 
 
