@@ -82,7 +82,6 @@ class TextColumn(Column):
     """
     A column subclass for storing text data.
     """
-
     def get_cell_config(self):
         return {
             'cellEditor': 'agLargeTextCellEditor',
@@ -155,26 +154,9 @@ class ButtonColumn(Column):
 
 class DropDownColumn(Column):
     """
-    A simple class for creating a dropdown
+    A simple class for creating dropdown
     columns for a dash data ag-table.
-    This needs to be cleaned up along
-    with the above.
     """
-    def __init__(self, ID, name, options=None):
-        """
-        Create the details for the column.
-        The min and max are only for the numeric
-        data type and provide the limits
-        for the values that can be entered.
-        :param ID: the ID for the column
-        :param name: the displayed name in the
-        column.
-        :param options: the options for the drop
-        down menu
-        """
-        super().__init__(ID, name)
-        self._options = options
-
     def get_cell_config(self):
         return {
            "cellEditor": "agSelectCellEditor",

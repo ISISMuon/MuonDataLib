@@ -48,8 +48,7 @@ class LogPresenter(TablePresenter):
         sample = TextColumn('sample_' + LOG_TABLE, 'selected')
         sample.set_uneditable()
 
-        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type',
-                                         ['above', 'between', 'below'])
+        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type')
         """
         we need an extra magic col as we cannot get the value from the
         dropdown in conditional formatting
