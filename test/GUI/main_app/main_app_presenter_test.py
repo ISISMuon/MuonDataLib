@@ -485,7 +485,8 @@ class MainAppPresenterTest(TestHelper):
 
         app.load._data.save_filters = mock.Mock(side_effect=throw)
 
-        name, msg = app.save_data(dtype + file, [], ' Exclude', *DUMMY_SETTINGS)
+        name, msg = app.save_data(dtype + file, [], ' Exclude',
+                                  *DUMMY_SETTINGS)
         self.assertFalse(os.path.isfile(file))
         self.assertEqual(name, '')
         self.assertEqual(str(msg), 'Saving Error: save crash')
