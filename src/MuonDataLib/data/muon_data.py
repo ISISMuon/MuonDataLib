@@ -192,8 +192,8 @@ class MuonEventData(MuonData):
                                           cache=self._cache)
         return self._cache.get_histograms()
 
-    def save_histograms(self, 
-                        file_name, 
+    def save_histograms(self,
+                        file_name,
                         min_time=0.,
                         max_time=32.768,
                         resolution=0.016):
