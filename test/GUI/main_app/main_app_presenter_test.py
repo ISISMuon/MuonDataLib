@@ -22,7 +22,7 @@ as it will removed in the long term
 """
 DEBUG = False
 TT = '_time-table'
-
+DUMMY_SETTINGS = ([], 0, 0, 32.768, 2048, DEBUG)
 
 def dummy_open(N_clicks):
     return 'bob.nxs'
@@ -357,7 +357,7 @@ class MainAppPresenterTest(TestHelper):
         dtype = 'n'
         file_name = 'test.nxs'
         name, msg = app.save_data(dtype + file_name, [],
-                                  'Exclude', [], 0, DEBUG)
+                                  'Exclude', *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -383,9 +383,7 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file_name,
                                   filters,
                                   'Exclude',
-                                  [],
-                                  0,
-                                  DEBUG)
+                                  *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -412,9 +410,7 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file_name,
                                   filters,
                                   'Include',
-                                  [],
-                                  0,
-                                  DEBUG)
+                                  *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -435,7 +431,7 @@ class MainAppPresenterTest(TestHelper):
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
         name, msg = app.save_data(dtype + file, filters,
-                                  'Exclude', [], 0, DEBUG)
+                                  'Exclude', *DUMMY_SETTINGS)
 
         with open('test.json') as f:
             result = json.load(f)
@@ -461,7 +457,7 @@ class MainAppPresenterTest(TestHelper):
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
         name, msg = app.save_data(dtype + file, filters, 'Include',
-                                  [], 0, DEBUG)
+                                  *DUMMY_SETTINGS)
 
         with open('test.json') as f:
             result = json.load(f)
@@ -489,14 +485,14 @@ class MainAppPresenterTest(TestHelper):
 
         app.load._data.save_filters = mock.Mock(side_effect=throw)
 
-        name, msg = app.save_data(dtype + file, [], ' Exclude', [], 0, DEBUG)
+        name, msg = app.save_data(dtype + file, [], ' Exclude', *DUMMY_SETTINGS)
         self.assertFalse(os.path.isfile(file))
         self.assertEqual(name, '')
         self.assertEqual(str(msg), 'Saving Error: save crash')
 
     def test_save_none(self):
         app = MainAppPresenter(dummy_open)
-        result = app.save_data('None', [], 'Exclude', [], 0, DEBUG)
+        result = app.save_data('None', [], 'Exclude', *DUMMY_SETTINGS)
         self.assertEqual(result[0], '')
         self.assertEqual(result[1], '')
 
