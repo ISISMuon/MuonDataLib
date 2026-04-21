@@ -7,7 +7,7 @@ class HistSettingsPresenter(PresenterTemplate):
     A class for the presenter of the histogram settings widget.
     """
 
-    def __init__(self): 
+    def __init__(self):
         self._view = HistSettingsView(self)
 
     def display_width(self, min_time, max_time, num_bin):

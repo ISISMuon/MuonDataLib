@@ -18,7 +18,7 @@ class HistSettingsView(ViewTemplate):
         return html.Div([
             "Minimum and maximum time:",
             dbc.Row([
-                dbc.Col(dcc.Input(id='min-time', 
+                dbc.Col(dcc.Input(id='min-time',
                                   value=0.,
                                   type='number')),
                 dbc.Col(dcc.Input(id='max-time',
@@ -26,7 +26,7 @@ class HistSettingsView(ViewTemplate):
                                   type='number')),
                 ]),
             dbc.Row(
-                dbc.Col(["Number of bins:", 
+                dbc.Col(["Number of bins:",
                      dcc.Input(id='num-bin',
                                value=2048,
                                type='number',
