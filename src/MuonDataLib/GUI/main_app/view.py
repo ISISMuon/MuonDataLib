@@ -145,7 +145,7 @@ class MainApp(Dash):
                   # histogram settings
                   State('min-time', 'value'),
                   State('max-time', 'value'),
-                  State('width', 'value'),
+                  State('num-bin', 'value'),
                   State('debug', 'on')],
                  prevent_initial_call=True)(self.presenter.save_data)
 

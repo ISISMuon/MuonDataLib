@@ -114,7 +114,7 @@ class MainAppPresenter(object):
 
     def save_data(self, name, time_filters, time_mode,
                   log_filters, amp_filters,
-                  min_time, max_time, width, debug):
+                  min_time, max_time, num_bin, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
@@ -127,6 +127,9 @@ class MainAppPresenter(object):
         :param log_filters: the data from the sample log
         filter table
         :param amp_filters: the amplitude filters
+        :param min_time: the histogram minimum time
+        :param max_time: the histogram maximum time
+        :param num_bin: the number of histogram bins
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -146,6 +149,7 @@ class MainAppPresenter(object):
                                                log_filters,
                                                amp_filters)
             if dtype == "n":
+                width = abs(max_time - min_time) / num_bin
                 data.save_histograms(file,
                                      min_time=min_time,
                                      max_time=max_time,
