@@ -76,14 +76,9 @@ class FilterView(ViewTemplate):
                  Input('log-table', 'rowData'),
                  Input('Amp', 'value')],
                  State('N_events', 'children'),
-                 prevent_initial_call=True)(lambda time_update, log_update,
-                                            amp_update, current_str:
-                                            presenter.update_N_events(
-                                                time_update
-                                                or log_update
-                                                or amp_update,
-                                                current_str)
-                                            )
+                 prevent_initial_call=True)(
+                         lambda *ignored: presenter.update_N_events(True, "")
+                         )
 
     @property
     def no_events_str(self):
