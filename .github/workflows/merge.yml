@@ -4,34 +4,11 @@ on:
   push:
     branches:
     - 'main'
-  pull_request:
-    branches:
-      - 'main'
-  release:
 
 permissions:
   contents: write
 
 jobs:
-  update_version:
-    name: update version
-    runs-on: ubuntu-slim
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: "1"
-      - name: Update version on merge
-        run:  |
-            python tools/version.py "beta"
-      - name: Store changes
-        uses: actions/upload-artifact@v4
-        with:
-          name: pyproject
-          path: |
-            ./pyproject.toml
-            ./setup.py
-
   build:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -108,31 +85,3 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-
-  update_setup:
-    needs: [upload_pypi]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: "1"
-          repository: ${{github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: pyproject
-      - name: check
-        run: |
-          cat pyproject.toml
-          echo ${{github.event.pull_request.head.repo.full_name }}
-      - name: Commit on merge
-        run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git add pyproject.toml setup.py
-          git commit -m "update version number"
-          git push
