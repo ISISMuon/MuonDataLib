@@ -1,6 +1,9 @@
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.time.view import TimeView
-from MuonDataLib.GUI.table.column import Column, TableGroup, TableColumns
+from MuonDataLib.GUI.table.column import (TextColumn,
+                                          NumericColumn,
+                                          TableGroup,
+                                          TableColumns)
 
 
 TIME_TABLE = 'time-table'
@@ -20,10 +23,10 @@ class TimePresenter(TablePresenter):
         self._previous = 'Exclude'
 
         # create columns
-        name = Column('Name_' + TIME_TABLE, 'Name', 'text')
+        name = TextColumn('Name_' + TIME_TABLE, 'Name')
 
-        start = Column('Start_' + TIME_TABLE, 'Start', 'numeric')
-        end = Column('End_' + TIME_TABLE, 'End', 'numeric')
+        start = NumericColumn('Start_' + TIME_TABLE, 'Start')
+        end = NumericColumn('End_' + TIME_TABLE, 'End')
 
         cols = TableColumns([TableGroup([name]),
                              TableGroup([start,
