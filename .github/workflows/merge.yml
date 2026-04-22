@@ -2,13 +2,31 @@ name: Build and upload to PyPI
 
 on:
   push:
-    branches:
-    - 'main'
+    - main
 
 permissions:
   contents: write
 
 jobs:
+  update_version:
+    name: update version
+    runs-on: ubuntu-slim
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: "1"
+      - name: Update version on merge
+        run:  |
+            python tools/version.py "beta"
+      - name: Store changes
+        uses: actions/upload-artifact@v4
+        with:
+          name: pyproject
+          path: |
+            ./pyproject.toml
+            ./setup.py
+
   build:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -85,3 +103,27 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
+
+  update_setup:
+    needs: [upload_pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: "1"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pyproject
+      - name: check
+        run: |
+          cat pyproject.toml
+      - uses: actions/add-and-commit@v9
+        with:
+          author_name: github-actions
+          author_email: github-actions@github.com
+          message: "update version number"
+          add: ['pyproject.toml', 'setup.py']
