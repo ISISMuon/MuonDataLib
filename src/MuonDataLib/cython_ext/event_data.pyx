@@ -1,5 +1,5 @@
 from MuonDataLib.data.utils import NONE
-from MuonDataLib.test import para_histogram
+from MuonDataLib.test import para_histogram, jit, para
 from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
@@ -8,7 +8,6 @@ from MuonDataLib.cython_ext.filter import (
                                            good_values_ints,
                                            good_values_double)
 import numpy as np
-import time
 cimport numpy as cnp
 import cython
 cnp.import_array()
@@ -375,7 +374,6 @@ cdef class Events:
         cdef double[:] f_start, f_end
         f_start = np.sort(np.asarray(list(self.filter_start.values()), dtype=np.double), kind='quicksort')
         f_end = np.sort(np.asarray(list(self.filter_end.values()), dtype=np.double), kind='quicksort')
-        # calculate the frames that are excluded by the filter
         f_i_start, f_i_end = get_indices(frame_times,
                                          ns_to_s*np.asarray(f_start),
                                          ns_to_s*np.asarray(f_end),
@@ -399,15 +397,13 @@ cdef class Events:
         cdef cnp.ndarray[double, ndim=1] times, amps
         cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-
         if len(self.filter_start.keys())>0:
             f_i_start, f_i_end, rm_frames = self._get_exclude_windows()
-
+            #start = time.time()
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
             amps = good_values_double(f_i_start, f_i_end, self.start_index_list,
                                       self.peak_prop['Amplitudes'])
-
             if len(times) == 0:
                 raise ValueError("The current filter selection results in zero data "
                                  "for the histograms. Aborting histogram generation.")
@@ -452,6 +448,7 @@ cdef class Events:
                                                                  1., 0.), dtype=np.int32)
 
         if parallel:
+            #start = time.time()
             hist, bins, N = para_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -461,7 +458,10 @@ cdef class Events:
                                            width=width,
                                            weight=weight
                                            )
+            #print('hist', time.time() - start)
         else:
+            
+            #start = time.time()
             hist, bins, N = make_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -470,6 +470,7 @@ cdef class Events:
                                            max_time=max_time,
                                            width=width,
                                            weight=weight)
+            #print('hist', time.time() - start)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,

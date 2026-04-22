@@ -17,7 +17,6 @@ def _load_data(file_name):
         amplitudes, time at the start of the frame,
         list of the period each frame belongs to
         """
-
         with h5py.File(file_name, 'r') as file:
             tmp = file.require_group('raw_data_1')
             tmp = tmp.require_group('detector_1_events')

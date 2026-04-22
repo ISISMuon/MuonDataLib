@@ -146,7 +146,7 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
     """
 
     cdef Py_ssize_t start = 0
-    cdef Py_ssize_t M, j, end, dm, filter_start
+    cdef Py_ssize_t k, M, j, end, dm, filter_start
     cdef Py_ssize_t len_filters = len(f_start)
     cdef Py_ssize_t N_frames = len(start_index)
     cdef cnp.ndarray[int] _good_periods = np.zeros(N_events,
@@ -180,10 +180,34 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
     M += dm
     return _good_periods[:M]
 
+ctypedef fused int_double:
+    double
+    int
+
+cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index,
+                          int[:] array):
+    cdef int[:] start_, end_, delta
+    cdef int N
+
+    start_, end_, delta, N = _get_good_frames(f_start, f_end, start_index, array)
+    
+    cdef cnp.ndarray[int] good_array = np.zeros(N, dtype=np.int32)
+    cdef int[:] _good_array = good_array
+    return _apply_good_frames(start_, end_, start_index, array, delta, _good_array)
+
+cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index,
+                          double[:] array):
+    cdef int[:] start_, end_, delta
+    cdef int N
+
+    start_, end_, delta, N = _get_good_frames(f_start, f_end, start_index, array)
+    cdef cnp.ndarray[double] good_array = np.zeros(N, dtype=np.double)
+    cdef double[:] _good_array = good_array
+    return _apply_good_frames(start_, end_, start_index, array, delta, _good_array)
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] int_array):
+cdef _get_good_frames(int[:] f_start, int[:] f_end, int[:] start_index, int_double[:] array):
     """
     This removes the values from the array corresponding to the filtered frames.
     :param f_start: the start indices for the filters (no overlaps)
@@ -193,60 +217,62 @@ cpdef good_values_ints(int[:] f_start, int[:] f_end, int[:] start_index, int[:] 
     :return: the int_array with the data in the filtered frames removed
     """
 
-    cdef Py_ssize_t start = 0
-    cdef cnp.ndarray[int] _good_ints = np.zeros(len(int_array), dtype=np.int32)
-    cdef int[:] good_ints = _good_ints
-    cdef Py_ssize_t k, last
-    cdef Py_ssize_t v, N, i
-    cdef Py_ssize_t M = len(f_start)
-    N = 0
+    cdef int start = 0
 
-    for k in range(M):
-        last = start_index[f_start[k]]
-        for v in range(start, last):
-            good_ints[N] = int_array[v]
-            N += 1
-        i = f_end[k] + 1
-        if i < len(start_index):
-            start = start_index[f_end[k] + 1]
+    cdef cnp.ndarray[int] start_ = np.zeros(len(f_start), dtype=np.int32)
+    cdef cnp.ndarray[int] end_ = np.zeros(len(f_start), dtype=np.int32)
+    cdef Py_ssize_t k
+    cdef Py_ssize_t z = 0
+    cdef int M = len(f_start) - 1
 
-    # check if filter covers last frame
-    if f_end[M-1] + 1 >= len(start_index):
-        return _good_ints[:N]
-    last = len(int_array)
-    for v in range(start, last):
-        good_ints[N] = int_array[v]
-        N += 1
-    return _good_ints[:N]
+    for k in range(len(f_start)-1):
+        start_[k] = start_index[f_start[k]]
+        end_[k] = start_index[f_end[k] + 1]
+    start_[M] = start_index[f_start[M]]
+
+    if len(start_index) == f_end[M] + 1:
+        end_[M] = len(array)
+    else:
+        end_[M] = start_index[f_end[M] + 1]
+
+    cdef int[:] delta = end_ - start_
+    cdef int N = len(array) - np.sum(delta)
+
+    return start_, end_, delta, N
 
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
-cpdef good_values_double(int[:] f_start, int[:] f_end, int[:] start_index, double[:] double_array):
-    cdef Py_ssize_t start = 0
-    cdef cnp.ndarray[double] _good_doubles = np.zeros(len(double_array), dtype=np.double)
-    cdef double[:] good_doubles = _good_doubles
-    cdef Py_ssize_t k, last
-    cdef Py_ssize_t v, N, i
-    cdef Py_ssize_t M = len(f_start)
-    N = 0
+cdef _apply_good_frames(int[:] start_, int[:] end_, int[:] start_index,
+                         int_double[:] array,
+                         int[:] delta,
+                         int_double[:] good_array):
+    """
+    This removes the values from the array corresponding to the filtered frames.
+    :param f_start: the start indices for the filters (no overlaps)
+    :param f_end: the end indices for the filters (no overlaps)
+    :param start_index: a list that gives the first index in int_array for that frame
+    :param int_array: the array to remove data from
+    :return: the int_array with the data in the filtered frames removed
+    """
+    cdef int a, b, c
+    cdef Py_ssize_t k, f
+    cdef int z = 0
 
-    for k in range(M):
-        last = start_index[f_start[k]]
-        for v in range(start, last):
-            good_doubles[N] = double_array[v]
-            N += 1
-        i = f_end[k] +1
-        if i < len(start_index):
-            start = start_index[f_end[k] + 1]
+    if start_[z] > start_index[z]:
+        a = start_[z]
+        good_array[z:a] = array[z:a]
 
-    # check if filter covers last frame
-    if f_end[M-1] + 1 >= len(start_index):
-        return _good_doubles[:N]
-    last = len(double_array)
-    for v in range(start, last):
-        good_doubles[N] = double_array[v]
-        N += 1
-    return _good_doubles[:N]
+    for k in range(1, len(start_)):
+
+        a = end_[k-1]
+        b = start_[k]
+        c = np.sum([delta[f] for f in range(k)])
+        good_array[a - c: a -c + b -a ] = array[a:b]
+
+    if int_double is int:
+        return np.asarray(good_array, dtype=np.int32)
+    else:
+        return np.asarray(good_array, dtype=np.double)
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking
@@ -265,8 +291,8 @@ cpdef apply_filter(x, y, times):
     cdef double[:] start_times= np.sort(np.asarray([ times[k][0] for k in range(len(times))], dtype=np.double), kind='quicksort')
     cdef double[:] end_times= np.sort(np.asarray([ times[k][1] for k in range(len(times))], dtype=np.double), kind='quicksort')
 
-    N = 0
-    k = 0
+    cdef Py_ssize_t N = 0
+    cdef Py_ssize_t k = 0
     for j in range(len(x)):
         if k == len(start_times) or x[j] < start_times[k]:
             fx[N] = x[j]
