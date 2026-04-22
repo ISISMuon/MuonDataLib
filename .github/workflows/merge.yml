@@ -1,8 +1,13 @@
 name: Build and upload to PyPI
 
 on:
-  pull_request_review:
-    types: [submitted]
+  push:
+    branches:
+    - 'main'
+  pull_request:
+    branches:
+      - 'main'
+  release:
 
 permissions:
   contents: write
@@ -10,7 +15,6 @@ permissions:
 jobs:
   update_version:
     name: update version
-    if: github.event.review.state == 'approved'
     runs-on: ubuntu-slim
     steps:
       - name: checkout
