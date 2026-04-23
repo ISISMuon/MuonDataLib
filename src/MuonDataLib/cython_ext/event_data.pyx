@@ -466,6 +466,8 @@ cdef class Events:
                        veto_frames=np.zeros(len(rm_frames), dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,
+                       min_time=min_time,
+                       max_time=max_time,
                        resolution=width,
                        N_events=N)
 
