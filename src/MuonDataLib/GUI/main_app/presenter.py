@@ -94,8 +94,7 @@ class MainAppPresenter(object):
 
             filters = name[len(CURRENT):]
             result = self.control.read_filter(filters)
-            time_data, log_data, amp, state, cols = result
-            return time_data, log_data, amp, state, cols, ''
+            return (*result, '')
         except Exception as err:
             cols = self.control.headers
             return [], [], 0, 'Exclude', cols, f'Load filter error: {err}'
@@ -143,17 +142,16 @@ class MainAppPresenter(object):
             if debug:
                 raise RuntimeError("Saving error")
 
+            hist_settings = (min_time, max_time, num_bin)
+
             print("saving to ", file)
             self.control._filter.apply_filters(time_filters,
                                                time_mode,
                                                log_filters,
-                                               amp_filters)
+                                               amp_filters,
+                                               hist_settings)
             if dtype == "n":
-                width = abs(max_time - min_time) / num_bin
-                data.save_histograms(file,
-                                     min_time=min_time,
-                                     max_time=max_time,
-                                     resolution=width)
+                data.save_histograms(file)
             elif dtype == 'j':
                 data.save_filters(file)
             return file, ''

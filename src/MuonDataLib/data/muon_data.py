@@ -61,6 +61,10 @@ class MuonEventData(MuonData):
         self._cache = cache
         self._time_filter = {}
         self._keep_times = {}
+        self._hist_settings = {'min_time': 0.,
+                               'max_time': 32.768,
+                               'num_bins': 2048,
+                               }
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
@@ -166,17 +170,38 @@ class MuonEventData(MuonData):
         self.clear_filters()
         return start_times, end_times
 
-    def histogram(self, min_time=0., max_time=32.768, resolution=0.016):
+    def set_histogram_settings(self,
+                               min_time=0.,
+                               max_time=32.768,
+                               num_bins=2048):
+        """
+        Change the histogram settings for the data.
+        :param min_time: the start time for the histogram
+        :param max_time: the end time for the histogram
+        :param num_bins: the number of bins in the histogram
+        """
+        self._hist_settings['min_time'] = min_time
+        self._hist_settings['max_time'] = max_time
+        self._hist_settings['num_bins'] = num_bins
+
+    def hist_settings_changed(self, cached_settings):
+        """
+        Whether the histogram settings are different to the cached settings.
+        """
+        min_time, max_time, num_bins = cached_settings
+        return (
+            self._hist_settings['min_time'] != min_time
+            or self._hist_settings['max_time'] != max_time
+            or self._hist_settings['num_bins'] != num_bins
+        )
+
+    def histogram(self):
         """
         A method for constructing a histogram.
         This will skip calculating the filters
         if the cache is occupied.
         If just the resolution has changed it will
         not alter the filtered values.
-        :param min_time: the start time for the histogram
-        :param max_time: the end time for the histogram
-        :param resolution: the resolution (bin width) of the
-        histogram
         :return: the histograms and bins
         """
         is_cache_empty = self._cache.empty()
@@ -184,29 +209,27 @@ class MuonEventData(MuonData):
         if is_cache_empty:
             self._filters()
 
-        if is_cache_empty or self._cache.get_resolution() != resolution:
-            return self._events.histogram(min_time=min_time,
-                                          max_time=max_time,
-                                          width=resolution,
-                                          cache=self._cache)
+        if (is_cache_empty
+            or self.hist_settings_changed(self._cache.get_hist_settings())):
+            min_time = self._hist_settings['min_time']
+            max_time = self._hist_settings['max_time']
+            num_bins = self._hist_settings['num_bins']
+            width = (max_time - min_time) / num_bins
+            return self._events.histogram(
+                    min_time=min_time,
+                    max_time=max_time,
+                    width=width,
+                    cache=self._cache
+                    )
         return self._cache.get_histograms()
 
-    def save_histograms(self,
-                        file_name,
-                        min_time=0.,
-                        max_time=32.768,
-                        resolution=0.016):
+    def save_histograms(self, file_name):
         """
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
-        :param min_time: the start time for the histogram
-        :param max_time: the end time for the histogram
-        :param resolution: the resolution for the histogram
         """
-        hist, _ = self.histogram(min_time=min_time,
-                                 max_time=max_time,
-                                 resolution=resolution)
+        hist, _ = self.histogram()
         super().save_histograms(file_name)
 
     def clear_filters(self):
@@ -219,6 +242,9 @@ class MuonEventData(MuonData):
         self._time_filter.clear()
         self._keep_times = {}
         self._events.clear_thresholds()
+        # note set_histogram_settings has default args,
+        # so passing this with no arguments resets to that default
+        self.set_histogram_settings()
 
     def add_sample_log(self, name, x_data, y_data):
         """
@@ -390,6 +416,8 @@ class MuonEventData(MuonData):
         # add time filters
         data['time_filters'] = {'keep_filters': self._keep_times,
                                 'remove_filters': self._time_filter}
+
+        data['histogram_settings'] = self._hist_settings
         return data
 
     def load_filters(self, file_name):
@@ -416,6 +444,8 @@ class MuonEventData(MuonData):
         tmp = data['peak_property']
         for name in tmp.keys():
             self._events.set_threshold(name, tmp[name])
+
+        self._hist_settings = data['histogram_settings']
 
     def save_filters(self, file_name):
         """
