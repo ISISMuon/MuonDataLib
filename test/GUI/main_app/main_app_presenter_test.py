@@ -289,9 +289,12 @@ class MainAppPresenterTest(TestHelper):
                                       }])
 
         self.assertEqual(result[2], 3.14)
-        self.assertEqual(result[3], 'Include')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], 3.5)
+        self.assertEqual(result[4], 42)
+        self.assertEqual(result[5], 1024)
+        self.assertEqual(result[6], 'Include')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], '')
 
     def test_load_filter_fail(self):
         bad_file = 'filters.json'
@@ -435,10 +438,13 @@ class MainAppPresenterTest(TestHelper):
 
         with open('test.json') as f:
             result = json.load(f)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
         self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
         self.assertEqual(result['sample_log_filters'], {})
+        self.assertEqual(result['histogram_settings']['min_time'], 0)
+        self.assertEqual(result['histogram_settings']['max_time'], 32.768)
+        self.assertEqual(result['histogram_settings']['num_bins'], 2048)
         self.assertEqual(result['time_filters']['keep_filters'], {})
         self.assertEqual(result['time_filters']['remove_filters'],
                          {'unit_test': [1.2, 200]})
@@ -461,10 +467,13 @@ class MainAppPresenterTest(TestHelper):
 
         with open('test.json') as f:
             result = json.load(f)
-        self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 4)
 
         self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
         self.assertEqual(result['sample_log_filters'], {})
+        self.assertEqual(result['histogram_settings']['min_time'], 0)
+        self.assertEqual(result['histogram_settings']['max_time'], 32.768)
+        self.assertEqual(result['histogram_settings']['num_bins'], 2048)
         self.assertEqual(result['time_filters']['keep_filters'],
                          {'unit_test': [1.2, 200]})
         self.assertEqual(result['time_filters']['remove_filters'], {})
