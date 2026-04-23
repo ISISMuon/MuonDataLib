@@ -302,10 +302,8 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the time table data, the log table data, time filter,
-        amplitude filter, the state for the time filter (include/exclude)
-        and the column headers
+        :returns: the filter data, the state for the time filter
+        (include/exclude) and the column headers
         """
         data = Filters.from_json(name)
-        time_data, log_data, amp, state, cols = self._filter.load(data)
-        return time_data, log_data, amp, state, cols
+        self._filter.load(data)

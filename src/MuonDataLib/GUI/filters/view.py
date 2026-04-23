@@ -58,7 +58,10 @@ class FilterView(ViewTemplate):
                  [State('time-table', 'rowData'),
                   State('dropdown-time', 'value'),
                   State('log-table', 'rowData'),
-                  State('Amp', 'value')],
+                  State('Amp', 'value'),
+                  State('min-time', 'value'),
+                  State('max-time', 'value'),
+                  State('num-bin', 'value'),],
                  prevent_initial_call=True)(presenter.calculate)
 
         callback(Output('title_test', 'hidden'),
@@ -66,6 +69,9 @@ class FilterView(ViewTemplate):
                   Input('time-table', 'rowData'),
                   Input('log-table', 'rowData'),
                   Input('Amp', 'value'),
+                  Input('min-time', 'value'),
+                  Input('max-time', 'value'),
+                  Input('num-bin', 'value'),
                   ],
                  prevent_initial_call=True)(presenter.show_file)
 
