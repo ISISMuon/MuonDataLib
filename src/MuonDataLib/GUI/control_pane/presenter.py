@@ -6,7 +6,6 @@ from MuonDataLib.data.filters import Filters
 
 from dash import no_update
 import numpy as np
-import json
 
 
 class ControlPanePresenter(PresenterTemplate):

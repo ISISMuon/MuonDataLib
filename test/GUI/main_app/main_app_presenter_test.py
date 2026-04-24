@@ -3,12 +3,11 @@ from unittest import mock
 import os
 import numpy as np
 import h5py
-import json
 
 from MuonDataLib.GUI.main_app.presenter import MainAppPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.GUI.load_bar.view import CURRENT
-from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
+from MuonDataLib.data.filters import Filter, Filters, TimeFilters
 import sys
 
 current = os.path.dirname(os.path.realpath(__file__))
