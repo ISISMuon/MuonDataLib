@@ -3,6 +3,7 @@ from unittest import mock
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.data.loader.load_events import load_events
+from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
 import numpy as np
 import os
 import sys
@@ -101,18 +102,6 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time.set_time_range.assert_called_with(1, 6 + 32e-6)
         self.assertEqual(self.presenter._log._logs, 'log data')
 
-    def cf_filters(self, result, expect):
-        self.assertEqual(len(result), 3)
-
-        self.assertEqual(result['peak_property']['Amplitudes'],
-                         expect[0])
-        self.assertEqual(result['sample_log_filters'],
-                         expect[1])
-        self.assertEqual(result['time_filters']['keep_filters'],
-                         expect[2])
-        self.assertEqual(result['time_filters']['remove_filters'],
-                         expect[3])
-
     def test_apply_filters_none(self):
         filters = []
         self.presenter._data = load_events(FILE, 64)
@@ -122,8 +111,7 @@ class FilterPresenterTest(TestHelper):
                                      0)
         result = self.presenter._data.report_filters()
 
-        expect = [0, {}, {}, {}]
-        self.cf_filters(result, expect)
+        assert result == Filters()
 
     def test_apply_filters_include(self):
         filters = [{'Name' + TT: 'unit',
@@ -140,12 +128,12 @@ class FilterPresenterTest(TestHelper):
                                      0)
         result = self.presenter._data.report_filters()
 
-        expect = [0,
-                  {},
-                  {'unit': [0.1, 0.5],
-                   'test': [0.7, 1.2]},
-                  {}]
-        self.cf_filters(result, expect)
+        assert result == Filters(
+                             time_filters=TimeFilters(
+                                 keep_filters=[Filter('unit', 0.1, 0.5),
+                                               Filter('test', 0.7, 1.2)]
+                             )
+                        )
 
     def test_apply_filters_exclude(self):
         filters = [{'Name' + TT: 'unit',
@@ -161,13 +149,13 @@ class FilterPresenterTest(TestHelper):
                                      [],
                                      0)
         result = self.presenter._data.report_filters()
-        expect = [0,
-                  {},
-                  {},
-                  {'unit': (0.1, 0.5),
-                   'test': (0.7, 1.2)},
-                  ]
-        self.cf_filters(result, expect)
+
+        assert result == Filters(
+                             time_filters=TimeFilters(
+                                 remove_filters=[Filter('unit', 0.1, 0.5),
+                                                 Filter('test', 0.7, 1.2)]
+                             )
+                        )
 
     def test_apply_filters_log_between(self):
         filters = [{'filter' + LT: 'between',
@@ -181,12 +169,10 @@ class FilterPresenterTest(TestHelper):
                                      filters,
                                      0)
         result = self.presenter._data.report_filters()
-        expect = [0,
-                  {'Temp': [1, 11]},
-                  {},
-                  {}
-                  ]
-        self.cf_filters(result, expect)
+
+        assert result == Filters(
+                             sample_log_filters=[Filter('Temp', 1, 11)]
+                         )
 
     def test_apply_filters_log_above(self):
         filters = [{'filter' + LT: 'above',
@@ -200,12 +186,9 @@ class FilterPresenterTest(TestHelper):
                                      filters,
                                      0)
         result = self.presenter._data.report_filters()
-        expect = [0,
-                  {'Temp': [4, -999]},
-                  {},
-                  {}
-                  ]
-        self.cf_filters(result, expect)
+        assert result == Filters(
+                             sample_log_filters=[Filter('Temp', 4, -999)]
+                         )
 
     def test_apply_filters_log_below(self):
         filters = [{'filter' + LT: 'below',
@@ -219,12 +202,9 @@ class FilterPresenterTest(TestHelper):
                                      filters,
                                      0)
         result = self.presenter._data.report_filters()
-        expect = [0,
-                  {'Temp': [-999, 7]},
-                  {},
-                  {}
-                  ]
-        self.cf_filters(result, expect)
+        assert result == Filters(
+                             sample_log_filters=[Filter('Temp', -999, 7)]
+                         )
 
     def test_apply_filters_mix(self):
         times = [{'Name' + TT: 'unit',
@@ -245,13 +225,13 @@ class FilterPresenterTest(TestHelper):
                                      logs,
                                      0)
         result = self.presenter._data.report_filters()
-        expect = [0,
-                  {'Temp': [2, 7]},
-                  {},
-                  {'unit': (0.1, 0.5),
-                   'test': (0.7, 1.2)},
-                  ]
-        self.cf_filters(result, expect)
+        assert result == Filters(
+                             time_filters=TimeFilters(
+                                 remove_filters=[Filter('unit', 0.1, 0.5),
+                                                 Filter('test', 0.7, 1.2)]
+                             ),
+                             sample_log_filters=[Filter('Temp', 2, 7)]
+                        )
 
     def test_update_filters_times(self):
         times = [{'Name' + TT: 'unit',
@@ -420,11 +400,14 @@ class FilterPresenterTest(TestHelper):
                          'Number of events: 0')
 
     def test_load_include(self):
-        filters = {'peak_property': {'Amplitudes': 1.2}}
-        filters['sample_log_filters'] = {'Temp': [36, 37]}
-        filters['time_filters'] = {'keep_filters': {'unit': [1, 2],
-                                                    'test': [3, 4]},
-                                   'remove_filters': {}}
+        filters = Filters(
+                      peak_property = PeakProperty(1.2),
+                      time_filters = TimeFilters(
+                          keep_filters=[Filter('unit', 1, 2),
+                                        Filter('test', 3, 4)]
+                      ),
+                      sample_log_filters = [Filter('Temp', 36, 37)]
+                  )
 
         _data = load_events(FILE, 64)
         self.presenter.set_data(_data)
@@ -450,11 +433,13 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(len(headers), 3)
 
     def test_load_exclude(self):
-        filters = {'peak_property': {'Amplitudes': 1.2}}
-        filters['sample_log_filters'] = {}
-        filters['time_filters'] = {'keep_filters': {},
-                                   'remove_filters': {'more': [5, 6],
-                                                      'tests': [7, 8]}}
+        filters = Filters(
+                      peak_property = PeakProperty(1.2),
+                      time_filters = TimeFilters(
+                          remove_filters=[Filter('more', 5, 6),
+                                          Filter('tests', 7, 8)]
+                      )
+                  )
         data, logs, amps, state, headers = self.presenter.load(filters)
         self.assertEqual(state, 'Exclude')
         self.assertEqual(len(data), 2)
@@ -469,12 +454,15 @@ class FilterPresenterTest(TestHelper):
         self.assertEqual(len(headers), 3)
 
     def test_load_fail(self):
-        filters = {'peak_property': {'Amplitudes': 1.2}}
-        filters['sample_log_filters'] = []
-        filters['time_filters'] = {'keep_filters': {'unit': [1, 2],
-                                                    'test': [3, 4]},
-                                   'remove_filters': {'more': [5, 6],
-                                                      'tests': [7, 8]}}
+        filters = Filters(
+                      peak_property = PeakProperty(1.2),
+                      time_filters = TimeFilters(
+                          keep_filters = [Filter('unit', 1, 2),
+                                          Filter('test', 3, 4)],
+                          remove_filters=[Filter('more', 5, 6),
+                                          Filter('tests', 7, 8)]
+                      )
+                  )
         with self.assertRaises(RuntimeError):
             _ = self.presenter.load(filters)
 

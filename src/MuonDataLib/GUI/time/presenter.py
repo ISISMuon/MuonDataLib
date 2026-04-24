@@ -4,6 +4,7 @@ from MuonDataLib.GUI.table.column import (TextColumn,
                                           NumericColumn,
                                           TableGroup,
                                           TableColumns)
+from MuonDataLib.data.filters import TimeFilters
 
 
 TIME_TABLE = 'time-table'
@@ -158,30 +159,29 @@ class TimePresenter(TablePresenter):
         else:
             return self._previous, data, self.cols.get_column_dict, False
 
-    def load(self, file_data):
+    def load(self, filters: TimeFilters):
         """
-        A method to load filters from a json file
-        :param file: the json dicts from the open file
+        A method to load filters from a TimeFilters object.
+        :param filters: the dataclass of time filters.
         :returns: a list of the row details
         for the time table (exluding the remove button),
         and the new state (include/exclude)
         """
-        name = 'remove_filters'
+        filter_list = filters.remove_filters
         new_state = 'Exclude'
-        if (len(file_data['keep_filters']) > 0 and
-                len(file_data['remove_filters']) > 0):
+        if (len(filters.keep_filters) > 0 and
+                len(filters.remove_filters) > 0):
             raise RuntimeError("Cannot have both include and "
                                "exclude time filters")
-        elif len(file_data['keep_filters']) > 0:
-            name = 'keep_filters'
+        elif len(filters.keep_filters) > 0:
+            filter_list = filters.keep_filters
             new_state = 'Include'
 
         data = []
-        for key in file_data[name].keys():
-            values = file_data[name][key]
-            data.append({'Name_' + TIME_TABLE: key,
-                         'Start_' + TIME_TABLE: values[0],
-                         'End_' + TIME_TABLE: values[1]})
+        for f in filter_list:
+            data.append({'Name_' + TIME_TABLE: f.name,
+                         'Start_' + TIME_TABLE: f.start,
+                         'End_' + TIME_TABLE: f.end})
 
         self._previous = new_state
         return data, new_state

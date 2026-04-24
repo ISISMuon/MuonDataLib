@@ -8,6 +8,7 @@ from MuonDataLib.GUI.table.column import (DropDownColumn,
                                           TableGroup,
                                           TableColumns)
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+from MuonDataLib.data.filters import Filter
 import numpy as np
 
 
@@ -365,19 +366,21 @@ class LogPresenter(TablePresenter):
                 'y_min_' + LOG_TABLE: 0,
                 'y_max_' + LOG_TABLE: 1}
 
-    def load(self, file_data):
+    def load(self, filters: list[Filter]):
         """
         A method to load filters from a json file
         If the filter values are outside of the data
         range, they will be updated to be within the
         range of possible y values.
-        :param file: the json dicts from the open file
+        :param filters: the list of filters.
         :returns: a list of the row details
         for the log table (exluding the remove button),
         """
         data = []
-        for key in file_data.keys():
-            start, end = file_data[key]
+        for f in filters:
+            key = f.name
+            start = f.start
+            end = f.end
 
             _, y = self._logs.get_sample_log(key).get_original_values()
 

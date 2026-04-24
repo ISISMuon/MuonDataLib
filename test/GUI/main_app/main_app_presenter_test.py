@@ -8,6 +8,7 @@ import json
 from MuonDataLib.GUI.main_app.presenter import MainAppPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.GUI.load_bar.view import CURRENT
+from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
 import sys
 
 current = os.path.dirname(os.path.realpath(__file__))
@@ -426,7 +427,7 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(name, file_name)
         self.assertEqual(msg, '')
 
-    def test_save_json_Exclude(self):
+    def test_save_filters_Exclude(self):
         app = MainAppPresenter(dummy_open)
         _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
@@ -437,22 +438,20 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file, filters,
                                   'Exclude', [], 0, DEBUG)
 
-        with open('test.json') as f:
-            result = json.load(f)
-        self.assertEqual(len(result), 3)
+        result = Filters.from_json('test.json')
 
-        self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
-        self.assertEqual(result['sample_log_filters'], {})
-        self.assertEqual(result['time_filters']['keep_filters'], {})
-        self.assertEqual(result['time_filters']['remove_filters'],
-                         {'unit_test': [1.2, 200]})
+        assert result == Filters(
+                             time_filters=TimeFilters(
+                                 remove_filters=[Filter('unit_test', 1.2, 200)]
+                             )
+                         )
 
         self.assertTrue(os.path.isfile(file))
         os.remove(file)
         self.assertEqual(name, file)
         self.assertEqual(msg, '')
 
-    def test_save_json_Include(self):
+    def test_save_filters_Include(self):
         app = MainAppPresenter(dummy_open)
         _ = app.load_nxs(CURRENT + FILE, [], [], DEBUG)
         dtype = 'j'
@@ -463,15 +462,13 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file, filters, 'Include',
                                   [], 0, DEBUG)
 
-        with open('test.json') as f:
-            result = json.load(f)
-        self.assertEqual(len(result), 3)
+        result = Filters.from_json('test.json')
 
-        self.assertEqual(result['peak_property']['Amplitudes'], 0.0)
-        self.assertEqual(result['sample_log_filters'], {})
-        self.assertEqual(result['time_filters']['keep_filters'],
-                         {'unit_test': [1.2, 200]})
-        self.assertEqual(result['time_filters']['remove_filters'], {})
+        assert result == Filters(
+                             time_filters=TimeFilters(
+                                 keep_filters=[Filter('unit_test', 1.2, 200)]
+                             )
+                         )
 
         self.assertTrue(os.path.isfile(file))
         os.remove(file)

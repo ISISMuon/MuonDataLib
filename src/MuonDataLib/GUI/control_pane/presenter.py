@@ -2,6 +2,7 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.GUI.control_pane.view import ControlPaneView
+from MuonDataLib.data.filters import Filters
 
 from dash import no_update
 import numpy as np
@@ -306,7 +307,6 @@ class ControlPanePresenter(PresenterTemplate):
         amplitude filter, the state for the time filter (include/exclude)
         and the column headers
         """
-        with open(name, 'r') as file:
-            data = json.load(file)
+        data = Filters.from_json(name)
         time_data, log_data, amp, state, cols = self._filter.load(data)
         return time_data, log_data, amp, state, cols
