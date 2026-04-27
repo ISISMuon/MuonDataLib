@@ -1,4 +1,9 @@
 {
+    "histogram_settings": {
+        "max_time": 32.768,
+        "min_time": 0.0,
+        "num_bins": 2048
+    },
     "peak_property": {
         "Amplitudes": 0.0
     },

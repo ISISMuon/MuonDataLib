@@ -262,9 +262,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], 'Load filter error: Cannot have '
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], 'Load filter error: Cannot have '
                          'both include and exclude time filters')
 
     def test_load_filter(self):
@@ -289,9 +292,12 @@ class MainAppPresenterTest(TestHelper):
                                       }])
 
         self.assertEqual(result[2], 3.14)
-        self.assertEqual(result[3], 'Include')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], 0.5)
+        self.assertEqual(result[4], 15.22)
+        self.assertEqual(result[5], 1024)
+        self.assertEqual(result[6], 'Include')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], '')
 
     def test_load_filter_fail(self):
         bad_file = 'filters.json'
@@ -303,9 +309,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], "Load filter error: "
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 
@@ -330,9 +339,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], "Load filter error: "
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 

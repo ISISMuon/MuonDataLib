@@ -3,7 +3,8 @@ from unittest import mock
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.data.loader.load_events import load_events
-from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
+from MuonDataLib.data.filters import (Filter, Filters, PeakProperty,
+                                      TimeFilters, HistogramSettings)
 import numpy as np
 import os
 import sys
@@ -16,6 +17,7 @@ from data_paths import FILE  # noqa: E402
 
 TT = '_time-table'
 LT = '_log-table'
+DEFAULT_HIST = (0., 32.768, 2048)  # default histogram settings
 
 
 class FilterPresenterTest(TestHelper):
@@ -32,8 +34,14 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
         self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
 
-        self.assertFalse(self.presenter.show_file(name, 'time', 'log', 2))
+        self.assertFalse(self.presenter.show_file(name, 'time', 'log', 2,
+                                                  0., 1., 2))
 
     def test_show_file_match_amp_fails(self):
         name = 'test.json'
@@ -44,8 +52,14 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
         self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
 
-        self.assertTrue(self.presenter.show_file(name, 'time', 'log', 4))
+        self.assertTrue(self.presenter.show_file(name, 'time', 'log', 4,
+                                                 0., 1., 2))
 
     def test_show_file_time_match(self):
         name = 'test.json'
@@ -56,8 +70,14 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
         self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
 
-        self.assertTrue(self.presenter.show_file(name, 'time', 'new', 2))
+        self.assertTrue(self.presenter.show_file(name, 'time', 'new', 2,
+                                                 0., 1., 2))
 
     def test_show_file_log_match(self):
         name = 'test.json'
@@ -68,9 +88,37 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
         self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
 
-        self.assertTrue(self.presenter.show_file(name, 'new', 'log', 2))
+        self.assertTrue(self.presenter.show_file(name, 'new', 'log', 2,
+                                                 0., 1., 2.))
 
+    def test_show_file_hist_fails(self):
+        """
+        Test that histogram settings changing causes a non-match.
+        """
+        name = "test.json"
+        self.presenter._time_file_data = 'time'
+        self.presenter._log_file_data = 'log'
+        self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
+
+        for hist_settings in [
+            (1., 1., 2),
+            (0., 2., 2),
+            (0., 1., 5),
+            ]:
+            self.assertTrue(
+                self.presenter.show_file(name, 'new', 'log', 2, *hist_settings)
+                )
     def test_show_file_no_match(self):
         name = 'test.json'
         """
@@ -80,8 +128,14 @@ class FilterPresenterTest(TestHelper):
         self.presenter._time_file_data = 'time'
         self.presenter._log_file_data = 'log'
         self.presenter._amp_file_data = 2
+        self.presenter._hist_data = HistogramSettings(
+            min_time = 0.,
+            max_time = 1.,
+            num_bins = 2,
+                )
 
-        self.assertTrue(self.presenter.show_file(name, 'unit', 'test', 3))
+        self.assertTrue(self.presenter.show_file(name, 'unit', 'test', 3,
+                                                 5., 6.5, 7))
 
     def test_headers(self):
         self.assertEqual(len(self.presenter.headers), 3)
@@ -347,14 +401,16 @@ class FilterPresenterTest(TestHelper):
 
     def test_calculate_no_filters(self):
         self.presenter._data = load_events(FILE, 64)
-        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 0)
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 0,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 64,147')
 
     def test_calculate_amp_filter(self):
         self.presenter._data = load_events(FILE, 64)
-        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 2500)
+        N_str, err_msg = self.presenter.calculate(1, {}, 'Exclude', [], 2500,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 7,944')
@@ -362,7 +418,8 @@ class FilterPresenterTest(TestHelper):
     def test_calculate_with_exclude_filter(self):
         self.presenter._data = load_events(FILE, 64)
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude', [], 0)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Exclude', [], 0,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 57,653')
@@ -370,7 +427,8 @@ class FilterPresenterTest(TestHelper):
     def test_calculate_with_include_filter(self):
         self.presenter._data = load_events(FILE, 64)
         filters = [{'Name' + TT: 'unit', 'Start' + TT: 0.1, 'End' + TT: 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 5,037')
@@ -382,19 +440,21 @@ class FilterPresenterTest(TestHelper):
                 'y0' + LT: 35.5,
                 'yN' + LT: 37}]
 
-        N_str, err_msg = self.presenter.calculate(1, [], 'Include', log, 0)
+        N_str, err_msg = self.presenter.calculate(1, [], 'Include', log, 0,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, '')
         self.assertEqual(N_str.children,
                          'Number of events: 57,481')
 
     def test_calculate_with_error(self):
-        def throw(filters, state, log, amp):
+        def throw(filters, state, log, amp, hist_settings):
             raise RuntimeError("mock throw")
 
         self.presenter._data = load_events(FILE, 64)
         self.presenter.apply_filters = mock.Mock(side_effect=throw)
         filters = [{'Name_t': 'unit', 'Start_t': 0.1, 'End_t': 1.2}]
-        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0)
+        N_str, err_msg = self.presenter.calculate(1, filters, 'Include', [], 0,
+                                                  *DEFAULT_HIST)
         self.assertEqual(err_msg, 'mock throw')
         self.assertEqual(N_str.children,
                          'Number of events: 0')
@@ -406,12 +466,18 @@ class FilterPresenterTest(TestHelper):
                           keep_filters=[Filter('unit', 1, 2),
                                         Filter('test', 3, 4)]
                       ),
-                      sample_log_filters = [Filter('Temp', 36, 37)]
+                      sample_log_filters = [Filter('Temp', 36, 37)],
+                      histogram_settings = HistogramSettings(
+                          min_time = 3.,
+                          max_time = 25.55,
+                          num_bins = 1000
+                          )
                   )
 
         _data = load_events(FILE, 64)
         self.presenter.set_data(_data)
-        data, logs, amps, state, headers = self.presenter.load(filters)
+        (data, logs, amps, min_time, max_time,
+         num_bins, state, headers) = self.presenter.load(filters)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'unit',
@@ -430,6 +496,9 @@ class FilterPresenterTest(TestHelper):
                                  'y_min_log-table': np.float64(35.0)}
                                 ])
         self.assertEqual(amps, 1.2)
+        self.assertEqual(min_time, 3.)
+        self.assertEqual(max_time, 25.55)
+        self.assertEqual(num_bins, 1000)
         self.assertEqual(len(headers), 3)
 
     def test_load_exclude(self):
@@ -438,9 +507,15 @@ class FilterPresenterTest(TestHelper):
                       time_filters = TimeFilters(
                           remove_filters=[Filter('more', 5, 6),
                                           Filter('tests', 7, 8)]
-                      )
+                      ),
+                      histogram_settings = HistogramSettings(
+                          min_time = 3.,
+                          max_time = 25.55,
+                          num_bins = 1000
+                          )
                   )
-        data, logs, amps, state, headers = self.presenter.load(filters)
+        (data, logs, amps, min_time, max_time,
+         num_bins, state, headers) = self.presenter.load(filters)
         self.assertEqual(state, 'Exclude')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'more',
@@ -451,6 +526,9 @@ class FilterPresenterTest(TestHelper):
                                    'End' + TT: 8})
         self.assertEqual(logs, [])
         self.assertEqual(amps, 1.2)
+        self.assertEqual(min_time, 3.)
+        self.assertEqual(max_time, 25.55)
+        self.assertEqual(num_bins, 1000)
         self.assertEqual(len(headers), 3)
 
     def test_load_fail(self):
