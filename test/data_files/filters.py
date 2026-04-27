@@ -4,7 +4,11 @@ These are turned into JSON files for testing
 by the setup function `handle_test_json_data`
 in conftest.py.
 """
-from MuonDataLib.filters import Filters, Filter, PeakProperty, TimeFilters
+from MuonDataLib.filters import (Filters,
+                                      Filter,
+                                      PeakProperty,
+                                      TimeFilters,
+                                      HistogramSettings)
 
 filter_exclude = Filters(
     time_filters = TimeFilters(
@@ -26,7 +30,12 @@ load_filter = Filters(
                         Filter('second', 0.05, 0.06)]
         ),
     sample_log_filters = [Filter('Temp', 0.0044, 0.163)],
-    peak_property = PeakProperty(3.14)
+    peak_property = PeakProperty(3.14),
+    histogram_settings = HistogramSettings(
+        min_time = 0.5,
+        max_time = 15.22,
+        num_bins = 1024
+        )
     )
 
 load_bad_filter = Filters(
