@@ -105,10 +105,19 @@ class PeakProperty:
     Amplitudes: float = 0.
 
 @dataclass
+class HistogramSettings:
+    min_time: float = 0.
+    max_time: float = 32.768
+    num_bins: int = 2048
+
+@dataclass
 class Filters:
     time_filters: TimeFilters = field(default_factory=TimeFilters)
     sample_log_filters: list[Filter] = field(default_factory=list)
     peak_property: PeakProperty = field(default_factory=PeakProperty)
+    histogram_settings: HistogramSettings = (
+            field(default_factory=HistogramSettings)
+            )
 
     def write_json(self, file_name):
         """
@@ -138,7 +147,8 @@ class Filters:
                 ),
             sample_log_filters = [Filter(**f) for f
                                   in data['sample_log_filters']],
-            peak_property = PeakProperty(**data['peak_property'])
+            peak_property = PeakProperty(**data['peak_property']),
+            histogram_settings=HistogramSettings(**data['histogram_settings'])
             )
 
 

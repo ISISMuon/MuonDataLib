@@ -4,7 +4,7 @@ from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
 from MuonDataLib.GUI.histogram_settings.presenter import HistSettingsPresenter
 from MuonDataLib.GUI.filters.view import FilterView
-from MuonDataLib.data.filters import Filters
+from MuonDataLib.data.filters import Filters, HistogramSettings
 
 
 class FilterPresenter(PresenterTemplate):
@@ -28,9 +28,7 @@ class FilterPresenter(PresenterTemplate):
         self._time_file_data = []
         self._log_file_data = []
         self._amp_file_data = 0
-        self._hist_data = {'min_time': 0,
-                           'max_time': 32.768,
-                           'num_bins': 2048}
+        self._hist_data = HistogramSettings()
 
     def show_file(self,
                   name,
@@ -57,9 +55,9 @@ class FilterPresenter(PresenterTemplate):
         if (self._time_file_data == time_data
             and self._log_file_data == log_data
             and self._amp_file_data == float(amp_data)
-            and self._hist_data['min_time'] == min_time
-            and self._hist_data['max_time'] == max_time
-            and self._hist_data['num_bins'] == num_bins):
+            and self._hist_data.min_time == min_time
+            and self._hist_data.max_time == max_time
+            and self._hist_data.num_bins == num_bins):
             return False
         return True
 
@@ -287,12 +285,12 @@ class FilterPresenter(PresenterTemplate):
 
         self._amp_file_data = self._amp.load(filters.peak_property)
 
-        self._hist_data = filters['histogram_settings']
+        self._hist_data = filters.histogram_settings
 
         print('loading filters ....')
         return (time_data, log_data, self._amp_file_data,
-                self._hist_data['min_time'], self._hist_data['max_time'],
-                self._hist_data['num_bins'], state, self.headers)
+                self._hist_data.min_time, self._hist_data.max_time,
+                self._hist_data.num_bins, state, self.headers)
 
     def update_N_events(self, update, current_str):
         """

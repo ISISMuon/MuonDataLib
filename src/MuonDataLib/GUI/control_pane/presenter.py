@@ -306,4 +306,4 @@ class ControlPanePresenter(PresenterTemplate):
         (include/exclude) and the column headers
         """
         data = Filters.from_json(name)
-        self._filter.load(data)
+        return self._filter.load(data)

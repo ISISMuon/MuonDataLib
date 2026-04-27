@@ -6,7 +6,8 @@ import numpy as np
 from MuonDataLib.data.filters import (Filter,
                                       Filters,
                                       PeakProperty,
-                                      TimeFilters)
+                                      TimeFilters,
+                                      HistogramSettings)
 
 
 class MuonData(object):
@@ -64,10 +65,8 @@ class MuonEventData(MuonData):
         self._events = events
         self._cache = cache
         self._time_filter = TimeFilters()
-        self._hist_settings = {'min_time': 0.,
-                               'max_time': 32.768,
-                               'num_bins': 2048,
-                               }
+        self._hist_settings = HistogramSettings()
+
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
@@ -181,9 +180,9 @@ class MuonEventData(MuonData):
         :param max_time: the end time for the histogram
         :param num_bins: the number of bins in the histogram
         """
-        self._hist_settings['min_time'] = min_time
-        self._hist_settings['max_time'] = max_time
-        self._hist_settings['num_bins'] = num_bins
+        self._hist_settings.min_time = min_time
+        self._hist_settings.max_time = max_time
+        self._hist_settings.num_bins = num_bins
 
     def hist_settings_changed(self, cached_settings):
         """
@@ -191,9 +190,9 @@ class MuonEventData(MuonData):
         """
         min_time, max_time, num_bins = cached_settings
         return (
-            self._hist_settings['min_time'] != min_time
-            or self._hist_settings['max_time'] != max_time
-            or self._hist_settings['num_bins'] != num_bins
+            self._hist_settings.min_time != min_time
+            or self._hist_settings.max_time != max_time
+            or self._hist_settings.num_bins != num_bins
         )
 
     def histogram(self):
@@ -212,9 +211,9 @@ class MuonEventData(MuonData):
 
         if (is_cache_empty
             or self.hist_settings_changed(self._cache.get_hist_settings())):
-            min_time = self._hist_settings['min_time']
-            max_time = self._hist_settings['max_time']
-            num_bins = self._hist_settings['num_bins']
+            min_time = self._hist_settings.min_time
+            max_time = self._hist_settings.max_time
+            num_bins = self._hist_settings.num_bins
             width = (max_time - min_time) / num_bins
             return self._events.histogram(
                     min_time=min_time,
@@ -403,7 +402,7 @@ class MuonEventData(MuonData):
 
         # add time filters
         data.time_filters = self._time_filter
-        data['histogram_settings'] = self._hist_settings
+        data.histogram_settings = self._hist_settings
         return data
 
     def load_filters(self, file_name):
@@ -422,7 +421,7 @@ class MuonEventData(MuonData):
 
         self._events.set_threshold('Amplitudes', data.peak_property.Amplitudes)
 
-        self._hist_settings = data['histogram_settings']
+        self._hist_settings = data.histogram_settings
 
     def save_filters(self, file_name):
         """
