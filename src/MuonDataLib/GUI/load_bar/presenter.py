@@ -34,24 +34,6 @@ class LoadBarPresenter(PresenterTemplate):
         """
         self.name = name
 
-    def load_filters(self, name):
-        """
-        Code to read a filter file and
-        place the information into a
-        string.
-        :param name: the name of the filter
-        file.
-        :return: a string of the filters
-        """
-        self._data.load_filters(name)
-        tmp = self._data.report_filters()
-        result = ''
-        for k in tmp.keys():
-            a = tmp[k]
-            for f in a.keys():
-                result += f'{k}.{f}: {a[f]} \n'
-        return result
-
     def load_nxs(self, name):
         """
         Reads a muon event nexus file

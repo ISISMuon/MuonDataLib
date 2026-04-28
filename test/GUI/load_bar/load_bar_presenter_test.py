@@ -8,7 +8,7 @@ import os
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
-from data_paths import FILE, FILTER, EXPECT  # noqa: E402
+from data_paths import FILE  # noqa: E402
 
 
 class LoadBarPresenterTest(TestHelper):
@@ -18,9 +18,6 @@ class LoadBarPresenterTest(TestHelper):
         self.view = view
         self.view.return_value = mock.Mock()
         self.load = LoadBarPresenter()
-
-    def expected_report(self, result):
-        self.assertEqual(result, EXPECT)
 
     def test_init(self):
         self.assertEqual(self.load._view,
@@ -34,12 +31,6 @@ class LoadBarPresenterTest(TestHelper):
 
         self.assertEqual(self.load._data._dict['raw_data']._dict['run_number'],
                          195790)
-
-    def test_load_filter(self):
-        self.load.load_nxs(FILE)
-
-        result = self.load.load_filters(FILTER)
-        self.expected_report(result)
 
     @mock.patch("MuonDataLib.GUI.load_bar.presenter.load_events")
     def test_get_data(self, data_mock):
