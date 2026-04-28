@@ -94,8 +94,7 @@ class MainAppPresenter(object):
 
             filters = name[len(CURRENT):]
             result = self.control.read_filter(filters)
-            time_data, log_data, amp, state, cols = result
-            return time_data, log_data, amp, state, cols, ''
+            return (*result, '')
         except Exception as err:
             cols = self.control.headers
             return [], [], 0, 'Exclude', cols, f'Load filter error: {err}'
@@ -113,7 +112,8 @@ class MainAppPresenter(object):
         return True
 
     def save_data(self, name, time_filters, time_mode,
-                  log_filters, amp_filters, debug):
+                  log_filters, amp_filters,
+                  min_time, max_time, num_bin, debug):
         """
         Saves either a muon histogram nexus file
         or a filter file, from the current muon
@@ -126,6 +126,9 @@ class MainAppPresenter(object):
         :param log_filters: the data from the sample log
         filter table
         :param amp_filters: the amplitude filters
+        :param min_time: the histogram minimum time
+        :param max_time: the histogram maximum time
+        :param num_bin: the number of histogram bins
         :param debug: if debug mode is on or off.
         :returns: the name of the saved file and
         the alert message
@@ -139,11 +142,14 @@ class MainAppPresenter(object):
             if debug:
                 raise RuntimeError("Saving error")
 
+            hist_settings = (min_time, max_time, num_bin)
+
             print("saving to ", file)
             self.control._filter.apply_filters(time_filters,
                                                time_mode,
                                                log_filters,
-                                               amp_filters)
+                                               amp_filters,
+                                               hist_settings)
             if dtype == "n":
                 data.save_histograms(file)
             elif dtype == 'j':

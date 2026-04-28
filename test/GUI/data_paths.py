@@ -24,4 +24,7 @@ EXPECT = ("peak_property.Amplitudes: 3.14 \n"
           "sample_log_filters.Temp: [0.0044, 0.163] \n"
           "time_filters.keep_filters: {'first': [0.01, 0.02],"
           " 'second': [0.05, 0.06]} \n"
-          "time_filters.remove_filters: {} \n")
+          "time_filters.remove_filters: {} \n"
+          "histogram_settings.max_time: 42 \n"
+          "histogram_settings.min_time: 3.5 \n"
+          "histogram_settings.num_bins: 1024 \n")
