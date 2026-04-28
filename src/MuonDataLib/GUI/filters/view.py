@@ -71,6 +71,20 @@ class FilterView(ViewTemplate):
                  State('N_events', 'children'),
                  prevent_initial_call=True)(presenter.update_N_events)
 
+        callback(Output('N_events', 'children', allow_duplicate=True),
+                 [Input('time-table', 'rowData'),
+                 Input('log-table', 'rowData'),
+                 Input('Amp', 'value')],
+                 State('N_events', 'children'),
+                 prevent_initial_call=True)(lambda time_update, log_update,
+                                            amp_update, current_str:
+                                            presenter.update_N_events(
+                                                time_update
+                                                or log_update
+                                                or amp_update,
+                                                current_str)
+                                            )
+
     @property
     def no_events_str(self):
         """
