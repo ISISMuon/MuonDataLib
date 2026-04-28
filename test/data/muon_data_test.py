@@ -553,7 +553,10 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.save_histograms('tmp.nxs')
 
         cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(width=0.016, cache=cache)
+        events.histogram.assert_called_once_with(min_time=0.,
+                                                 max_time=32.768,
+                                                 width=0.016,
+                                                 cache=cache)
         sample.assert_called_once()
         raw_data.assert_called_once()
         source.assert_called_once()
@@ -578,7 +581,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=True)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -595,10 +598,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.016)
+        data.histogram()
 
         cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(width=0.016, cache=cache)
+        events.histogram.assert_called_once_with(min_time=0.,
+                                                 max_time=32.768,
+                                                 width=0.016,
+                                                 cache=cache)
         self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
         self.assertEqual(2, events.apply_log_filter.call_count)
 
@@ -617,7 +623,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -634,7 +640,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.016)
+        data.set_histogram_settings(1,2,3)
+        data.histogram()
 
         cache.empty.assert_called_once()
         self.assertEqual(0, events.histogram.call_count)
@@ -656,7 +663,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -673,7 +680,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.01)
+        data.set_histogram_settings(4,5,6)
+        data.histogram()
 
         cache.empty.assert_called_once()
         self.assertEqual(1, events.histogram.call_count)
@@ -699,7 +707,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -709,6 +717,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              user,
                              periods,
                              detector_1)
+        data.set_histogram_settings(1,2,3)
         data.save_histograms('tmp.nxs')
 
         cache.empty.assert_called_once()

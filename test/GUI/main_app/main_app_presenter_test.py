@@ -22,7 +22,7 @@ as it will removed in the long term
 """
 DEBUG = False
 TT = '_time-table'
-
+DUMMY_SETTINGS = ([], 0, 0, 32.768, 2048, DEBUG)
 
 def dummy_open(N_clicks):
     return 'bob.nxs'
@@ -262,9 +262,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], 'Load filter error: Cannot have '
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], 'Load filter error: Cannot have '
                          'both include and exclude time filters')
 
     def test_load_filter(self):
@@ -289,9 +292,12 @@ class MainAppPresenterTest(TestHelper):
                                       }])
 
         self.assertEqual(result[2], 3.14)
-        self.assertEqual(result[3], 'Include')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], '')
+        self.assertEqual(result[3], 0.5)
+        self.assertEqual(result[4], 15.22)
+        self.assertEqual(result[5], 1024)
+        self.assertEqual(result[6], 'Include')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], '')
 
     def test_load_filter_fail(self):
         bad_file = 'filters.json'
@@ -303,9 +309,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], "Load filter error: "
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 
@@ -330,9 +339,12 @@ class MainAppPresenterTest(TestHelper):
         self.assertEqual(result[0], [])
         self.assertEqual(result[1], [])
         self.assertEqual(result[2], 0)
-        self.assertEqual(result[3], 'Exclude')
-        self.assertEqual(len(result[4]), 3)
-        self.assertEqual(result[5], "Load filter error: "
+        self.assertEqual(result[3], 0)
+        self.assertEqual(result[4], 0)
+        self.assertEqual(result[5], 0)
+        self.assertEqual(result[6], 'Exclude')
+        self.assertEqual(len(result[7]), 3)
+        self.assertEqual(result[8], "Load filter error: "
                          "[Errno 2] No such file or "
                          f"directory: '{bad_file}'")
 
@@ -357,7 +369,7 @@ class MainAppPresenterTest(TestHelper):
         dtype = 'n'
         file_name = 'test.nxs'
         name, msg = app.save_data(dtype + file_name, [],
-                                  'Exclude', [], 0, DEBUG)
+                                  'Exclude', *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -383,9 +395,7 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file_name,
                                   filters,
                                   'Exclude',
-                                  [],
-                                  0,
-                                  DEBUG)
+                                  *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -412,9 +422,7 @@ class MainAppPresenterTest(TestHelper):
         name, msg = app.save_data(dtype + file_name,
                                   filters,
                                   'Include',
-                                  [],
-                                  0,
-                                  DEBUG)
+                                  *DUMMY_SETTINGS)
         self.assertTrue(os.path.isfile(file_name))
 
         with h5py.File(file_name, 'r') as file:
@@ -435,7 +443,7 @@ class MainAppPresenterTest(TestHelper):
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
         name, msg = app.save_data(dtype + file, filters,
-                                  'Exclude', [], 0, DEBUG)
+                                  'Exclude', *DUMMY_SETTINGS)
 
         result = Filters.from_json('test.json')
 
@@ -459,7 +467,7 @@ class MainAppPresenterTest(TestHelper):
                     'Start' + TT: 1.2,
                     'End' + TT: 200}]
         name, msg = app.save_data(dtype + file, filters, 'Include',
-                                  [], 0, DEBUG)
+                                  *DUMMY_SETTINGS)
 
         result = Filters.from_json('test.json')
 
@@ -485,14 +493,15 @@ class MainAppPresenterTest(TestHelper):
 
         app.load._data.save_filters = mock.Mock(side_effect=throw)
 
-        name, msg = app.save_data(dtype + file, [], ' Exclude', [], 0, DEBUG)
+        name, msg = app.save_data(dtype + file, [], ' Exclude',
+                                  *DUMMY_SETTINGS)
         self.assertFalse(os.path.isfile(file))
         self.assertEqual(name, '')
         self.assertEqual(str(msg), 'Saving Error: save crash')
 
     def test_save_none(self):
         app = MainAppPresenter(dummy_open)
-        result = app.save_data('None', [], 'Exclude', [], 0, DEBUG)
+        result = app.save_data('None', [], 'Exclude', *DUMMY_SETTINGS)
         self.assertEqual(result[0], '')
         self.assertEqual(result[1], '')
 
