@@ -2,6 +2,7 @@ import unittest
 from unittest import mock
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
+from MuonDataLib.data.filters import TimeFilters, Filter
 
 
 def get_validation_data_end(new_value):
@@ -203,9 +204,11 @@ class TimePresenterTest(TestHelper):
         self.assertFalse(change)
 
     def test_load_keep_filters(self):
-        filter_data = {'keep_filters': {'default_1': [200, 400],
-                                        'default_2': [800, 1000]},
-                       'remove_filters': {}}
+        filter_data = TimeFilters(
+                          keep_filters = [Filter('default_1', 200, 400),
+                                          Filter('default_2', 800, 1000)]
+                      )
+
         data, state = self.presenter.load(filter_data)
 
         self.assertEqual(len(data), 2)
@@ -221,9 +224,11 @@ class TimePresenterTest(TestHelper):
         self.assertEqual(state, 'Include')
 
     def test_load_remove_filters(self):
-        filter_data = {'keep_filters': {},
-                       'remove_filters': {'default_1': [200, 400],
-                                          'default_2': [800, 1000]}}
+        filter_data = TimeFilters(
+                          remove_filters = [Filter('default_1', 200, 400),
+                                            Filter('default_2', 800, 1000)]
+                      )
+
         data, state = self.presenter.load(filter_data)
 
         self.assertEqual(len(data), 2)
@@ -240,8 +245,10 @@ class TimePresenterTest(TestHelper):
 
     def test_load_fails(self):
 
-        filter_data = {'keep_filters': {'default_1': [200, 400]},
-                       'remove_filters': {'default_2': [800, 1000]}}
+        filter_data = TimeFilters(
+                          keep_filters = [Filter('default_1', 200, 400)],
+                          remove_filters = [Filter('default_2', 800, 1000)]
+                      )
         try:
             data, state = self.presenter.load(filter_data)
         except RuntimeError as err:

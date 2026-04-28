@@ -2,7 +2,11 @@ import h5py
 from MuonDataLib.data.sample_logs import SampleLogs
 from MuonDataLib.data.utils import NONE
 import numpy as np
-import json
+
+from MuonDataLib.data.filters import (Filter,
+                                      Filters,
+                                      PeakProperty,
+                                      TimeFilters)
 
 
 class MuonData(object):
@@ -59,8 +63,7 @@ class MuonEventData(MuonData):
         """
         self._events = events
         self._cache = cache
-        self._time_filter = {}
-        self._keep_times = {}
+        self._time_filter = TimeFilters()
         super().__init__(sample, raw_data, source, user, periods, detector1)
         self._dict['logs'] = SampleLogs()
 
@@ -80,9 +83,8 @@ class MuonEventData(MuonData):
         A method for getting getting time filter values
         from the remove_data_time_between method
         """
-        for name in self._time_filter.keys():
-            start, end = self._time_filter[name]
-            self._events.add_filter(name, start/ns_to_s, end/ns_to_s)
+        for f in self._time_filter.remove_filters:
+            self._events.add_filter(f.name, f.start/ns_to_s, f.end/ns_to_s)
 
     def _filter_keep_times(self):
         """
@@ -92,10 +94,9 @@ class MuonEventData(MuonData):
 
         start_times = []
         end_times = []
-        for key in self._keep_times.keys():
-            tmp = self._keep_times[key]
-            start_times.append(tmp[0])
-            end_times.append(tmp[1])
+        for f in self._time_filter.keep_filters:
+            start_times.append(f.start)
+            end_times.append(f.end)
 
         start_times = np.sort(np.asarray(start_times), kind='quicksort')
         end_times = np.sort(np.asarray(end_times), kind='quicksort')
@@ -106,7 +107,7 @@ class MuonEventData(MuonData):
             # remove from start (assume 0) to first window
             self._events.add_filter('keep_0', 0.0,
                                     start_times[0]/ns_to_s)
-            for j in range(1, len(self._keep_times)):
+            for j in range(1, len(self._time_filter.keep_filters)):
                 self._events.add_filter(f'keep_{j}',
                                         end_times[j-1]/ns_to_s,
                                         start_times[j]/ns_to_s)
@@ -289,14 +290,9 @@ class MuonEventData(MuonData):
         Adds a filter that keeps data between given times
         :param times: a list of the start, end times (as a list)
         """
-        if name in self._keep_times.keys():
-            raise RuntimeError(f'The name {name} is already in use')
-        elif start > end:
-            error = (f'the start time {start} is after '
-                     f'the end time {end}')
-            raise RuntimeError(error)
         self._clear()
-        self._keep_times[name] = [start, end]
+        # TODO: just get callers to directly call add_keep_filter?
+        self._time_filter.add_keep_filter(name, start, end)
 
     def remove_data_time_between(self, name, start, end):
         """
@@ -304,12 +300,8 @@ class MuonEventData(MuonData):
         :param name: the name for the filter
         :param start: the time to start removing data from
         """
-        if name in self._time_filter.keys():
-            raise RuntimeError(f'The name {name} already exists')
-        if start > end:
-            raise RuntimeError('The start time is after the end time')
         self._clear()
-        self._time_filter[name] = (start, end)
+        self._time_filter.add_remove_filter(name, start, end)
 
     def delete_sample_log_filter(self, name):
         """
@@ -326,10 +318,8 @@ class MuonEventData(MuonData):
         A method to remove the filters that
         define time bands to keep date within
         """
-        if name not in self._keep_times.keys():
-            raise RuntimeError(f'The name {name} is not present')
         self._clear()
-        del self._keep_times[name]
+        self._time_filter.delete_keep_filter(name)
 
     def delete_remove_data_time_between(self, name):
         """
@@ -338,7 +328,7 @@ class MuonEventData(MuonData):
         :param name: the name of the filter to remove
         """
         self._clear()
-        del self._time_filter[name]
+        self._time_filter.delete_remove_filter(name)
 
     def get_frame_start_times(self):
         """
@@ -357,27 +347,24 @@ class MuonEventData(MuonData):
             data[key] = [x*ns_to_s for x in data[key]]
         return data
 
-    def report_filters(self):
+    def report_filters(self) -> Filters:
         """
-        :returns: the applied filters as a structured dict
+        :returns: the applied filters as a dataclass
         """
-        data = {}
+        data = Filters()
 
-        # peak filter
-        data['peak_property'] = {'Amplitudes':
-                                 self._events.get_threshold('Amplitudes')}
+        data.peak_property = PeakProperty(0.)
 
         # add sample logs
-        tmp = {}
         for name in self._dict['logs'].get_names():
             result = self._dict['logs'].get_filter(name)
             if result[3] != NONE or result[4] != NONE:
-                tmp[name] = [result[3], result[4]]
-        data['sample_log_filters'] = tmp
+                data.sample_log_filters.append(Filter(name,
+                                                      result[3],
+                                                      result[4]))
 
         # add time filters
-        data['time_filters'] = {'keep_filters': self._keep_times,
-                                'remove_filters': self._time_filter}
+        data.time_filters = self._time_filter
         return data
 
     def load_filters(self, file_name):
@@ -387,30 +374,19 @@ class MuonEventData(MuonData):
         :param file_name: the name of the json file
         """
         self._clear()
-        with open(file_name, 'r') as file:
-            data = json.load(file)
-        tmp = data['time_filters']
-        self._time_filter = tmp['remove_filters']
+        data = Filters.from_json(file_name)
 
-        tmp = tmp['keep_filters']
-        self._keep_times = {}
-        for key in tmp.keys():
-            self._keep_times[key] = tmp[key]
+        self._time_filter = data.time_filters
 
-        tmp = data['sample_log_filters']
-        for name in tmp.keys():
-            self._dict['logs'].add_filter(name, *tmp[name])
+        for f in data.sample_log_filters:
+            self._dict['logs'].add_filter(f.name, f.start, f.end)
 
-        tmp = data['peak_property']
-        for name in tmp.keys():
-            self._events.set_threshold(name, tmp[name])
+        self._events.set_threshold('Amplitudes', data.peak_property.Amplitudes)
 
     def save_filters(self, file_name):
         """
         A method to save the current filters to a file.
         :param file_name: the name of the json file to save to.
         """
-        data = self.report_filters()
-        with open(file_name, 'w') as file:
-            json.dump(data, file, ensure_ascii=False,
-                      sort_keys=True, indent=4)
+        self.report_filters().write_json(file_name)
+

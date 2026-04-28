@@ -3,6 +3,7 @@ from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
 from MuonDataLib.GUI.filters.view import FilterView
+from MuonDataLib.data.filters import Filters
 
 
 class FilterPresenter(PresenterTemplate):
@@ -220,22 +221,22 @@ class FilterPresenter(PresenterTemplate):
         N = f"{self._data._cache.get_N_events:,}"
         return self._view.get_N(N), ''
 
-    def load(self, filters):
+    def load(self, filters: Filters):
         """
-        Loads the filters that have been reported from a json file
-        :param filters: the dict of the filters
+        Loads the filters that have been reported from a Filters object.
+        :param filters: the dataclass of filters
         :returns: the time filters, the sample log
         filters, the amplitude filters, if to include/exclude the time filters,
         and the table headers
         """
-        time_data, state = self._time.load(filters['time_filters'])
+        time_data, state = self._time.load(filters.time_filters)
         self._time_file_data = time_data
         self._time.set_state(state)
 
-        log_data = self._log.load(filters['sample_log_filters'])
+        log_data = self._log.load(filters.sample_log_filters)
         self._log_file_data = log_data
 
-        self._amp_file_data = self._amp.load(filters['peak_property'])
+        self._amp_file_data = self._amp.load(filters.peak_property)
 
         print('loading filters ....')
         return time_data, log_data, self._amp_file_data, state, self.headers

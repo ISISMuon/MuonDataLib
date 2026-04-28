@@ -1,6 +1,7 @@
 from MuonDataLib.GUI.table.presenter import PresenterTemplate
 from MuonDataLib.GUI.amp.view import AmplitudeView
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+from MuonDataLib.data.filters import PeakProperty
 
 
 class AmpPresenter(PresenterTemplate):
@@ -19,15 +20,14 @@ class AmpPresenter(PresenterTemplate):
         self._plot = PlotAreaPresenter('amp')
         self._view = AmplitudeView(self)
 
-    def load(self, data):
+    def load(self, data: PeakProperty):
         """
         Loads the amplitude data from
-        a json file.
-        :param data: the dict containing the
-        amplitude
+        a PeakProperty object.
+        :param data: the PeakProperty object.
         :returns: the amplitude filter details
         """
-        return data['Amplitudes']
+        return data.Amplitudes
 
     def plot(self, data):
         """

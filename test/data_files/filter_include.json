@@ -2,18 +2,20 @@
     "peak_property": {
         "Amplitudes": 0.0
     },
-    "sample_log_filters": {},
+    "sample_log_filters": [],
     "time_filters": {
-        "keep_filters": {},
-        "remove_filters": {
-            "default_1": [
-                200,
-                400
-            ],
-            "default_2": [
-                600,
-                1100
-            ]
-        }
+        "keep_filters": [
+            {
+                "end": 400,
+                "name": "default_1",
+                "start": 200
+            },
+            {
+                "end": 1100,
+                "name": "default_2",
+                "start": 600
+            }
+        ],
+        "remove_filters": []
     }
 }
