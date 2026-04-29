@@ -9,3 +9,6 @@ It is important that when these files are updated they are tested directly
 
 HIFI42.nxs: saved single period data, only works with Wimda, no sample logs
 HIFI51.nxs: saved multiperiod data, only works with Wimda, no sample logs
+
+The JSON files in this folder are generated from the script `generate_filters.py`
+which holds the schemata for each JSON file in the form of a Filters object.
