@@ -81,10 +81,8 @@ class TimeFilters:
         for i, f in enumerate(filter_list):
             if f.name == name:
                 filter_list.pop(i)
-                break
-        # note this is an else for the for, so only runs at end if no break
-        else:
-            raise RuntimeError(f"The name {name} is not present.")
+                return
+        raise RuntimeError(f"The name {name} is not present.")
 
     def delete_keep_filter(self, name: str):
         """

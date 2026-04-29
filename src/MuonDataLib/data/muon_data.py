@@ -291,7 +291,6 @@ class MuonEventData(MuonData):
         :param times: a list of the start, end times (as a list)
         """
         self._clear()
-        # TODO: just get callers to directly call add_keep_filter?
         self._time_filter.add_keep_filter(name, start, end)
 
     def remove_data_time_between(self, name, start, end):
