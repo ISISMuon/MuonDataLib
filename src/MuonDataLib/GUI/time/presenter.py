@@ -4,7 +4,7 @@ from MuonDataLib.GUI.table.column import (TextColumn,
                                           NumericColumn,
                                           TableGroup,
                                           TableColumns)
-from MuonDataLib.data.filters import TimeFilters
+from MuonDataLib.filters import TimeFilters
 
 
 TIME_TABLE = 'time-table'

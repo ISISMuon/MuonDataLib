@@ -8,7 +8,7 @@ from MuonDataLib.GUI.table.column import (DropDownColumn,
                                           TableGroup,
                                           TableColumns)
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
-from MuonDataLib.data.filters import Filter
+from MuonDataLib.filters import Filter
 import numpy as np
 
 

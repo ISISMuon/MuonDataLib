@@ -3,7 +3,7 @@ from MuonDataLib.data.sample_logs import SampleLogs
 from MuonDataLib.data.utils import NONE
 import numpy as np
 
-from MuonDataLib.data.filters import (Filter,
+from MuonDataLib.filters import (Filter,
                                       Filters,
                                       PeakProperty,
                                       TimeFilters)

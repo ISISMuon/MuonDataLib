@@ -1,6 +1,6 @@
 from MuonDataLib.data.utils import NONE
 from MuonDataLib.data.muon_data import MuonData, MuonEventData
-from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
+from MuonDataLib.filters import Filter, Filters, PeakProperty, TimeFilters
 from MuonDataLib.data.loader.load_events import load_events
 from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest

@@ -2,7 +2,7 @@ import unittest
 from unittest import mock
 from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
-from MuonDataLib.data.filters import TimeFilters, Filter
+from MuonDataLib.filters import TimeFilters, Filter
 
 
 def get_validation_data_end(new_value):

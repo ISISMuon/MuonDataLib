@@ -3,7 +3,7 @@ from unittest import mock
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.data.loader.load_events import load_events
-from MuonDataLib.data.filters import Filter, Filters, PeakProperty, TimeFilters
+from MuonDataLib.filters import Filter, Filters, PeakProperty, TimeFilters
 import numpy as np
 import os
 import sys

@@ -2,7 +2,7 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.GUI.control_pane.view import ControlPaneView
-from MuonDataLib.data.filters import Filters
+from MuonDataLib.filters import Filters
 
 from dash import no_update
 import numpy as np

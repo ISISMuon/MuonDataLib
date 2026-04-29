@@ -1,5 +1,5 @@
 """Generate the filter files used by tests."""
-from MuonDataLib.data.filters import Filters, Filter, PeakProperty, TimeFilters
+from MuonDataLib.filters import Filters, Filter, PeakProperty, TimeFilters
 
 filter_exclude = Filters(
     time_filters = TimeFilters(

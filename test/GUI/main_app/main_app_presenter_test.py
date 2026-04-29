@@ -7,7 +7,7 @@ import h5py
 from MuonDataLib.GUI.main_app.presenter import MainAppPresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.GUI.load_bar.view import CURRENT
-from MuonDataLib.data.filters import Filter, Filters, TimeFilters
+from MuonDataLib.filters import Filter, Filters, TimeFilters
 import sys
 
 current = os.path.dirname(os.path.realpath(__file__))

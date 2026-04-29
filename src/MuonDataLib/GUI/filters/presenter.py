@@ -3,7 +3,7 @@ from MuonDataLib.GUI.time.presenter import TimePresenter
 from MuonDataLib.GUI.log.presenter import LogPresenter
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
 from MuonDataLib.GUI.filters.view import FilterView
-from MuonDataLib.data.filters import Filters
+from MuonDataLib.filters import Filters
 
 
 class FilterPresenter(PresenterTemplate):
