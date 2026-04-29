@@ -139,7 +139,7 @@ class MainApp(Dash):
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('save_btn_dummy', 'children'),
                  [State('time-table', 'rowData'),
-                  State('dropdown-time', 'values'),
+                  State('dropdown-time', 'value'),
                   State('log-table', 'rowData'),
                   State('Amp', 'value'),
                   State('debug', 'on')],

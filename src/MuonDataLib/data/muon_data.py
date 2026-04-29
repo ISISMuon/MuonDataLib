@@ -206,7 +206,6 @@ class MuonEventData(MuonData):
         self._clear()
         self._dict['logs'].clear_filters()
         self._time_filter.clear()
-        self._keep_times = {}
         self._events.clear_thresholds()
 
     def add_sample_log(self, name, x_data, y_data):
