@@ -304,11 +304,11 @@ def get_muon_data_docs():
             Doc('report_filters',
                 'data.muon_data.MuonData',
                 [MUONDATA, FILTER],
-                "A method to return a Python "
-                "dict of the filters that are "
+                "A method to return a dataclass "
+                "of the filters that are "
                 "currently active on the "
                 "MuonData object.",
-                returns='A structured dict of the current filters',
+                returns='A Filters dataclass of the current filters',
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
