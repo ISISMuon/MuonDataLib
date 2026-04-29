@@ -1,4 +1,9 @@
-"""Generate the filter files used by tests."""
+"""Example filter sets used by tests.
+
+These are turned into JSON files for testing
+by the setup function `handle_test_json_data`
+in conftest.py.
+"""
 from MuonDataLib.filters import Filters, Filter, PeakProperty, TimeFilters
 
 filter_exclude = Filters(
@@ -35,8 +40,4 @@ load_bad_filter = Filters(
     peak_property = PeakProperty(3.14)
     )
 
-filter_exclude.write_json("filter_exclude.json")
-filter_include.write_json("filter_include.json")
-load_filter.write_json("load_filter.json")
-load_bad_filter.write_json("load_bad_filter.json")
-load_bad_filter.write_json("script_load_filter.json")
+
