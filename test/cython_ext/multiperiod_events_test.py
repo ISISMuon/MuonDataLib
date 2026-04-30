@@ -51,7 +51,7 @@ class MultiperiodEventsTest(TestHelper):
         Here we are checking that the correct values
         are passed to the histogram generation
         """
-        mat, bins = self._events.histogram(0., 9., 1.)
+        mat, bins = self._events.histogram(0., 9., 9)
         self.assertArrays(bins, np.arange(0., 10., 1.))
         self.assertEqual(len(mat), 2)
         self.assertEqual(len(mat[0]), 2)
@@ -64,7 +64,7 @@ class MultiperiodEventsTest(TestHelper):
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100, 100], dtype=np.int32))
         self.assertTrue(cache.empty())
-        mat, bins = self._events.histogram(1.2, 8.2, .2, cache)
+        mat, bins = self._events.histogram(1.2, 8.2, 35, cache)
 
         self.assertFalse(cache.empty())
         c_mat, c_bins = cache.get_histograms()
@@ -72,14 +72,14 @@ class MultiperiodEventsTest(TestHelper):
         self.assertEqual(len(mat), len(c_mat))
         self.assertEqual(len(mat[0]), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
-        self.assertEqual(cache.resolution, 0.2)
+        self.assertEqual(cache.num_bins, 35)
         self.assertEqual(cache.get_N_events, 7)
 
     def test_filter_histogram_period_1(self):
         self._events.add_filter('test', 1.2, 1.7)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100, 100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 9., 1., cache)
+        mat, bins = self._events.histogram(0., 9., 9, cache)
         self.assertArrays(bins, np.arange(0., 10., 1.))
         self.assertEqual(len(mat), 2)
         self.assertEqual(len(mat[0]), 2)
@@ -96,7 +96,7 @@ class MultiperiodEventsTest(TestHelper):
         self._events.add_filter('test', 6.2, 8.7)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100, 100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 9., 1., cache)
+        mat, bins = self._events.histogram(0., 9., 9, cache)
         self.assertArrays(bins, np.arange(0., 10., 1.))
         self.assertEqual(len(mat), 2)
         self.assertEqual(len(mat[0]), 2)
@@ -113,7 +113,7 @@ class MultiperiodEventsTest(TestHelper):
         self._events.add_filter('test', 4.2, 6.2)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100, 100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 9., 1., cache)
+        mat, bins = self._events.histogram(0., 9., 9, cache)
         self.assertArrays(bins, np.arange(0., 10., 1.))
         self.assertEqual(len(mat), 2)
         self.assertEqual(len(mat[0]), 2)
@@ -134,7 +134,7 @@ class MultiperiodEventsTest(TestHelper):
         self._events.add_filter('unit', 4.2, 5.9)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100, 100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 9., 1., cache)
+        mat, bins = self._events.histogram(0., 9., 9, cache)
         self.assertArrays(bins, np.arange(0., 10., 1.))
         self.assertEqual(len(mat), 2)
         self.assertEqual(len(mat[0]), 2)
