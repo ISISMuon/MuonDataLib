@@ -214,11 +214,11 @@ class MuonEventData(MuonData):
             min_time = self._hist_settings.min_time
             max_time = self._hist_settings.max_time
             num_bins = self._hist_settings.num_bins
-            width = (max_time - min_time) / num_bins
+
             return self._events.histogram(
                     min_time=min_time,
                     max_time=max_time,
-                    width=width,
+                    num_bins=num_bins,
                     cache=self._cache
                     )
         return self._cache.get_histograms()

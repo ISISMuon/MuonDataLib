@@ -424,7 +424,7 @@ cdef class Events:
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,
-                  double width=0.016,
+                  int num_bins=2048,
                   cache=None,
                   ):
         """
@@ -448,6 +448,7 @@ cdef class Events:
         cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
                                       dtype=np.int32)
 
+        cdef double width = (max_time - min_time) / num_bins
         hist, bins, N = make_histogram(times=times,
                                        spec=IDs,
                                        N_spec=self.N_spec,
@@ -468,7 +469,7 @@ cdef class Events:
                        last_time=last_time,
                        min_time=min_time,
                        max_time=max_time,
-                       resolution=width,
+                       num_bins=num_bins,
                        N_events=N)
 
         return hist, bins

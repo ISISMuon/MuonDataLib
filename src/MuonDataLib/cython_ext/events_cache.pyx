@@ -120,7 +120,7 @@ cdef class EventsCache:
         """
         :return: the resolution of the histogram
         """
-        return self.min_time, self.max_time, self.resolution
+        return self.min_time, self.max_time, self.num_bins
 
     @property
     def _discarded_good_frames(self):

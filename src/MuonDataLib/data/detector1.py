@@ -223,7 +223,9 @@ class EventsDetector_1(_Detector_1):
         Get the resolution in pico seconds
         :return the resolution in pico seconds
         """
-        return np.int32(1e6*self._cache.get_resolution())
+        min_time, max_time, num_bins = self._cache.get_hist_settings()
+        width = (max_time - min_time) / num_bins
+        return np.int32(1e6*width)
 
     def save_nxs2(self, file):
         """
