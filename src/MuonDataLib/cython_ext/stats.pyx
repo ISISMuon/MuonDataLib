@@ -4,6 +4,11 @@ import cython
 cnp.import_array()
 
 
+cpdef api int add(cnp.ndarray[int, ndim=1] a):
+    b = a[0] + a[1]
+    return b
+
+
 @cython.boundscheck(False)  # Deactivate bounds checking
 @cython.wraparound(False)   # Deactivate negative indexing.
 cpdef make_histogram(

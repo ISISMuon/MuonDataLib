@@ -1,5 +1,5 @@
 from MuonDataLib.data.utils import NONE
-from MuonDataLib.test import para_histogram, jit, para
+from MuonDataLib.test import para_histogram
 from MuonDataLib.cython_ext.stats import make_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
@@ -399,7 +399,6 @@ cdef class Events:
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         if len(self.filter_start.keys())>0:
             f_i_start, f_i_end, rm_frames = self._get_exclude_windows()
-            #start = time.time()
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
             amps = good_values_double(f_i_start, f_i_end, self.start_index_list,
@@ -433,6 +432,7 @@ cdef class Events:
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram
         :param cache: the cache of event data histograms
+        :param parallel: if to run the calculation in parallel
         :returns: a matrix of histograms, bin edges
         """
         cdef int[:] f_i_start, f_i_end
@@ -441,14 +441,11 @@ cdef class Events:
         cdef cnp.ndarray[int, ndim=1] IDs, periods
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
-
+        
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
-
         cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
-                                                                 1., 0.), dtype=np.int32)
-
+                                                                 1, 0), dtype=np.int32)
         if parallel:
-            #start = time.time()
             hist, bins, N = para_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -456,12 +453,10 @@ cdef class Events:
                                            min_time=min_time,
                                            max_time=max_time,
                                            width=width,
-                                           weight=weight
+                                           weight=weight,
+                                           conversion=1.e-3
                                            )
-            #print('hist', time.time() - start)
         else:
-            
-            #start = time.time()
             hist, bins, N = make_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -470,7 +465,6 @@ cdef class Events:
                                            max_time=max_time,
                                            width=width,
                                            weight=weight)
-            #print('hist', time.time() - start)
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
@@ -483,7 +477,6 @@ cdef class Events:
                        last_time=last_time,
                        resolution=width,
                        N_events=N)
-
         return hist, bins
 
     @staticmethod
