@@ -171,18 +171,26 @@ class MuonEventData(MuonData):
         return start_times, end_times
 
     def set_histogram_settings(self,
-                               min_time=0.,
-                               max_time=32.768,
-                               num_bins=2048):
+                               min_time: float = 0.,
+                               max_time: float = 32.768,
+                               num_bins: int = 2048):
         """
         Change the histogram settings for the data.
         :param min_time: the start time for the histogram
         :param max_time: the end time for the histogram
         :param num_bins: the number of bins in the histogram
         """
+        if min_time > max_time:
+            raise RuntimeError(
+                    "Minimum time cannot be larger than maximum time."
+                    )
+        if num_bins <= 0 or not isinstance(num_bins, int):
+            raise RuntimeError("Number of bins must be a positive integer.")
+
         self._hist_settings.min_time = min_time
         self._hist_settings.max_time = max_time
         self._hist_settings.num_bins = num_bins
+        print(f"Resolution: {(max_time - min_time) / num_bins}")
 
     def hist_settings_changed(self, cached_settings):
         """
