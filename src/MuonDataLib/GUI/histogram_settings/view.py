@@ -1,4 +1,4 @@
-from dash import html, dcc, callback, Output, Input
+from dash import html, callback, Output, Input
 import dash_bootstrap_components as dbc
 
 from MuonDataLib.GUI.view_template import ViewTemplate
@@ -18,16 +18,16 @@ class HistSettingsView(ViewTemplate):
         return html.Div([
             "Minimum and maximum time:",
             dbc.Row([
-                dbc.Col(dcc.Input(id='min-time',
+                dbc.Col(dbc.Input(id='min-time',
                                   value=0.,
                                   type='number')),
-                dbc.Col(dcc.Input(id='max-time',
+                dbc.Col(dbc.Input(id='max-time',
                                   value=32.768,
                                   type='number')),
                 ]),
             dbc.Row(
                 dbc.Col(["Number of bins:",
-                     dcc.Input(id='num-bin',
+                     dbc.Input(id='num-bin',
                                value=2048,
                                type='number',
                                step=1),
