@@ -13,10 +13,10 @@ class HistogramSettingsPresenterTest(TestHelper):
         for valid settings.
         """
         output = self.presenter.display_width(0, 10, 2)
-        assert output == "Resolution: 5.00000"
+        self.assertEqual(output, "Resolution: 5.00000 μs")
 
         output = self.presenter.display_width(0, 1, 3)
-        assert output == "Resolution: 0.33333"
+        self.assertEqual(output, "Resolution: 0.33333 μs")
 
     def test_display_width_invalid(self):
         """
@@ -25,4 +25,5 @@ class HistogramSettingsPresenterTest(TestHelper):
         """
         for num_bins in [0, None]:
             output = self.presenter.display_width(0, 4, num_bins)
-            assert output == "Resolution: "
+            self.assertEqual(output,
+                             "Resolution: N/A (invalid number of bins)")

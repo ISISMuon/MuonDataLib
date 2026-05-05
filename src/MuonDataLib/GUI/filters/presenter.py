@@ -147,6 +147,8 @@ class FilterPresenter(PresenterTemplate):
         self._data.keep_data_peak_property_above("Amplitudes",
                                                  float(amp_filters))
         if hist_settings is not None:
+            if any(value is None for value in hist_settings):
+                raise RuntimeError("Cannot leave histogram settings blank.")
             self._data.set_histogram_settings(*hist_settings)
 
     def update_filters(self,

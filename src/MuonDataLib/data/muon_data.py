@@ -190,7 +190,7 @@ class MuonEventData(MuonData):
         self._hist_settings.min_time = min_time
         self._hist_settings.max_time = max_time
         self._hist_settings.num_bins = num_bins
-        print(f"Resolution: {(max_time - min_time) / num_bins}")
+        print(f"Resolution: {(max_time - min_time) / num_bins} μs")
 
     def hist_settings_changed(self, cached_settings):
         """

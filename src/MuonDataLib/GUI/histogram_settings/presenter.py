@@ -19,5 +19,5 @@ class HistSettingsPresenter(PresenterTemplate):
         :returns: The width of each bin.
         """
         if num_bin is None or num_bin == 0:
-            return "Resolution: "
-        return "Resolution: {:.5f}".format((max_time - min_time) / num_bin)
+            return "Resolution: N/A (invalid number of bins)"
+        return "Resolution: {:.5f} μs".format((max_time - min_time) / num_bin)

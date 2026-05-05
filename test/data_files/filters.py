@@ -5,10 +5,10 @@ by the setup function `handle_test_json_data`
 in conftest.py.
 """
 from MuonDataLib.filters import (Filters,
-                                      Filter,
-                                      PeakProperty,
-                                      TimeFilters,
-                                      HistogramSettings)
+                                 Filter,
+                                 PeakProperty,
+                                 TimeFilters,
+                                 HistogramSettings)
 
 filter_exclude = Filters(
     time_filters = TimeFilters(
