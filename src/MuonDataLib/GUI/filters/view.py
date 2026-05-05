@@ -49,6 +49,7 @@ class FilterView(ViewTemplate):
         Sets the callbacks for the widget
         :param presenter: the presenter for the widget
         """
+        # calculate events when Calculate button is pressed
         callback([Output('N_events', 'children'),
                   Output('error_msg', 'children', allow_duplicate=True)],
                  Input('calc_btn', 'n_clicks'),
@@ -58,6 +59,7 @@ class FilterView(ViewTemplate):
                   State('Amp', 'value')],
                  prevent_initial_call=True)(presenter.calculate)
 
+        # show filename if filter data is equal to that in the file
         callback(Output('title_test', 'hidden'),
                  [Input('title_test', 'children'),
                   Input('time-table', 'rowData'),
@@ -66,24 +68,29 @@ class FilterView(ViewTemplate):
                   ],
                  prevent_initial_call=True)(presenter.show_file)
 
+        # clear events string if time filter changes between include/exclude
         callback(Output('N_events', 'children', allow_duplicate=True),
                  Input('time-table_changed_state', 'data'),
                  State('N_events', 'children'),
+                 prevent_initial_call=True)(lambda *_: self.no_events_str)
+
+        # clear events string if time filter parameters change
+        callback(Output('N_events', 'children', allow_duplicate=True),
+                 Input('time-table', 'cellValueChanged'),
+                 State('N_events', 'children'),
                  prevent_initial_call=True)(presenter.update_N_events)
 
+        # clear events string if log filter parameters change
         callback(Output('N_events', 'children', allow_duplicate=True),
-                 [Input('time-table', 'rowData'),
-                 Input('log-table', 'rowData'),
-                 Input('Amp', 'value')],
+                 Input('log-table', 'cellValueChanged'),
                  State('N_events', 'children'),
-                 prevent_initial_call=True)(lambda time_update, log_update,
-                                            amp_update, current_str:
-                                            presenter.update_N_events(
-                                                time_update
-                                                or log_update
-                                                or amp_update,
-                                                current_str)
-                                            )
+                 prevent_initial_call=True)(presenter.update_N_events)
+
+        # clear events string if Amp value changes
+        callback(Output('N_events', 'children', allow_duplicate=True),
+                 Input('Amp', 'value'),
+                 State('N_events', 'children'),
+                 prevent_initial_call=True)(lambda *_: self.no_events_str)
 
     @property
     def no_events_str(self):
