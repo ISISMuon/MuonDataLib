@@ -1,6 +1,6 @@
 from MuonDataLib.data.utils import NONE
 from MuonDataLib.test import para_histogram
-from MuonDataLib.cython_ext.stats import make_histogram
+from MuonDataLib.cython_ext.stats import make_histogram, c_histogram
 from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
@@ -422,7 +422,7 @@ cdef class Events:
                   double max_time=32.768,
                   double width=0.016,
                   cache=None,
-                  parallel=False,
+                  N_threads=1,
                   ):
         """
         Create a matrix of histograms from the event data
@@ -445,7 +445,7 @@ cdef class Events:
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
         cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
                                                                  1, 0), dtype=np.int32)
-        if parallel:
+        if N_threads > 0:
             hist, bins, N = para_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -454,7 +454,8 @@ cdef class Events:
                                            max_time=max_time,
                                            width=width,
                                            weight=weight,
-                                           conversion=1.e-3
+                                           conversion=1.e-3,
+                                           N_threads=N_threads
                                            )
         else:
             hist, bins, N = make_histogram(times=times,

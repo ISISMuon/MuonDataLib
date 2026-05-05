@@ -1,5 +1,6 @@
 from setuptools import find_packages, setup, Extension
 import numpy
+import sys
 
 
 version = "0.13.0b0"
@@ -7,6 +8,11 @@ version = "0.13.0b0"
 
 PACKAGE_NAME = 'MuonDataLib'
 
+
+if sys.platform.startswith("win"):
+    openmp_arg = '/openmp'
+else:
+    openmp_arg = '-fopenmp'
 
 extensions = [
               Extension(
@@ -27,7 +33,9 @@ extensions = [
                 ),
               Extension(
                 "MuonDataLib.cython_ext.stats",
-                sources=["src/MuonDataLib/cython_ext/stats.pyx"]
+                sources=["src/MuonDataLib/cython_ext/stats.pyx"],
+                extra_compile_args=[openmp_arg],
+                extra_link_args=[openmp_arg],
                 ),
               Extension(
                 "MuonDataLib.cython_ext.filter",
