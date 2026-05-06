@@ -10,14 +10,67 @@ class HistSettingsPresenter(PresenterTemplate):
     def __init__(self):
         self._view = HistSettingsView(self)
 
-    def display_width(self, min_time, max_time, num_bin):
+    def display_width(self, min_time, max_time, num_bins):
         """
         Calculate bin width of a histogram from a range and number of bins.
         :param min_time: The lower limit of the range.
         :param max_time: The upper limit of the range.
-        :param num_bin: The number of bins.
+        :param num_bins: The number of bins.
         :returns: The width of each bin.
         """
-        if num_bin is None or num_bin == 0:
-            return "Resolution: N/A (invalid number of bins)"
-        return "Resolution: {:.5f} μs".format((max_time - min_time) / num_bin)
+        err_msg = None
+        if self.invalidate_num_bins(num_bins):
+            err_msg = "invalid number of bins"
+
+        invalid_range = self.invalidate_range(min_time, max_time)
+        if all(invalid_range):
+            err_msg = "invalid time range"
+        elif invalid_range[0]:
+            err_msg = "invalid min time"
+        elif invalid_range[1]:
+            err_msg = "invalid max time"
+
+        if err_msg is not None:
+            return f"Resolution: N/A ({err_msg})"
+
+        width = (max_time - min_time) / num_bins
+
+        return f"Resolution: {width:.5f} μs"
+
+    def invalidate_min_time(self, min_time: float) -> bool:
+        """
+        Check whether minimum time is valid.
+        :input min_time: The minimum time value.
+        :returns: True if the time is invalid.
+        """
+        return min_time is None
+
+    def invalidate_max_time(self, max_time: float) -> bool:
+        """
+        Check whether maximum time is valid.
+        :input max_time: The maximum time value.
+        :returns: True if the time is invalid.
+        """
+        return max_time is None
+
+    def invalidate_num_bins(self, num_bins: int) -> bool:
+        """
+        Check whether the number of bins is valid.
+        :input num_bins: The number of bins.
+        :returns: Whether the number of bins is valid.
+        """
+        return num_bins is None or num_bins <= 0
+
+    def invalidate_range(self, min_time: float, max_time: float) -> bool:
+        """
+        Check whether the minimum and maximum times are valid.
+        :input min_time: The minimum time value.
+        :input max_time: The maximum time value.
+        :returns: A pair of bools: the first is True if min_time is invalid,
+                  the second is True if max_time is invalid.
+        """
+        invalid = (min_time is None, max_time is None)
+        if not any(invalid):
+            if min_time > max_time:
+                return (True, True)
+        return invalid

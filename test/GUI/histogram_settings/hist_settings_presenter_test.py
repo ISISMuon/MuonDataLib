@@ -27,3 +27,31 @@ class HistogramSettingsPresenterTest(TestHelper):
             output = self.presenter.display_width(0, 4, num_bins)
             self.assertEqual(output,
                              "Resolution: N/A (invalid number of bins)")
+
+
+    def test_display_min_time(self):
+        """
+        Test that no resolution is displayed if min_time is incorrect.
+        """
+        output = self.presenter.display_width(None, 10, 2048)
+        self.assertEqual(output,
+                         "Resolution: N/A (invalid min time)")
+
+    def test_display_max_time(self):
+        """
+        Test that no resolution is displayed if min_time is incorrect.
+        """
+        output = self.presenter.display_width(0, None, 2048)
+        self.assertEqual(output,
+                         "Resolution: N/A (invalid max time)")
+
+    def test_display_bad_range(self):
+        """
+        Test that no resolution is displayed if min_time is incorrect.
+        """
+        for time_range in [(5, 3), (None, None)]:
+            output = self.presenter.display_width(time_range[0],
+                                                  time_range[1],
+                                                  2048)
+            self.assertEqual(output,
+                             "Resolution: N/A (invalid time range)")

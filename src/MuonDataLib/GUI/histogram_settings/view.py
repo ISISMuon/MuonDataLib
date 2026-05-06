@@ -20,10 +20,14 @@ class HistSettingsView(ViewTemplate):
             dbc.Row([
                 dbc.Col(dbc.Input(id='min-time',
                                   value=0.,
-                                  type='number')),
+                                  type='number',
+                                  debounce=True,
+                                  placeholder=0.)),
                 dbc.Col(dbc.Input(id='max-time',
                                   value=32.768,
-                                  type='number')),
+                                  type='number',
+                                  debounce=True,
+                                  placeholder=32.768)),
                 ]),
             dbc.Row(
                 dbc.Col(["Number of bins:",
@@ -40,10 +44,18 @@ class HistSettingsView(ViewTemplate):
         """
         Set callbacks required by the GUI.
         """
+        # callback to update resolution display
         callback(Output('display-width', 'children'),
                  Input('min-time', 'value'),
                  Input('max-time', 'value'),
                  Input('num-bin', 'value'))(presenter.display_width)
 
+        # callback to mark number of bins if invalid
+        callback(Output('num-bin', 'invalid'),
+                 Input('num-bin', 'value'))(presenter.invalidate_num_bins)
 
-
+        # callback to mark min or max time if invalid
+        callback([Output('min-time', 'invalid'),
+                  Output('max-time', 'invalid')],
+                 [Input('min-time', 'value'),
+                  Input('max-time', 'value')])(presenter.invalidate_range)
