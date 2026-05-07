@@ -68,10 +68,14 @@ class FilterView(ViewTemplate):
                   ],
                  prevent_initial_call=True)(presenter.show_file)
 
-        # clear events string if time filter changes between include/exclude
+        # clear events string if event data is made invalid
         callback(Output('N_events', 'children', allow_duplicate=True),
-                 Input('time-table_changed_state', 'data'),
-                 State('N_events', 'children'),
+                 [Input('time-table_changed_state', 'data'),
+                  Input('Amp', 'value'),
+                  Input('time-table_add', 'n_clicks'),
+                  Input('log-table_add', 'n_clicks'),
+                  Input('time-table', 'cellRendererData'),
+                  Input('log-table', 'cellRendererData')],
                  prevent_initial_call=True)(lambda *_: self.no_events_str)
 
         # clear events string if time filter parameters change
@@ -85,12 +89,6 @@ class FilterView(ViewTemplate):
                  Input('log-table', 'cellValueChanged'),
                  State('N_events', 'children'),
                  prevent_initial_call=True)(presenter.update_N_events)
-
-        # clear events string if Amp value changes
-        callback(Output('N_events', 'children', allow_duplicate=True),
-                 Input('Amp', 'value'),
-                 State('N_events', 'children'),
-                 prevent_initial_call=True)(lambda *_: self.no_events_str)
 
     @property
     def no_events_str(self):
