@@ -40,7 +40,11 @@ class MuonData(object):
         """
         file = h5py.File(file_name, 'w')
         for key in self._dict.keys():
-            self._dict[key].save_nxs2(file)
+            import traceback
+            try:
+                self._dict[key].save_nxs2(file)
+            except Exception:
+                print(traceback.format_exc())
         file.close()
         return
 

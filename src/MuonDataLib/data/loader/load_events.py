@@ -92,7 +92,7 @@ def _load_events(file_name, N):
                     'affiliation: test')
 
         periods = EventsPeriods(cache,
-                                p_group['number'][()],
+                                events.N_periods,
                                 'label test',
                                 p_group['type'][:],
                                 [0])
