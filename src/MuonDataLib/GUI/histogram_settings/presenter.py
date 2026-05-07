@@ -19,10 +19,10 @@ class HistSettingsPresenter(PresenterTemplate):
         :returns: The width of each bin.
         """
         err_msg = None
-        if self.invalidate_num_bins(num_bins):
+        if self.check_num_bins_invalid(num_bins):
             err_msg = "invalid number of bins"
 
-        invalid_range = self.invalidate_range(min_time, max_time)
+        invalid_range = self.check_range_invalid(min_time, max_time)
         if all(invalid_range):
             err_msg = "invalid time range"
         elif invalid_range[0]:
@@ -37,23 +37,7 @@ class HistSettingsPresenter(PresenterTemplate):
 
         return f"Resolution: {width:.5f} μs"
 
-    def invalidate_min_time(self, min_time: float) -> bool:
-        """
-        Check whether minimum time is valid.
-        :input min_time: The minimum time value.
-        :returns: True if the time is invalid.
-        """
-        return min_time is None
-
-    def invalidate_max_time(self, max_time: float) -> bool:
-        """
-        Check whether maximum time is valid.
-        :input max_time: The maximum time value.
-        :returns: True if the time is invalid.
-        """
-        return max_time is None
-
-    def invalidate_num_bins(self, num_bins: int) -> bool:
+    def check_num_bins_invalid(self, num_bins: int) -> bool:
         """
         Check whether the number of bins is valid.
         :input num_bins: The number of bins.
@@ -61,7 +45,7 @@ class HistSettingsPresenter(PresenterTemplate):
         """
         return num_bins is None or num_bins <= 0
 
-    def invalidate_range(self, min_time: float, max_time: float) -> bool:
+    def check_range_invalid(self, min_time: float, max_time: float) -> bool:
         """
         Check whether the minimum and maximum times are valid.
         :input min_time: The minimum time value.

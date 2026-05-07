@@ -52,10 +52,10 @@ class HistSettingsView(ViewTemplate):
 
         # callback to mark number of bins if invalid
         callback(Output('num-bin', 'invalid'),
-                 Input('num-bin', 'value'))(presenter.invalidate_num_bins)
+                 Input('num-bin', 'value'))(presenter.check_num_bins_invalid)
 
         # callback to mark min or max time if invalid
         callback([Output('min-time', 'invalid'),
                   Output('max-time', 'invalid')],
                  [Input('min-time', 'value'),
-                  Input('max-time', 'value')])(presenter.invalidate_range)
+                  Input('max-time', 'value')])(presenter.check_range_invalid)
