@@ -67,8 +67,8 @@ fig = plt.figure()
 ax1 = fig.add_subplot(111)
 ax2 = ax1.twiny()
 
-para_data.plot_rate(ax1, load)
 seq_data.plot_rate(ax1, load)
+para_data.plot_rate(ax1, load)
 
 ax1.set_xlabel('Millions of events')
 ax1.set_ylabel('Millions of events per second')
