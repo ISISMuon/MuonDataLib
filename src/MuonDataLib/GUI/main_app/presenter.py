@@ -145,7 +145,7 @@ class MainAppPresenter(object):
                                                log_filters,
                                                amp_filters)
             if dtype == "n":
-                data.save_histograms(file)
+                data.save_histograms(file, N_threads=1)
             elif dtype == 'j':
                 data.save_filters(file)
             return file, ''

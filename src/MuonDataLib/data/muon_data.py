@@ -166,7 +166,7 @@ class MuonEventData(MuonData):
         self.clear_filters()
         return start_times, end_times
 
-    def histogram(self, resolution=0.016, N_threads=0):
+    def histogram(self, resolution=0.016, N_threads=1):
         """
         A method for constructing a histogram.
         This will skip calculating the filters
@@ -175,6 +175,7 @@ class MuonEventData(MuonData):
         not alter the filtered values.
         :param resolution: the resolution of the
         histogram
+        :param N_threads: the number of threads to run on
         :return: the histograms and bins
         """
         is_cache_empty = self._cache.empty()
@@ -188,14 +189,15 @@ class MuonEventData(MuonData):
                                           N_threads=N_threads)
         return self._cache.get_histograms()
 
-    def save_histograms(self, file_name, resolution=0.016):
+    def save_histograms(self, file_name, resolution=0.016, N_threads=1):
         """
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
         :param resolution: the resolution for the histogram
+        :param N_threads: the number of threads to run on
         """
-        hist, _ = self.histogram(resolution)
+        hist, _ = self.histogram(resolution, N_threads)
         super().save_histograms(file_name)
 
     def clear_filters(self):

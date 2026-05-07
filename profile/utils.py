@@ -1,27 +1,27 @@
-from MuonDataLib.data.loader.load_events import load_events
-from MuonDataLib.data.utils import convert_date
-import datetime
-import os
-import sys
-
-import datetime
 import numpy as np
-import matplotlib.pyplot as plt
 import time
-from MuonDataLib.cython_ext.load_events import load_data, _load_data
 
-"""
-Lets split these up:
-    - 1 filter for N files
-    - N filters for 1 file
-    - filter of size N for 2 files (big and small)
-where N is the quantity being looped over
-"""
+
+def get_data():
+    """
+    Method to get the data for profiling.
+    :return: the path, list of file names and number of detectors
+    """
+    path = ''
+    name = [f'SIM0000000{k}' for k in range(1, 7)]
+    # number of detectors
+    N = 960
+    return path, name, N
 
 
 class Data(object):
-
     def __init__(self, x, marker, label):
+        """
+        Class to make it easier to handle data.
+        :param x: the x values
+        :param marker: the marker to use in plots
+        :param label: the label for plots
+        """
         self.x = x
         self.y = np.zeros(len(x))
         self.e = np.zeros(len(x))
@@ -29,15 +29,34 @@ class Data(object):
         self.label = label
 
     def add_data(self, index, y, e):
+        """
+        Adds y and error data to the
+        index
+        :param index: the index to add the data
+        :param y: the y value
+        :param e: the error value on y
+        """
         self.y[index] = y
         self.e[index] = e
 
     def plot(self, ax):
+        """
+        Plots the data on the axis ax
+        :param ax: the axis to plot on
+        """
         ax.errorbar(self.x, self.y, self.e, fmt=self.marker, label=self.label)
 
     def plot_rate(self, ax, load):
+        """
+        Plots the rate, requires x to be events
+        and y to be time.
+        :param ax: the axis to add the plot to
+        :param load: an array of the load times
+        """
         rate = self.x/(load + self.y)
-        ax.errorbar(self.x, rate, self.e/rate**2, fmt=self.marker, label=self.label)
+        ax.errorbar(self.x, rate, self.e/rate**2,
+                    fmt=self.marker, label=self.label)
+
 
 def add_N_filters(data, N):
     """
@@ -66,8 +85,9 @@ def add_N_filters(data, N):
         elif m == N:
             return data
         else:
-           skip = False
- 
+            skip = False
+
+
 def remove_filters(data):
     """
     A simple method to remove the filters.
@@ -83,14 +103,18 @@ def remove_filters(data):
     return data
 
 
-def get_data():
-    # will need to update these to be the path and file names of your test data
-    path = ''
-    name = [f'SIM0000000{k}' for k in range(1, 3)]#7)]
-    N = 960 #  number of detectors
-    return name, N
-
 def get_stats(data, func, N_threads, N_stats):
+    """
+    Calculates the time taken to do histogram
+    + filters on N_threads, it is then averaged
+    over N_stats.
+    :param data: the muon event data object
+    :param func: the function for adding filters
+    :param N_threads: the number of threads to use
+    :param N_stats: the number of calculations to average
+    :return: the mean and standard deviation of the time taken
+    for the calculation.
+    """
     tmp = np.zeros(N_stats)
     for k in range(N_stats):
         start = time.time()

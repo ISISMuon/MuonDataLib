@@ -216,7 +216,7 @@ class FilterPresenter(PresenterTemplate):
             self.apply_filters(time_filters, state, log_filters, amp_filter)
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
-        _ = self._data.histogram()
+        _ = self._data.histogram(N_threads=1)
         N = f"{self._data._cache.get_N_events:,}"
         return self._view.get_N(N), ''
 
