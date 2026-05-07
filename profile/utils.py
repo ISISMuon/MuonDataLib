@@ -19,6 +19,25 @@ where N is the quantity being looped over
 """
 
 
+class Data(object):
+
+    def __init__(self, x, marker, label):
+        self.x = x
+        self.y = np.zeros(len(x))
+        self.e = np.zeros(len(x))
+        self.marker = marker
+        self.label = label
+
+    def add_data(self, index, y, e):
+        self.y[index] = y
+        self.e[index] = e
+
+    def plot(self, ax):
+        ax.errorbar(self.x, self.y, self.e, fmt=self.marker, label=self.label)
+
+    def plot_rate(self, ax, load):
+        rate = self.x/(load + self.y)
+        ax.errorbar(self.x, rate, self.e/rate**2, fmt=self.marker, label=self.label)
 
 def add_N_filters(data, N):
     """
@@ -49,23 +68,35 @@ def add_N_filters(data, N):
         else:
            skip = False
  
-def remove_filters(data, N):
+def remove_filters(data):
     """
     A simple method to remove the filters.
     :param data: the MuonEventData object
-    :param N: the number of filters to remove
     :return: the MuonEventData object
     """
-    if N == 0:
-        return data
-    for j in range(N):
-        data.delete_remove_data_time_between(f'tmp_{j}')
+    # this clears the cache for no filters
+    data._clear()
+    filters = data.report_filters()['time_filters']['remove_filters'].copy()
+    if len(filters) > 0:
+        for name in filters:
+            data.delete_remove_data_time_between(name)
     return data
 
 
 def get_data():
     # will need to update these to be the path and file names of your test data
     path = ''
-    name = [f'SIM0000000{k}' for k in range(1, 7)]
+    name = [f'SIM0000000{k}' for k in range(1, 3)]#7)]
     N = 960 #  number of detectors
     return name, N
+
+def get_stats(data, func, N_threads, N_stats):
+    tmp = np.zeros(N_stats)
+    for k in range(N_stats):
+        start = time.time()
+        data = func(data)
+        _ = data.histogram(N_threads=N_threads)
+        tmp[k] = time.time() - start
+        N = data._cache.get_N_events
+        data = remove_filters(data)
+    return np.mean(tmp), np.std(tmp), N
