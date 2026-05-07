@@ -467,11 +467,17 @@ class FilterPresenterTest(TestHelper):
             _ = self.presenter.load(filters)
 
     def test_update_N_events_success(self):
-        result = self.presenter.update_N_events([{'colId': 'Start_time-table'}]
-                                                , 'old')
-        self.assertEqual(result, 'Number of events: Not Calculated')
+        for col_id in ['Start_time-table',
+                       'End_time-table',
+                       'filter_log-table',
+                       'y0_log-table',
+                       'yN_log-table',]:
+            result = self.presenter.update_N_events(
+                    [{'colId': col_id}], 'old'
+                    )
+            self.assertEqual(result, 'Number of events: Not Calculated')
 
-    def test_update_N_events_failt(self):
+    def test_update_N_events_fail(self):
         result = self.presenter.update_N_events([{'colId': 'unit test'}],
                                                 'old')
         self.assertEqual(result, 'old')
