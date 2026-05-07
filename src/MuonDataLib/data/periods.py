@@ -85,7 +85,7 @@ class EventsPeriods(_Periods):
     """
     A class to store the period information for muon data
     """
-    def __init__(self, cache, _number, _labels, p_type,
+    def __init__(self, cache, number, _labels, p_type,
                  _output):
         """
         A class to store the period data needed for a muon nexus v2 file
@@ -97,15 +97,11 @@ class EventsPeriods(_Periods):
         :param p_type: an int array representing the type of period
         :param output: an int array of the outputs
         """
-        N = len(p_type)
+        # label is a semicolon-delimited string of period names
+        label = ";".join(f'period {k + 1}' for k in range(0, number))
+        output = np.zeros(number, dtype=np.int32)
 
-        label = ''
-        for k in range(N):
-            label += f'period {k + 1};'
-        label = label[:-1]
-        output = np.zeros(N, dtype=np.int32)
-
-        super().__init__(N, label, p_type, output)
+        super().__init__(number, label, p_type, output)
         self._cache = cache
 
     def save_nxs2(self, file):
