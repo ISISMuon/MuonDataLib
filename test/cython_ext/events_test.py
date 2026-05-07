@@ -60,7 +60,7 @@ class EventsTest(TestHelper):
         self.assertEqual(len(mat[0]), 2)
 
     def test_custom_histogram(self):
-        mat, bins = self._events.histogram(0., 7., 1.)
+        mat, bins = self._events.histogram(0., 7., 7)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
@@ -71,7 +71,7 @@ class EventsTest(TestHelper):
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
         self.assertTrue(cache.empty())
-        mat, bins = self._events.histogram(1.2, 4.2, .2, cache)
+        mat, bins = self._events.histogram(1.2, 4.2, 15, cache)
 
         self.assertFalse(cache.empty())
         c_mat, c_bins = cache.get_histograms()
@@ -80,12 +80,14 @@ class EventsTest(TestHelper):
         self.assertEqual(len(mat), len(c_mat))
         self.assertEqual(len(mat[0]), len(c_mat[0]))
         self.assertEqual(cache.get_good_frames[0], 100)
-        self.assertEqual(cache.resolution, 0.2)
+        self.assertEqual(cache.min_time, 1.2)
+        self.assertEqual(cache.max_time, 4.2)
+        self.assertEqual(cache.num_bins, 15)
         self.assertEqual(cache.get_N_events, 3)
 
     def test_amplitude_filter_on_histogram(self):
         self._events.set_threshold('Amplitudes', 1.1)
-        mat, bins = self._events.histogram(0., 7., 1.)
+        mat, bins = self._events.histogram(0., 7., 7)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
@@ -178,7 +180,7 @@ class EventsTest(TestHelper):
         self._events.add_filter('test', 1.2, 1.7)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 7., 1., cache)
+        mat, bins = self._events.histogram(0., 7., 7, cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)
@@ -193,7 +195,7 @@ class EventsTest(TestHelper):
         self._events.add_filter('unit', 1.6, 1.9)
         date = datetime.datetime(2024, 12, 21, 7, 59, 0)
         cache = EventsCache(date, np.asarray([100], dtype=np.int32))
-        mat, bins = self._events.histogram(0., 7., 1., cache)
+        mat, bins = self._events.histogram(0., 7., 7, cache)
         self.assertArrays(bins, np.arange(0., 8., 1.))
         self.assertEqual(len(mat), 1)
         self.assertEqual(len(mat[0]), 2)

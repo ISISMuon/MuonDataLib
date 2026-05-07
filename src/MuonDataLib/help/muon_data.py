@@ -39,10 +39,6 @@ def get_muon_data_docs():
                 "not alter the filtered values.",
                 {'file_name': "The name of the file to save the "
                               "NeXus v2 histogram file to."},
-                optional_param={'resolution': ["The resolution (bin width), "
-                                               "in microseconds, to use "
-                                               "in the histograms.",
-                                               "0.016 microseconds"]},
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
@@ -59,16 +55,23 @@ def get_muon_data_docs():
                 "if the cache is occupied. "
                 "If just the resolution has changed it will "
                 "not alter the filtered values.",
-                optional_param={'resolution': ["The resolution (bin width), "
-                                               "in microseconds, to use "
-                                               "in the histograms.",
-                                               "0.016 microseconds"]},
                 returns="A matrix of histograms (period, "
                         "spectrum number, bin) and bin edges.",
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
                          'hist, bins = data.histogram(resolution=0.01)']),
+
+            Doc('set_histogram_settings',
+                'data.muon_data.MuonData',
+                [MUONDATA, HIST, FILTER],
+                "Change the histogram bounds and bin width.",
+                optional_param = {
+                    'min_time': 'The lower time bound for the histogram.',
+                    'max_time': 'The upper time bound for the histogram.',
+                    'num_bins': 'The number of bins to use in the histogram.'
+                    }
+                ),
 
             Doc('get_peak_property_histogram',
                 'data.muon_data.MuonData',
