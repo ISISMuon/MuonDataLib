@@ -4,7 +4,7 @@ import numpy as np
 
 class _Periods(HDF5):
     """
-    A base class to store the period informtaion for muon data
+    A base class to store the period information for muon data
     """
     def __init__(self, number, labels, p_type,
                  output):
@@ -47,7 +47,7 @@ class _Periods(HDF5):
 
 class Periods(_Periods):
     """
-    A class to store the period informtaion for muon data
+    A class to store the period information for muon data
     """
     def __init__(self, number, labels, p_type, requested,
                  raw, output, counts, sequences):
@@ -83,7 +83,7 @@ class Periods(_Periods):
 
 class EventsPeriods(_Periods):
     """
-    A class to store the period informtaion for muon data
+    A class to store the period information for muon data
     """
     def __init__(self, cache, _number, _labels, p_type,
                  _output):

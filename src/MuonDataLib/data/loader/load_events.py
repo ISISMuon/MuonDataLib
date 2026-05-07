@@ -52,9 +52,8 @@ def load_events(file_name, N):
     """
     try:
         return _load_events(file_name, N)
-    except Exception:
-        msg = f"The file {file_name} cannot be read"
-        raise RuntimeError(msg)
+    except Exception as err:
+        raise RuntimeError(f"The file {file_name} cannot be read") from err
 
 
 def _load_events(file_name, N):
@@ -68,7 +67,6 @@ def _load_events(file_name, N):
         raw_args, start_time = read_raw_data_from_events(file)
         tmp = file.require_group('raw_data_1')
         p_group = tmp.require_group('periods')
-        p_type = p_group['type'][:]
 
         # store data in objects
         _, events = load_data(file_name, N)
@@ -94,9 +92,9 @@ def _load_events(file_name, N):
                     'affiliation: test')
 
         periods = EventsPeriods(cache,
-                                1,
+                                p_group['number'][()],
                                 'label test',
-                                p_type,
+                                p_group['type'][:],
                                 [0])
 
         detector1 = Det1(cache,
