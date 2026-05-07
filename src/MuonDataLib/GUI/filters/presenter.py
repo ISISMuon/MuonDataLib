@@ -1,6 +1,6 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
-from MuonDataLib.GUI.time.presenter import TimePresenter
-from MuonDataLib.GUI.log.presenter import LogPresenter
+from MuonDataLib.GUI.time.presenter import TimePresenter, TIME_TABLE
+from MuonDataLib.GUI.log.presenter import LogPresenter, LOG_TABLE
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
 from MuonDataLib.GUI.filters.view import FilterView
 from MuonDataLib.filters import Filters
@@ -241,18 +241,33 @@ class FilterPresenter(PresenterTemplate):
         print('loading filters ....')
         return time_data, log_data, self._amp_file_data, state, self.headers
 
-    def update_N_events(self, update, current_str):
+    def update_N_events(self, update: list[dict], current_str: str) -> str:
         """
-        A method to provide the correct string to display
-        after an update occurs. We need to clear the
-        number of events if the filters change.
-        :param update: If an update hass occured and is valid
-        :param current_str: the current string for the number
-        of events
-        :returns: the string to display for the number of
-        events
+        Update the events string when the filters are updated.
+        Expects update data in the form returned by
+        the Dash cellValueChanged property.
+        :param update: The filter update data.
+        :param current_str: The current string for the number of events.
+        :returns: The string to display for the number of events.
         """
-        if update:
-            return self._view.no_events_str
-        else:
-            return current_str
+        # I'm not sure if it's even possible
+        # to update multiple cells simultaneously
+        # but we have to unwrap this list anyway
+        # so may as well do it properly
+        for updated_cell in update:
+            col = updated_cell.get('colId', None)
+
+            # if a filter value has changed, we need to clear the string
+            # but we don't if just e.g. name changed
+            update_required = col in ['Start_' + TIME_TABLE,
+                                      'End_' + TIME_TABLE,
+                                      'filter_' + LOG_TABLE,
+                                      'y0_' + LOG_TABLE,
+                                      'yN_' + LOG_TABLE,
+                                      ]
+
+            if update_required:
+                return self._view.no_events_str
+
+        return current_str
+
