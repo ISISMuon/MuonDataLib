@@ -203,13 +203,14 @@ class MuonEventData(MuonData):
             or self._hist_settings.num_bins != num_bins
         )
 
-    def histogram(self):
+    def histogram(self, N_threads=1):
         """
         A method for constructing a histogram.
         This will skip calculating the filters
         if the cache is occupied.
         If just the resolution has changed it will
         not alter the filtered values.
+        :param N_threads: the number of threads to run on
         :return: the histograms and bins
         """
         is_cache_empty = self._cache.empty()
@@ -227,17 +228,19 @@ class MuonEventData(MuonData):
                     min_time=min_time,
                     max_time=max_time,
                     num_bins=num_bins,
-                    cache=self._cache
+                    cache=self._cache,
+                    N_threads=N_threads
                     )
         return self._cache.get_histograms()
 
-    def save_histograms(self, file_name):
+    def save_histograms(self, file_name, N_threads=1):
         """
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
+        :param N_threads: the number of threads to run on
         """
-        hist, _ = self.histogram()
+        hist, _ = self.histogram(N_threads)
         super().save_histograms(file_name)
 
     def clear_filters(self):

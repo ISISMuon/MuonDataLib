@@ -146,7 +146,7 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
     """
 
     cdef Py_ssize_t start = 0
-    cdef Py_ssize_t M, j, end, dm, filter_start
+    cdef Py_ssize_t M, j, k, end, dm, filter_start
     cdef Py_ssize_t len_filters = len(f_start)
     cdef Py_ssize_t N_frames = len(start_index)
     cdef cnp.ndarray[int] _good_periods = np.zeros(N_events,
@@ -178,7 +178,7 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
     dm = N_events - start_index[N_frames-1]
     good_periods[M:M + dm] = periods[len(periods)-1]
     M += dm
-    return good_periods[:M]
+    return _good_periods[:M]
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking

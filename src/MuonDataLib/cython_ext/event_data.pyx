@@ -6,8 +6,8 @@ from MuonDataLib.cython_ext.filter import (
                                            good_periods,
                                            good_values_ints,
                                            good_values_double)
+from MuonDataLib.numba.stats import para_histogram
 import numpy as np
-import time
 cimport numpy as cnp
 import cython
 cnp.import_array()
@@ -394,13 +394,13 @@ cdef class Events:
         the amplitudes of the kept events.
         """
 
-        cdef int[:] IDs, f_i_start, f_i_end
-        cdef int[:] periods
+        cdef cnp.ndarray[int, ndim=1] IDs, periods
+        cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
-        cdef double[:] times, amps
+        cdef cnp.ndarray[double, ndim=1] times, amps
 
         if len(self.filter_start.keys())>0:
-            f_i_start, f_i_end, rm_frames = self._get_exclude_windows()#rm_overlaps(f_i_start, f_i_end, self.periods)
+            f_i_start, f_i_end, rm_frames = self._get_exclude_windows()
 
             IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
             times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
@@ -412,9 +412,9 @@ cdef class Events:
                                  "for the histograms. Aborting histogram generation.")
         else:
             # no filters
-            IDs = self.IDs
-            times = self.times
-            amps = self.peak_prop['Amplitudes']
+            IDs = np.asarray(self.IDs)
+            times = np.asarray(self.times)
+            amps = np.asarray(self.peak_prop['Amplitudes'])
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
@@ -426,6 +426,7 @@ cdef class Events:
                   double max_time=32.768,
                   int num_bins=2048,
                   cache=None,
+                  int N_threads=1
                   ):
         """
         Create a matrix of histograms from the event data
@@ -435,28 +436,46 @@ cdef class Events:
         :param max_time: the end time for the histogram
         :param width: the bin width for the histogram
         :param cache: the cache of event data histograms
+        :param N_threads: the number of threads to run on
         :returns: a matrix of histograms, bin edges
         """
-        cdef int[:] IDs, f_i_start, f_i_end, periods
+        cdef cnp.ndarray[int, ndim=1] IDs, periods
+        cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames
-        cdef double[:] times
+        cdef cnp.ndarray[double, ndim=1] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
 
-        cdef int[:] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']), 1., 0.),
-                                      dtype=np.int32)
+        cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
+                                                                 1., 0.), dtype=np.int32)
 
         cdef double width = (max_time - min_time) / num_bins
-        hist, bins, N = make_histogram(times=times,
-                                       spec=IDs,
-                                       N_spec=self.N_spec,
-                                       periods=periods,
-                                       min_time=min_time,
-                                       max_time=max_time,
-                                       width=width,
-                                       weight=weight)
+
+        if N_threads == 1:
+            hist, bins, N = make_histogram(times=times,
+                                           spec=IDs,
+                                           N_spec=self.N_spec,
+                                           periods=periods,
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=weight)
+        elif N_threads > 1:
+            hist, bins, N = para_histogram(times=times,
+                                           spec=IDs,
+                                           N_spec=self.N_spec,
+                                           periods=periods,
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=weight,
+                                           conversion=1.e-3,
+                                           N_threads=N_threads)
+        else:
+            raise ValueError(f'The number of threads {N_threads} is not valid')
+
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,

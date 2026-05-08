@@ -558,7 +558,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         events.histogram.assert_called_once_with(min_time=0.,
                                                  max_time=32.768,
                                                  num_bins=2048,
-                                                 cache=cache)
+                                                 cache=cache,
+                                                 N_threads=1)
         sample.assert_called_once()
         raw_data.assert_called_once()
         source.assert_called_once()
@@ -606,7 +607,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         events.histogram.assert_called_once_with(min_time=0.,
                                                  max_time=32.768,
                                                  num_bins=2048,
-                                                 cache=cache)
+                                                 cache=cache,
+                                                 N_threads=1)
         self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
         self.assertEqual(2, events.apply_log_filter.call_count)
 
