@@ -71,9 +71,12 @@ def get_muon_data_docs():
                 [MUONDATA, HIST, FILTER],
                 "Change the histogram bounds and bin width.",
                 optional_param = {
-                    'min_time': ['The lower time bound for the histogram.', 0.0],
-                    'max_time': ['The upper time bound for the histogram.', 32.768],
-                    'num_bins': ['The number of bins to use in the histogram.', 2048]
+                    'min_time': ['The lower time bound for the histogram.',
+                                 0.0],
+                    'max_time': ['The upper time bound for the histogram.',
+                                 32.768],
+                    'num_bins': ['The number of bins to use in the histogram.',
+                                 2048]
                     }
                 ),
 
