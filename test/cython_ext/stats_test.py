@@ -12,7 +12,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          0, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
@@ -27,7 +28,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.asarray([1, 0, 0, 1, 1, 1, 1, 0, 0], dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          0, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
@@ -42,7 +44,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          1, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [1, 2, 3, 4, 5])
@@ -58,7 +61,7 @@ class StatsTest(TestHelper):
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs, 1, periods,
-                                         weights, -1, 5, 1,
+                                         1, weights, -1, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [-1, 0, 1, 2, 3, 4, 5])
         self.assertEqual(len(result), 1)
@@ -72,7 +75,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          0, 5, 1,
                                          conversion=1.)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
@@ -88,7 +92,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          0, 5, 1,
                                          conversion=1.)
         self.assertEqual(N, 4)
@@ -103,7 +108,8 @@ class StatsTest(TestHelper):
         periods = np.zeros(len(IDs), dtype=np.int32)
         weights = np.ones(len(IDs), dtype=np.int32)
 
-        result, bins, N = make_histogram(times, IDs, 1, periods, weights,
+        result, bins, N = make_histogram(times, IDs, 1, periods,
+                                         1, weights,
                                          -5, -2, 1, conversion=1.)
         self.assertArrays(bins, [-5, -4, -3, -2])
         self.assertEqual(N, 4)
@@ -118,7 +124,7 @@ class StatsTest(TestHelper):
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs,
-                                         1, periods,
+                                         1, periods, 1,
                                          weights,
                                          0, 0.4, width=.10,
                                          conversion=1.)
@@ -136,7 +142,7 @@ class StatsTest(TestHelper):
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs,
-                                         1, periods,
+                                         1, periods, 1,
                                          weights,
                                          0, 0.5, .1, conversion=0.1)
         self.assertArrays(bins, [0, .1, .2, .3, .4, .5])
@@ -153,7 +159,7 @@ class StatsTest(TestHelper):
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs, 4,
-                                         periods, weights,
+                                         periods, 1, weights,
                                          0, 5, 1, conversion=1.)
         self.assertEqual(N, 9)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
@@ -171,7 +177,7 @@ class StatsTest(TestHelper):
         weights = np.ones(len(IDs), dtype=np.int32)
 
         result, bins, N = make_histogram(times, IDs, 2,
-                                         periods, weights,
+                                         periods, 2, weights,
                                          0, 5, 1, conversion=1.)
         self.assertEqual(N, 9)
         self.assertArrays(bins, [0, 1, 2, 3, 4, 5])
