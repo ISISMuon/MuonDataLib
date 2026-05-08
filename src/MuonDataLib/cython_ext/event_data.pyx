@@ -445,7 +445,16 @@ cdef class Events:
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
         cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
                                                                  1, 0), dtype=np.int32)
-        if N_threads > 1:
+        if N_threads == 1:
+            hist, bins, N = make_histogram(times=times,
+                                           spec=IDs,
+                                           N_spec=self.N_spec,
+                                           periods=periods,
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=weight)
+        elif N_threads > 1:
             hist, bins, N = para_histogram(times=times,
                                            spec=IDs,
                                            N_spec=self.N_spec,
@@ -458,14 +467,7 @@ cdef class Events:
                                            N_threads=N_threads
                                            )
         else:
-            hist, bins, N = make_histogram(times=times,
-                                           spec=IDs,
-                                           N_spec=self.N_spec,
-                                           periods=periods,
-                                           min_time=min_time,
-                                           max_time=max_time,
-                                           width=width,
-                                           weight=weight)
+            raise ValueError(f"The requested number of threads, {N_threads} is not valid")
         if cache is not None:
 
             first_time, last_time = self._start_and_end_times(frame_times,
