@@ -1,71 +1,31 @@
-class Column(object):
+from abc import ABC, abstractmethod
+
+
+class Column(ABC):
     """
     A simple class for creating columns for
     a dash data ag-table. This stores the extra
     information (e.g. dropdowns, validation,
     conditional formating).
     """
-    def __init__(self, ID, name, dtype):
+    def __init__(self, ID, name):
         """
         Create the details for the column.
-        The min and max are only for the numeric
-        data type and provide the limits
-        for the values that can be entered.
         :param ID: the ID for the column
         :param name: the displayed name in the
         column.
-        :param dtype: the data type for the column
-        (allowed values; text, numeric, button)
         """
-        if dtype in ['text', 'numeric', 'button']:
-            self.ID = ID
-            self.name = name
-            self.dtype = dtype
-            self._editable = True
-            self._con = None
-            self._hide = False
-            # set default range for numeric data
-            self._min = -1e6
-            self._max = 1e6
-            # set default button values (delete)
-            self._icon = 'bi bi-trash me-2'
-            self._className = 'btn btn-danger'
-        else:
-            raise ValueError(f"Unkown column dtype {dtype}."
-                             "Options are 'text', 'numeric' and 'button'.")
+        self.ID = ID
+        self.name = name
+        self._editable = True
+        self._con = None
+        self._hide = False
 
     def set_uneditable(self):
         """
         A method to make the column uneditable
         """
         self._editable = False
-
-    def set_icon(self, icon, class_name):
-        """
-        A method to set the column's button to a
-        custom one.
-        :param icon: the code for the button image
-        see https://icons.getbootstrap.com/
-        :param class_name: the class name
-        for the button (sets colour)
-        """
-        self._icon = icon
-        self._className = class_name
-
-    def set_range(self, min_value, max_value):
-        """
-        Sets the range of allowed values for a numeric
-        cell.
-        :param min_value: the smallest allowed value
-        :param max_value: the largest allowed value
-        """
-        if self.is_numeric:
-            if min_value > max_value:
-                raise RuntimeError("col range: Min value > Max value")
-            self._min = min_value
-            self._max = max_value
-        else:
-            raise RuntimeError('Cannot set col range for non-numeric dtype')
 
     def set_condition(self, condition):
         """
@@ -102,82 +62,107 @@ class Column(object):
                'width': 100,
                'editable': self._editable,
                'hide': self._hide}
-        if self.dtype == 'text':
-            col['cellEditor'] = 'agLargeTextCellEditor'
-            col['cellEditorPopup'] = False
-            col['cellEditorParams'] = {'maxLength': 50}
-
-        elif self.dtype == 'numeric':
-            col['cellEditor'] = 'agNumberCellEditor'
-            col['cellEditorParams'] = {'min': self._min,
-                                       'max': self._max,
-                                       'precision': 5}
-        elif self.dtype == 'button':
-            col['editable'] = False
-            col['cellRenderer'] = 'Button'
-            col['cellRendererParams'] = {'Icon': self._icon,
-                                         'className': self._className}
+        col.update(self.get_cell_config())
 
         if self._con is not None:
             col['cellStyle'] = self._con
         return col
 
-    @property
-    def is_numeric(self):
+    @abstractmethod
+    def get_cell_config(self):
         """
-        Checks if a cell is numeric
-        :returns: a bool for if its numeric.
+        Get dash cell configuration details
+        for a specific data type.
+        :returns: the config for the specific cell type
         """
-        if self.dtype == 'numeric':
-            return True
-        return False
+        raise NotImplementedError
+
+
+class TextColumn(Column):
+    """
+    A column subclass for storing text data.
+    """
+    def get_cell_config(self):
+        return {
+            'cellEditor': 'agLargeTextCellEditor',
+            'cellEditorPopup': False,
+            'cellEditorParams': {'maxLength': 50},
+            }
+
+
+class NumericColumn(Column):
+    """
+    A column subclass for storing numeric data.
+    """
+    def __init__(self, ID, name):
+        super().__init__(ID, name)
+        self._min = -1e6
+        self._max = 1e6
+
+    def get_cell_config(self):
+        return {
+            'cellEditor': 'agNumberCellEditor',
+            'cellEditorParams': {'min': self._min,
+                                 'max': self._max,
+                                 'precision': 5}
+            }
+
+    def set_range(self, min_value, max_value):
+        """
+        Sets the range of allowed values for a numeric
+        cell.
+        :param min_value: the smallest allowed value
+        :param max_value: the largest allowed value
+        """
+        if min_value > max_value:
+            raise ValueError("col range: Min value > Max value")
+        self._min = min_value
+        self._max = max_value
+
+
+class ButtonColumn(Column):
+    """
+    A column subclass for storing buttons.
+    """
+    def __init__(self, ID, name):
+        super().__init__(ID, name)
+        # set default button values (delete)
+        self._icon = 'bi bi-trash me-2'
+        self._className = 'btn btn-danger'
+
+    def get_cell_config(self):
+        return {
+            'editable': False,
+            'cellRenderer': 'Button',
+            'cellRendererParams': {'Icon': self._icon,
+                                   'className': self._className}
+
+            }
+
+    def set_icon(self, icon, class_name):
+        """
+        A method to set the column's button to a
+        custom one.
+        :param icon: the code for the button image
+        see https://icons.getbootstrap.com/
+        :param class_name: the class name
+        for the button (sets colour)
+        """
+        self._icon = icon
+        self._className = class_name
 
 
 class DropDownColumn(Column):
     """
-    A simple class for creating a dropdown
+    A simple class for creating dropdown
     columns for a dash data ag-table.
-    This needs to be cleaned up along
-    with the above.
     """
-    def __init__(self, ID, name, options):
-        """
-        Create the details for the column.
-        The min and max are only for the numeric
-        data type and provide the limits
-        for the values that can be entered.
-        :param ID: the ID for the column
-        :param name: the displayed name in the
-        column.
-        :param options: the options for the drop
-        down menu
-        """
-        self.ID = ID
-        self.name = name
-        self._options = options
-
-    @property
-    def get_column_dict(self):
-        """
-        This method generates a dict
-        for the config of the column.
-        :returns: the dict of the config
-        """
-        col = {'field': self.ID,
-               'headerName': self.name,
-               "cellEditor": "agSelectCellEditor",
-               "cellEditorParams": {"values": ["above", "between", "below"]},
-               'singleClickEdit': True,
-               'width': 100}
-        return col
-
-    @property
-    def is_numeric(self):
-        """
-        Checks if a cell is numeric
-        :returns: a bool for if its numeric.
-        """
-        return False
+    def get_cell_config(self):
+        return {
+           "cellEditor": "agSelectCellEditor",
+           "cellEditorParams": {"values": ["above", "between", "below"]},
+           'singleClickEdit': True,
+            }
 
 
 class TableGroup(object):
@@ -218,7 +203,7 @@ class TableGroup(object):
         :param max_value: the largst allowed value
         """
         for col in self.cols:
-            if col.is_numeric:
+            if isinstance(col, NumericColumn):
                 col.set_range(min_value,
                               max_value)
 
@@ -260,8 +245,7 @@ class TableColumns(object):
             raise RuntimeError('Need to include an ID '
                                'for the delete button')
         elif inc_delete_row:
-            self.cols = [TableGroup([Column('Delete_' + btn_ID,
-                                            '', 'button')])]
+            self.cols = [TableGroup([ButtonColumn('Delete_' + btn_ID, '')])]
 
         if isinstance(col_groups, list):
             for tmp in col_groups:

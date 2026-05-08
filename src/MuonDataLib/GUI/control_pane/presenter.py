@@ -2,10 +2,10 @@ from MuonDataLib.GUI.presenter_template import PresenterTemplate
 from MuonDataLib.GUI.filters.presenter import FilterPresenter
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
 from MuonDataLib.GUI.control_pane.view import ControlPaneView
+from MuonDataLib.filters import Filters
 
 from dash import no_update
 import numpy as np
-import json
 
 
 class ControlPanePresenter(PresenterTemplate):
@@ -302,11 +302,8 @@ class ControlPanePresenter(PresenterTemplate):
         A method to get the filters from a file
         and populate the GUI.
         :param name: the name of the json file
-        :returns: the time table data, the log table data, time filter,
-        amplitude filter, the state for the time filter (include/exclude)
-        and the column headers
+        :returns: the filter data, the state for the time filter
+        (include/exclude) and the column headers
         """
-        with open(name, 'r') as file:
-            data = json.load(file)
-        time_data, log_data, amp, state, cols = self._filter.load(data)
-        return time_data, log_data, amp, state, cols
+        data = Filters.from_json(name)
+        return self._filter.load(data)

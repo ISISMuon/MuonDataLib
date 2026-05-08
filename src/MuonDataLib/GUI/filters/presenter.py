@@ -1,8 +1,10 @@
 from MuonDataLib.GUI.presenter_template import PresenterTemplate
-from MuonDataLib.GUI.time.presenter import TimePresenter
-from MuonDataLib.GUI.log.presenter import LogPresenter
+from MuonDataLib.GUI.time.presenter import TimePresenter, TIME_TABLE
+from MuonDataLib.GUI.log.presenter import LogPresenter, LOG_TABLE
 from MuonDataLib.GUI.amp.presenter import AmpPresenter
+from MuonDataLib.GUI.histogram_settings.presenter import HistSettingsPresenter
 from MuonDataLib.GUI.filters.view import FilterView
+from MuonDataLib.filters import Filters, HistogramSettings
 
 
 class FilterPresenter(PresenterTemplate):
@@ -20,13 +22,22 @@ class FilterPresenter(PresenterTemplate):
         self._time = TimePresenter()
         self._log = LogPresenter()
         self._amp = AmpPresenter()
+        self._hist_settings = HistSettingsPresenter()
         self._view = FilterView(self)
         self._data = None
         self._time_file_data = []
         self._log_file_data = []
         self._amp_file_data = 0
+        self._hist_data = HistogramSettings()
 
-    def show_file(self, name, time_data, log_data, amp_data):
+    def show_file(self,
+                  name,
+                  time_data,
+                  log_data,
+                  amp_data,
+                  min_time,
+                  max_time,
+                  num_bins):
         """
         If to display the name of the loaded
         filter file. This method chekcs
@@ -41,9 +52,12 @@ class FilterPresenter(PresenterTemplate):
         :param amp_data: The amplitude filter data
         :returns: if to hide the name in the GUI
         """
-        if (self._time_file_data == time_data and
-                self._log_file_data == log_data and
-                self._amp_file_data == float(amp_data)):
+        if (self._time_file_data == time_data
+            and self._log_file_data == log_data
+            and self._amp_file_data == float(amp_data)
+            and self._hist_data.min_time == min_time
+            and self._hist_data.max_time == max_time
+            and self._hist_data.num_bins == num_bins):
             return False
         return True
 
@@ -66,7 +80,12 @@ class FilterPresenter(PresenterTemplate):
 
         self._time.set_time_range(times[0], times[-1] + 32e-6)
 
-    def apply_filters(self, time_filters, state, log_filters, amp_filters):
+    def apply_filters(self,
+                      time_filters,
+                      state,
+                      log_filters,
+                      amp_filters,
+                      hist_settings=None):
         """
         A method to apply the filters to the
         muon event data object. This allows
@@ -76,12 +95,22 @@ class FilterPresenter(PresenterTemplate):
         :param state: If to include or exclude the data
         :param log_filters: a list of log filters
         :param amp_filters: amplitude filter
+        :param hist_settings: histogram settings
         """
-        if (len(time_filters) == 0 and
-                len(log_filters) == 0 and
-                amp_filters == 0):
+        # if no data, raise an error:
+        if self._data is None:
+            raise RuntimeError("Cannot save filters when no data is loaded")
+
+        hist_changed = (hist_settings is not None
+                        and self._data.hist_settings_changed(hist_settings)
+                        )
+        if (len(time_filters) == 0
+            and len(log_filters) == 0
+            and amp_filters == 0
+            and not hist_changed):
             # if no filters, do nothing
             return
+
 
         elif state == 'Exclude':
             # exclude time filters
@@ -117,8 +146,16 @@ class FilterPresenter(PresenterTemplate):
                                                       stop)
         self._data.keep_data_peak_property_above("Amplitudes",
                                                  float(amp_filters))
+        if hist_settings is not None:
+            if any(value is None for value in hist_settings):
+                raise RuntimeError("Cannot leave histogram settings blank.")
+            self._data.set_histogram_settings(*hist_settings)
 
-    def update_filters(self, time_filters, state, log_filters, amp_filters):
+    def update_filters(self,
+                       time_filters,
+                       state,
+                       log_filters,
+                       amp_filters):
         """
         Gets the updated start and stop times for the
         exclude filters. The first step is a bit
@@ -131,7 +168,8 @@ class FilterPresenter(PresenterTemplate):
         for the time filter table
         :param log_filters: the data from the sample
         log filter table
-        :param apm_filters: the amplitude filter
+        :param amp_filters: the amplitude filter
+        :param hist_settings: the histogram settings
         :returns: a list of the exclude filter start times,
         a list of the exclude filter end times,
         an error message.
@@ -140,7 +178,10 @@ class FilterPresenter(PresenterTemplate):
         if len(time_filters) == 0 and len(log_filters) == 0:
             return [], [], ''
         try:
-            self.apply_filters(time_filters, state, log_filters, amp_filters)
+            self.apply_filters(time_filters,
+                               state,
+                               log_filters,
+                               amp_filters)
         except RuntimeError as msg:
             return [], [], str(msg)
         start, stop = self._data.get_filters_as_times()
@@ -194,7 +235,8 @@ class FilterPresenter(PresenterTemplate):
         return row_log['y_min_log-table'], row_log['y_max_log-table']
 
     def calculate(self, n_clicks, time_filters, state,
-                  log_filters, amp_filter):
+                  log_filters, amp_filter, min_time, max_time,
+                  num_bins):
         """
         A method to calculate the number of
         events that would be used to make
@@ -210,48 +252,75 @@ class FilterPresenter(PresenterTemplate):
         :param amp_filter: the amplitude filter
         :returns: The string to display the number
         of events, the error message (if there is one)
+        :param min_time: the minimum time for the histogram
+        :param max_time: the maximum time for the histogram
+        :param num_bins: the number of bins for the histogram
         """
         self._data.clear_filters()
+        hist_settings = (min_time, max_time, num_bins)
         try:
-            self.apply_filters(time_filters, state, log_filters, amp_filter)
+            self.apply_filters(time_filters,
+                               state,
+                               log_filters,
+                               amp_filter,
+                               hist_settings)
         except RuntimeError as msg:
             return self._view.get_N(0), str(msg)
         _ = self._data.histogram(N_threads=1)
         N = f"{self._data._cache.get_N_events:,}"
         return self._view.get_N(N), ''
 
-    def load(self, filters):
+    def load(self, filters: Filters):
         """
-        Loads the filters that have been reported from a json file
-        :param filters: the dict of the filters
+        Loads the filters that have been reported from a Filters object.
+        :param filters: the dataclass of filters
         :returns: the time filters, the sample log
         filters, the amplitude filters, if to include/exclude the time filters,
         and the table headers
         """
-        time_data, state = self._time.load(filters['time_filters'])
+        time_data, state = self._time.load(filters.time_filters)
         self._time_file_data = time_data
         self._time.set_state(state)
 
-        log_data = self._log.load(filters['sample_log_filters'])
+        log_data = self._log.load(filters.sample_log_filters)
         self._log_file_data = log_data
 
-        self._amp_file_data = self._amp.load(filters['peak_property'])
+        self._amp_file_data = self._amp.load(filters.peak_property)
+
+        self._hist_data = filters.histogram_settings
 
         print('loading filters ....')
-        return time_data, log_data, self._amp_file_data, state, self.headers
+        return (time_data, log_data, self._amp_file_data,
+                self._hist_data.min_time, self._hist_data.max_time,
+                self._hist_data.num_bins, state, self.headers)
 
-    def update_N_events(self, update, current_str):
+    def update_N_events(self, update: list[dict], current_str: str) -> str:
         """
-        A method to provide the correct string to display
-        after an update occurs. We need to clear the
-        number of events if the filters change.
-        :param update: If an update hass occured and is valid
-        :param current_str: the current string for the number
-        of events
-        :returns: the string to display for the number of
-        events
+        Update the events string when the filters are updated.
+        Expects update data in the form returned by
+        the Dash cellValueChanged property.
+        :param update: The filter update data.
+        :param current_str: The current string for the number of events.
+        :returns: The string to display for the number of events.
         """
-        if update:
-            return self._view.no_events_str
-        else:
-            return current_str
+        # I'm not sure if it's even possible
+        # to update multiple cells simultaneously
+        # but we have to unwrap this list anyway
+        # so may as well do it properly
+        for updated_cell in update:
+            col = updated_cell.get('colId', None)
+
+            # if a filter value has changed, we need to clear the string
+            # but we don't if just e.g. name changed
+            update_required = col in ['Start_' + TIME_TABLE,
+                                      'End_' + TIME_TABLE,
+                                      'filter_' + LOG_TABLE,
+                                      'y0_' + LOG_TABLE,
+                                      'yN_' + LOG_TABLE,
+                                      ]
+
+            if update_required:
+                return self._view.no_events_str
+
+        return current_str
+

@@ -1,11 +1,11 @@
 from MuonDataLib.data.utils import NONE
 from MuonDataLib.data.muon_data import MuonData, MuonEventData
+from MuonDataLib.filters import Filter, Filters, PeakProperty, TimeFilters
 from MuonDataLib.data.loader.load_events import load_events
 from MuonDataLib.test_helpers.unit_test import TestHelper
 import unittest
 import numpy as np
 import os
-import json
 from unittest import mock
 
 
@@ -192,7 +192,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                          np.asarray([0], dtype=np.int32),
                          0.1,
                          5.1,
-                         0.0016,
+                         0.,
+                         32.768,
+                         2048,
                          6)
         self.assertEqual(data._cache.empty(), False)
 
@@ -269,9 +271,11 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         data.only_keep_data_time_between('second', 5, 7)
 
-        self.assertArrays(list(data._keep_times.keys()), ['first', 'second'])
-        self.assertArrays(data._keep_times['first'], np.asarray([1, 2]))
-        self.assertArrays(data._keep_times['second'], np.asarray([5, 7]))
+        expected = TimeFilters(
+            keep_filters = [Filter('first', 1, 2), Filter('second', 5, 7)]
+                )
+
+        assert data._time_filter == expected
 
     def test_only_keep_data_time_between_duplicate(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -304,15 +308,13 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(data._cache.empty(), True)
         data.remove_data_time_between('two', 5, 7)
 
-        self.assertEqual(len(data._time_filter), 2)
+        self.assertEqual(len(data._time_filter.remove_filters), 2)
 
-        start, end = data._time_filter['one']
-        self.assertEqual(start, 1)
-        self.assertEqual(end, 2)
+        expected = TimeFilters(
+            remove_filters = [Filter('one', 1, 2), Filter('two', 5, 7)]
+                )
 
-        start, end = data._time_filter['two']
-        self.assertEqual(start, 5)
-        self.assertEqual(end, 7)
+        assert data._time_filter == expected
 
     def test_remove_data_time_between_duplicate(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -366,8 +368,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.fill_cache(data)
         data.delete_only_keep_data_time_between('one')
         self.assertEqual(data._cache.empty(), True)
-        self.assertArrays(list(data._keep_times.keys()), ['two'])
-        self.assertArrays(data._keep_times['two'], np.asarray([13, 24]))
+        self.assertEqual(len(data._time_filter.keep_filters), 1)
+        assert data._time_filter.keep_filters[0] == Filter('two', 13, 24)
 
     def test_delete_remove_data_time_between(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -379,14 +381,12 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.remove_data_time_between('two', 5, 7)
         self.fill_cache(data)
 
-        self.assertEqual(len(data._time_filter), 2)
+        self.assertEqual(len(data._time_filter.remove_filters), 2)
 
         data.delete_remove_data_time_between("two")
         self.assertEqual(data._cache.empty(), True)
-        self.assertEqual(len(data._time_filter), 1)
-        start, end = data._time_filter['one']
-        self.assertEqual(start, 1)
-        self.assertEqual(end, 2)
+        self.assertEqual(len(data._time_filter.remove_filters), 1)
+        assert data._time_filter.remove_filters[0] == Filter('one', 1, 2)
 
     def test_filter_remove_times(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -518,8 +518,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         self.assertEqual(log._min, NONE)
         self.assertEqual(log._max, NONE)
 
-        self.assertEqual(data._keep_times, {})
-        self.assertEqual(data._time_filter, {})
+        self.assertEqual(data._time_filter.keep_filters, [])
+        self.assertEqual(data._time_filter.remove_filters, [])
 
         self.assertEqual(data._events.get_threshold('Amplitudes'), 0.0)
 
@@ -555,7 +555,9 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.save_histograms('tmp.nxs')
 
         cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(width=0.016,
+        events.histogram.assert_called_once_with(min_time=0.,
+                                                 max_time=32.768,
+                                                 num_bins=2048,
                                                  cache=cache,
                                                  N_threads=1)
         sample.assert_called_once()
@@ -582,7 +584,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=True)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -599,10 +601,12 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.016)
+        data.histogram()
 
         cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(width=0.016,
+        events.histogram.assert_called_once_with(min_time=0.,
+                                                 max_time=32.768,
+                                                 num_bins=2048,
                                                  cache=cache,
                                                  N_threads=1)
         self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
@@ -623,7 +627,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -640,7 +644,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.016)
+        data.set_histogram_settings(1,2,3)
+        data.histogram()
 
         cache.empty.assert_called_once()
         self.assertEqual(0, events.histogram.call_count)
@@ -662,7 +667,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -679,7 +684,8 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                             np.asarray([3], dtype=np.double),
                             np.asarray([4], dtype=np.double))
         data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram(0.01)
+        data.set_histogram_settings(4,5,6)
+        data.histogram()
 
         cache.empty.assert_called_once()
         self.assertEqual(1, events.histogram.call_count)
@@ -705,7 +711,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         cache = mock.Mock()
         cache.empty = mock.Mock(return_value=False)
-        cache.get_resolution = mock.MagicMock(return_value=0.016)
+        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
         cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
         data = MuonEventData(events,
                              cache,
@@ -715,6 +721,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
                              user,
                              periods,
                              detector_1)
+        data.set_histogram_settings(1,2,3)
         data.save_histograms('tmp.nxs')
 
         cache.empty.assert_called_once()
@@ -824,32 +831,17 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         data.remove_data_time_between('two', 5, 7)
 
     def expected_report(self, result):
-        self.assertArrays(list(result.keys()),
-                          ['peak_property',
-                           'sample_log_filters',
-                           'time_filters'])
+        expected_filters = Filters(
+            time_filters = TimeFilters(
+                keep_filters = [Filter('first', 0.01, 0.02),
+                                Filter('second', 0.05, 0.06)],
+                remove_filters = [Filter('one', 1, 2), Filter('two', 5, 7)]
+            ),
+            sample_log_filters = [Filter('Temp', 0.0044, 0.163)],
+            peak_property = PeakProperty(0.)
+        )
 
-        self.assertArrays(list(result['time_filters'].keys()),
-                          ['keep_filters',
-                           'remove_filters'])
-
-        tmp = result['time_filters']['remove_filters']
-        self.assertArrays(list(tmp.keys()), ['one', 'two'])
-        self.assertArrays(tmp['one'], [1, 2])
-        self.assertArrays(tmp['two'], [5, 7])
-
-        tmp = result['time_filters']['keep_filters']
-        self.assertArrays(list(tmp.keys()), ['first', 'second'])
-        self.assertArrays(tmp['first'], [0.01, 0.02])
-        self.assertArrays(tmp['second'], [0.05, 0.06])
-
-        tmp = result['sample_log_filters']
-        self.assertArrays(list(tmp.keys()), ['Temp'])
-        self.assertArrays(tmp['Temp'], [0.0044, 0.163])
-
-        tmp = result['peak_property']
-        self.assertEqual(len(tmp.keys()), 1)
-        self.assertEqual(tmp['Amplitudes'], 3.14)
+        assert result == expected_filters
 
     def test_report_filters(self):
         file = os.path.join(os.path.dirname(__file__),
@@ -875,8 +867,7 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
 
         data.save_filters('muon_test.json')
 
-        with open('muon_test.json') as file:
-            result = json.load(file)
+        result = Filters.from_json("muon_test.json")
         self.expected_report(result)
         os.remove('muon_test.json')
 

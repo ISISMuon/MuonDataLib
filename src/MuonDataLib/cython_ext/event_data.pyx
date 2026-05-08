@@ -420,7 +420,7 @@ cdef class Events:
     def histogram(self,
                   double min_time=0.,
                   double max_time=32.768,
-                  double width=0.016,
+                  int num_bins=2048,
                   cache=None,
                   N_threads=1,
                   ):
@@ -443,8 +443,10 @@ cdef class Events:
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
         f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
+
         cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
                                                                  1, 0), dtype=np.int32)
+        cdef double width = (max_time - min_time) / num_bins
         if N_threads == 1:
             hist, bins, N = make_histogram(times=times,
                                            spec=IDs,
@@ -478,7 +480,9 @@ cdef class Events:
                        veto_frames=np.zeros(len(rm_frames), dtype=np.int32),
                        first_time=first_time,
                        last_time=last_time,
-                       resolution=width,
+                       min_time=min_time,
+                       max_time=max_time,
+                       num_bins=num_bins,
                        N_events=N)
         return hist, bins
 

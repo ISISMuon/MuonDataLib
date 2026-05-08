@@ -1,7 +1,11 @@
 import unittest
-from MuonDataLib.GUI.table.column import TableColumns
+from MuonDataLib.GUI.table.column import (TableColumns,
+                                          ButtonColumn,
+                                          NumericColumn)
 from MuonDataLib.test_helpers.unit_test import TestHelper
-from MuonDataLib.test_helpers.table_ref_data import COL_GROUPS, COLS
+from MuonDataLib.test_helpers.table_ref_data import (COL_GROUPS,
+                                                     COLS,
+                                                     EXPECTED_NUMERIC)
 from MuonDataLib.test_helpers.table_ref_data import expected_col_dict
 
 
@@ -49,7 +53,7 @@ class TableColumnsTest(TestHelper):
                 del_btn = del_btn[0]
                 self.assertEqual(del_btn.ID, 'Delete_rm')
                 self.assertEqual(del_btn.name, '')
-                self.assertEqual(del_btn.dtype, 'button')
+                assert isinstance(del_btn, ButtonColumn)
 
     def test_init_fail_add_delete(self):
         for data in COL_GROUPS:
@@ -104,19 +108,18 @@ class TableColumnsTest(TestHelper):
                         self.fail("data exists, should be able to set")
 
     def test_set_range(self):
-        for data in COL_GROUPS:
+        for data, expected_numeric in zip(COL_GROUPS, EXPECTED_NUMERIC):
             with self.subTest(data=data):
+                numeric_cols = 0
                 table = TableColumns(data, False)
                 table.set_range(1.2, 4.7)
                 for group in table.cols:
                     for col in group.cols:
-                        if col.dtype == 'numeric':
+                        if isinstance(col, NumericColumn):
                             self.assertEqual(col._min, 1.2)
                             self.assertEqual(col._max, 4.7)
-                        else:
-                            # if not numeric these never update (or used)
-                            self.assertEqual(col._min, -1e6)
-                            self.assertEqual(col._max, 1e6)
+                            numeric_cols += 1
+                self.assertEqual(numeric_cols, expected_numeric)
 
     def test_get_column_dict(self):
         names = ['test', 'more']
@@ -133,13 +136,13 @@ class TableColumnsTest(TestHelper):
                                              'group')
                             children = col_dict[j]['children']
                             self.assertEqual(children[k],
-                                             expected_col_dict(col.dtype,
+                                             expected_col_dict(type(col),
                                                                IDs[k],
                                                                names[k]))
                     else:
                         for col in group.cols:
                             self.assertEqual(col_dict[j],
-                                             expected_col_dict(col.dtype,
+                                             expected_col_dict(type(col),
                                                                'Unit',
                                                                'unit'))
 

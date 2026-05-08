@@ -1,6 +1,9 @@
 import unittest
 from unittest import mock
-from MuonDataLib.GUI.table.column import TableGroup, Column, TableColumns
+from MuonDataLib.GUI.table.column import (TableGroup,
+                                          TextColumn,
+                                          NumericColumn,
+                                          TableColumns)
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.test_helpers.unit_test import TestHelper
 
@@ -20,8 +23,8 @@ class TablePresenterTest(TestHelper):
     def setUp(self, view):
         self.view = view
         self.view.return_value = 'widget'
-        cols = TableColumns([TableGroup([Column(NAME, 'name', 'text')]),
-                             TableGroup([Column('Data', 'data', 'numeric')])],
+        cols = TableColumns([TableGroup([TextColumn(NAME, 'name')]),
+                             TableGroup([NumericColumn('Data', 'data')])],
                             False)
         self.presenter = TablePresenterMock('table_test',
                                             cols,

@@ -471,7 +471,8 @@ class ControlPanePresenterTest(TestHelper):
         self.check_hover_text(result[2], expect)
 
     def test_read_filter(self):
-        data, log_data, amp, state, cols = self.presenter.read_filter(FILTER)
+        (data, log_data, amp, min_time,
+         max_time, num_bins, state, cols) = self.presenter.read_filter(FILTER)
         self.assertEqual(state, 'Include')
         self.assertEqual(len(data), 2)
         self.assertEqual(data[0], {'Name' + TT: 'first',
@@ -491,6 +492,9 @@ class ControlPanePresenterTest(TestHelper):
                            'y_max' + LT: 39.0}])
 
         self.assertEqual(amp, 3.14)
+        self.assertEqual(min_time, 0.5)
+        self.assertEqual(max_time, 15.22)
+        self.assertEqual(num_bins, 1024)
         # this is the only bit that can change
         self.assertEqual(cols[2]['headerName'], 'Include Filter details')
 

@@ -1,8 +1,9 @@
 name: Build and upload to PyPI
 
 on:
-  pull_request_review:
-    types: [submitted]
+  push:
+    branches:
+    - 'main'
 
 permissions:
   contents: write
@@ -10,7 +11,6 @@ permissions:
 jobs:
   update_version:
     name: update version
-    if: github.event.review.state == 'approved'
     runs-on: ubuntu-slim
     steps:
       - name: checkout
@@ -19,7 +19,7 @@ jobs:
           fetch-depth: "1"
       - name: Update version on merge
         run:  |
-            python tools/version.py "minor"
+            python tools/version.py "beta"
       - name: Store changes
         uses: actions/upload-artifact@v4
         with:
@@ -80,29 +80,30 @@ jobs:
           python setup.py sdist
       - uses: actions/upload-artifact@v4
         with:
+          name: src
           path: dist/*.tar.gz
 
   upload_pypi:
-    needs: [build]
+    needs: [build, build_sdist]
     runs-on: ubuntu-latest
+    environment: pypi
     permissions:
       id-token: write
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: src
+          path: dist
       - uses: actions/download-artifact@v4
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
 
-      - name: mint API token
-        id: mint
-        uses: tschm/token-mint-action@v1.0.2
-
       - name: Publish package distribution to PYPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-          password: ${{ steps.mint.outputs.api-token }}
 
   update_setup:
     needs: [upload_pypi]
@@ -130,4 +131,4 @@ jobs:
           git config user.email github-actions@github.com
           git add pyproject.toml setup.py
           git commit -m "update version number"
-          git push
+          git push -f

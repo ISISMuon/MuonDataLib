@@ -1,7 +1,7 @@
 import unittest
-from MuonDataLib.GUI.table.column import TableGroup
+from MuonDataLib.GUI.table.column import TableGroup, NumericColumn
 from MuonDataLib.test_helpers.unit_test import TestHelper
-from MuonDataLib.test_helpers.table_ref_data import COLS
+from MuonDataLib.test_helpers.table_ref_data import COLS, EXPECTED_NUMERIC
 from MuonDataLib.test_helpers.table_ref_data import expected_col_dict
 
 
@@ -44,18 +44,17 @@ class TableGroupTest(TestHelper):
                     self.fail('should not allow no name for lists')
 
     def test_set_range(self):
-        for col_list in COLS:
+        for col_list, expected_numeric in zip(COLS, EXPECTED_NUMERIC):
             with self.subTest(col_list=col_list):
+                numeric_cols = 0
                 table = TableGroup(col_list, 'grouping')
                 table.set_range(1.2, 4.7)
                 for col in table.cols:
-                    if col.dtype == 'numeric':
+                    if isinstance(col, NumericColumn):
                         self.assertEqual(col._min, 1.2)
                         self.assertEqual(col._max, 4.7)
-                    else:
-                        # if not numeric these never update (or used)
-                        self.assertEqual(col._min, -1e6)
-                        self.assertEqual(col._max, 1e6)
+                        numeric_cols += 1
+                self.assertEqual(numeric_cols, expected_numeric)
 
     def test_get_column_dict(self):
         names = ['unit', 'test']
@@ -71,7 +70,7 @@ class TableGroupTest(TestHelper):
                     col = data[0]
                     col_dict = data[1]
                     self.assertEqual(col_dict,
-                                     expected_col_dict(col.dtype,
+                                     expected_col_dict(type(col),
                                                        IDs[k],
                                                        names[k]))
 
@@ -99,13 +98,9 @@ class TableGroupTest(TestHelper):
                 table = TableGroup(col_list)
                 table.set_range(1.2, 4.7)
                 for col in table.cols:
-                    if col.dtype == 'numeric':
+                    if isinstance(col, NumericColumn):
                         self.assertEqual(col._min, 1.2)
                         self.assertEqual(col._max, 4.7)
-                    else:
-                        # if not numeric these never update (or used)
-                        self.assertEqual(col._min, -1e6)
-                        self.assertEqual(col._max, 1e6)
 
     def test_get_column_dict_1(self):
         for col_list in SINGLE:
@@ -114,7 +109,7 @@ class TableGroupTest(TestHelper):
                 col_dict_list = table.get_column_dict[0]
                 col = table.cols[0]
                 self.assertEqual(col_dict_list,
-                                 expected_col_dict(col.dtype,
+                                 expected_col_dict(type(col),
                                                    'Unit',
                                                    'unit'))
 

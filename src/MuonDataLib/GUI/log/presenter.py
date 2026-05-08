@@ -2,10 +2,13 @@ from MuonDataLib.data.utils import NONE
 from MuonDataLib.GUI.table.presenter import TablePresenter
 from MuonDataLib.GUI.log.view import LogView
 from MuonDataLib.GUI.table.column import (DropDownColumn,
-                                          Column,
+                                          TextColumn,
+                                          ButtonColumn,
+                                          NumericColumn,
                                           TableGroup,
                                           TableColumns)
 from MuonDataLib.GUI.plot_area.presenter import PlotAreaPresenter
+from MuonDataLib.filters import Filter
 import numpy as np
 
 
@@ -38,25 +41,24 @@ class LogPresenter(TablePresenter):
         self._plot = PlotAreaPresenter('log')
 
         # create table
-        name = Column('Name_' + LOG_TABLE, 'Name', 'text')
+        name = TextColumn('Name_' + LOG_TABLE, 'Name')
 
-        log = Column('change_btn_' + LOG_TABLE, '', 'button')
+        log = ButtonColumn('change_btn_' + LOG_TABLE, '')
         log.set_icon(icon='bi bi-graph-up me-2', class_name='btn btn-primary')
 
-        sample = Column('sample_' + LOG_TABLE, 'selected', 'text')
+        sample = TextColumn('sample_' + LOG_TABLE, 'selected')
         sample.set_uneditable()
 
-        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type',
-                                         ['above', 'between', 'below'])
+        filter_selector = DropDownColumn('filter_' + LOG_TABLE, 'Filter type')
         """
         we need an extra magic col as we cannot get the value from the
         dropdown in conditional formatting
         """
-        magic = Column('magic', '', 'text')
+        magic = TextColumn('magic', '')
         magic.hide()
 
-        filter_start = Column('y0_' + LOG_TABLE, 'Keep data from', 'numeric')
-        filter_end = Column('yN_' + LOG_TABLE, 'Keep data to', 'numeric')
+        filter_start = NumericColumn('y0_' + LOG_TABLE, 'Keep data from')
+        filter_end = NumericColumn('yN_' + LOG_TABLE, 'Keep data to')
 
         filter_start.set_condition({"styleConditions": [
             {"condition": "params.data.magic == 'below'",
@@ -73,9 +75,9 @@ class LogPresenter(TablePresenter):
                  })
 
         # want the min and max y values in the row data to make it easier.
-        y_min = Column('y_min_' + LOG_TABLE, 'y min', 'numeric')
+        y_min = NumericColumn('y_min_' + LOG_TABLE, 'y min')
         y_min.hide()
-        y_max = Column('y_max_' + LOG_TABLE, 'y max', 'numeric')
+        y_max = NumericColumn('y_max_' + LOG_TABLE, 'y max')
         y_max.hide()
         cols = TableColumns([TableGroup([name]),
                              TableGroup([log, sample], 'Sample logs'),
@@ -364,19 +366,21 @@ class LogPresenter(TablePresenter):
                 'y_min_' + LOG_TABLE: 0,
                 'y_max_' + LOG_TABLE: 1}
 
-    def load(self, file_data):
+    def load(self, filters: list[Filter]):
         """
         A method to load filters from a json file
         If the filter values are outside of the data
         range, they will be updated to be within the
         range of possible y values.
-        :param file: the json dicts from the open file
+        :param filters: the list of filters.
         :returns: a list of the row details
         for the log table (exluding the remove button),
         """
         data = []
-        for key in file_data.keys():
-            start, end = file_data[key]
+        for f in filters:
+            key = f.name
+            start = f.start
+            end = f.end
 
             _, y = self._logs.get_sample_log(key).get_original_values()
 
