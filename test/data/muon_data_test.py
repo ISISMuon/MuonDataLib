@@ -9,6 +9,8 @@ import os
 from unittest import mock
 
 
+THREADS = [1, 2]
+
 class fake_nxs_part(object):
     def __init__(self):
         self.save_nxs2 = mock.Mock(return_value='moo')
@@ -529,168 +531,182 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         parts are called when saving. So will use
         mocks.
         """
+        for N in THREADS:
+            with self.subTest(N=N):
 
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        events = mock.Mock()
-        events.histogram = mock.Mock(return_value=([1], [2]))
-        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+                events = mock.Mock()
+                events.histogram = mock.Mock(return_value=([1], [2]))
+                events.report_filters = mock.Mock(return_value={'a': [1, 3]})
 
-        cache = mock.Mock()
-        cache.empty = mock.Mock(return_value=True)
+                cache = mock.Mock()
+                cache.empty = mock.Mock(return_value=True)
 
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.save_histograms('tmp.nxs')
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.save_histograms('tmp.nxs', N_threads=N)
 
-        cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(min_time=0.,
+                cache.empty.assert_called_once()
+                events.histogram.assert_called_once_with(min_time=0.,
                                                  max_time=32.768,
                                                  num_bins=2048,
                                                  cache=cache,
-                                                 N_threads=1)
-        sample.assert_called_once()
-        raw_data.assert_called_once()
-        source.assert_called_once()
-        user.assert_called_once()
-        periods.assert_called_once()
-        detector_1.assert_called_once()
+                                                 N_threads=N)
+                sample.assert_called_once()
+                raw_data.assert_called_once()
+                source.assert_called_once()
+                user.assert_called_once()
+                periods.assert_called_once()
+                detector_1.assert_called_once()
 
-        os.remove('tmp.nxs')
+                os.remove('tmp.nxs')
 
     def test_histogram_with_logs_no_cache(self):
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+        for N in THREADS:
+            with self.subTest(N=N):
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        events = mock.Mock()
-        events.histogram = mock.Mock(return_value=([1], [2]))
-        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
-        events.apply_log_filter = mock.Mock()
+                events = mock.Mock()
+                events.histogram = mock.Mock(return_value=([1],
+                                                           [2]))
+                events.report_filters = mock.Mock(return_value={'a':
+                                                                [1, 3]})
+                events.apply_log_filter = mock.Mock()
 
-        cache = mock.Mock()
-        cache.empty = mock.Mock(return_value=True)
-        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
-        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.add_sample_log('B',
-                            np.asarray([1], dtype=np.double),
-                            np.asarray([2], dtype=np.double))
-        data.add_sample_log('T',
-                            np.asarray([3], dtype=np.double),
-                            np.asarray([4], dtype=np.double))
-        data._dict['logs'].apply_filter = mock.Mock()
-        data.histogram()
+                cache = mock.Mock()
+                cache.empty = mock.Mock(return_value=True)
+                cache.get_hist_settings = mock.MagicMock(return_value=(1,
+                                                                       2,
+                                                                       3))
+                cache.get_histograms = mock.MagicMock(return_value=([1],
+                                                                    [2]))
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.add_sample_log('B',
+                                    np.asarray([1], dtype=np.double),
+                                    np.asarray([2], dtype=np.double))
+                data.add_sample_log('T',
+                                    np.asarray([3], dtype=np.double),
+                                    np.asarray([4], dtype=np.double))
+                data._dict['logs'].apply_filter = mock.Mock()
+                data.histogram(N_threads=N)
 
-        cache.empty.assert_called_once()
-        events.histogram.assert_called_once_with(min_time=0.,
-                                                 max_time=32.768,
-                                                 num_bins=2048,
-                                                 cache=cache,
-                                                 N_threads=1)
-        self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
-        self.assertEqual(2, events.apply_log_filter.call_count)
+                cache.empty.assert_called_once()
+                events.histogram.assert_called_once_with(min_time=0.,
+                                                         max_time=32.768,
+                                                         num_bins=2048,
+                                                         cache=cache,
+                                                         N_threads=N)
+
+                self.assertEqual(1, data._dict['logs'].apply_filter.call_count)
+                self.assertEqual(2, events.apply_log_filter.call_count)
 
     def test_histogram_with_logs_with_cache(self):
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+        for N in THREADS:
+            with self.subTest(N=N):
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        events = mock.Mock()
-        events.histogram = mock.Mock(return_value=([1], [2]))
-        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
-        events.apply_log_filter = mock.Mock()
+                events = mock.Mock()
+                events.histogram = mock.Mock(return_value=([1], [2]))
+                events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+                events.apply_log_filter = mock.Mock()
 
-        cache = mock.Mock()
-        cache.empty = mock.Mock(return_value=False)
-        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
-        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.add_sample_log('B',
-                            np.asarray([1], dtype=np.double),
-                            np.asarray([2], dtype=np.double))
-        data.add_sample_log('T',
-                            np.asarray([3], dtype=np.double),
-                            np.asarray([4], dtype=np.double))
-        data._dict['logs'].apply_filter = mock.Mock()
-        data.set_histogram_settings(1,2,3)
-        data.histogram()
+                cache = mock.Mock()
+                cache.empty = mock.Mock(return_value=False)
+                cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
+                cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.add_sample_log('B',
+                                    np.asarray([1], dtype=np.double),
+                                    np.asarray([2], dtype=np.double))
+                data.add_sample_log('T',
+                                    np.asarray([3], dtype=np.double),
+                                    np.asarray([4], dtype=np.double))
+                data._dict['logs'].apply_filter = mock.Mock()
+                data.set_histogram_settings(1,2,3)
+                data.histogram(N_threads=N)
 
-        cache.empty.assert_called_once()
-        self.assertEqual(0, events.histogram.call_count)
-        self.assertEqual(0, events.apply_log_filter.call_count)
-        self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
+                cache.empty.assert_called_once()
+                self.assertEqual(0, events.histogram.call_count)
+                self.assertEqual(0, events.apply_log_filter.call_count)
+                self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
 
     def test_histogram_with_logs_with_cache_new_resolution(self):
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+        for N in THREADS:
+            with self.subTest(N=N):
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        events = mock.Mock()
-        events.histogram = mock.Mock(return_value=([1], [2]))
-        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
-        events.apply_log_filter = mock.Mock()
+                events = mock.Mock()
+                events.histogram = mock.Mock(return_value=([1], [2]))
+                events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+                events.apply_log_filter = mock.Mock()
 
-        cache = mock.Mock()
-        cache.empty = mock.Mock(return_value=False)
-        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
-        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.add_sample_log('B',
-                            np.asarray([1], dtype=np.double),
-                            np.asarray([2], dtype=np.double))
-        data.add_sample_log('T',
-                            np.asarray([3], dtype=np.double),
-                            np.asarray([4], dtype=np.double))
-        data._dict['logs'].apply_filter = mock.Mock()
-        data.set_histogram_settings(4,5,6)
-        data.histogram()
+                cache = mock.Mock()
+                cache.empty = mock.Mock(return_value=False)
+                cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
+                cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.add_sample_log('B',
+                                    np.asarray([1], dtype=np.double),
+                                    np.asarray([2], dtype=np.double))
+                data.add_sample_log('T',
+                                    np.asarray([3], dtype=np.double),
+                                    np.asarray([4], dtype=np.double))
+                data._dict['logs'].apply_filter = mock.Mock()
+                data.set_histogram_settings(4,5,6)
+                data.histogram(N_threads=N)
 
-        cache.empty.assert_called_once()
-        self.assertEqual(1, events.histogram.call_count)
-        self.assertEqual(0, events.apply_log_filter.call_count)
-        self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
+                cache.empty.assert_called_once()
+                self.assertEqual(1, events.histogram.call_count)
+                self.assertEqual(0, events.apply_log_filter.call_count)
+                self.assertEqual(0, data._dict['logs'].apply_filter.call_count)
 
     def test_save_histogram_occupied_cache(self):
         """
@@ -698,42 +714,44 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         parts are called when saving. So will use
         mocks.
         """
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+        for N in THREADS:
+            with self.subTest(N=N):
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        events = mock.Mock()
-        events.histogram = mock.Mock(return_value=([1], [2]))
-        events.report_filters = mock.Mock(return_value={'a': [1, 3]})
+                events = mock.Mock()
+                events.histogram = mock.Mock(return_value=([1], [2]))
+                events.report_filters = mock.Mock(return_value={'a': [1, 3]})
 
-        cache = mock.Mock()
-        cache.empty = mock.Mock(return_value=False)
-        cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
-        cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.set_histogram_settings(1,2,3)
-        data.save_histograms('tmp.nxs')
+                cache = mock.Mock()
+                cache.empty = mock.Mock(return_value=False)
+                cache.get_hist_settings = mock.MagicMock(return_value=(1,2,3))
+                cache.get_histograms = mock.MagicMock(return_value=([1], [2]))
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.set_histogram_settings(1,2,3)
+                data.save_histograms('tmp.nxs', N_threads=N)
 
-        cache.empty.assert_called_once()
-        events.histogram.assert_not_called()
-        sample.assert_called_once()
-        raw_data.assert_called_once()
-        source.assert_called_once()
-        user.assert_called_once()
-        periods.assert_called_once()
-        detector_1.assert_called_once()
+                cache.empty.assert_called_once()
+                events.histogram.assert_not_called()
+                sample.assert_called_once()
+                raw_data.assert_called_once()
+                source.assert_called_once()
+                user.assert_called_once()
+                periods.assert_called_once()
+                detector_1.assert_called_once()
 
-        os.remove('tmp.nxs')
+                os.remove('tmp.nxs')
 
     def test_save_histogram(self):
         """
@@ -741,40 +759,42 @@ class MuonEventDataTest(TestHelper, unittest.TestCase):
         parts are called when saving. So will use
         mocks.
         """
-        events = mock.MagicMock()
-        events.report_filters = mock.Mock(return_value={})
-        events.histogram = mock.Mock(return_value=([1, 1], [2]))
-        cache = mock.MagicMock()
-        cache.empty = mock.MagicMock(return_value=True)
-        sample = fake_nxs_part()
-        raw_data = fake_nxs_part()
-        source = fake_nxs_part()
-        user = fake_nxs_part()
-        periods = fake_nxs_part()
-        detector_1 = fake_nxs_part()
+        for N in THREADS:
+            with self.subTest(N=N):
+                events = mock.MagicMock()
+                events.report_filters = mock.Mock(return_value={})
+                events.histogram = mock.Mock(return_value=([1, 1], [2]))
+                cache = mock.MagicMock()
+                cache.empty = mock.MagicMock(return_value=True)
+                sample = fake_nxs_part()
+                raw_data = fake_nxs_part()
+                source = fake_nxs_part()
+                user = fake_nxs_part()
+                periods = fake_nxs_part()
+                detector_1 = fake_nxs_part()
 
-        data = MuonEventData(events,
-                             cache,
-                             sample,
-                             raw_data,
-                             source,
-                             user,
-                             periods,
-                             detector_1)
-        data.add_sample_log('T',
-                            np.arange(0, 5, dtype=np.double),
-                            np.arange(5, 10, dtype=np.double))
-        data._dict['logs'].save_nxs2 = mock.Mock()
-        data.save_histograms('tmp.nxs')
+                data = MuonEventData(events,
+                                     cache,
+                                     sample,
+                                     raw_data,
+                                     source,
+                                     user,
+                                     periods,
+                                     detector_1)
+                data.add_sample_log('T',
+                                    np.arange(0, 5, dtype=np.double),
+                                    np.arange(5, 10, dtype=np.double))
+                data._dict['logs'].save_nxs2 = mock.Mock()
+                data.save_histograms('tmp.nxs', N_threads=N)
 
-        sample.assert_called_once()
-        raw_data.assert_called_once()
-        source.assert_called_once()
-        user.assert_called_once()
-        periods.assert_called_once()
-        detector_1.assert_called_once()
-        data._dict['logs'].save_nxs2.assert_called_once()
-        os.remove('tmp.nxs')
+                sample.assert_called_once()
+                raw_data.assert_called_once()
+                source.assert_called_once()
+                user.assert_called_once()
+                periods.assert_called_once()
+                detector_1.assert_called_once()
+                data._dict['logs'].save_nxs2.assert_called_once()
+                os.remove('tmp.nxs')
 
     def test_get_frame_start_times(self):
         """
