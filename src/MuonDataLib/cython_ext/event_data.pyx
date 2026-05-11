@@ -474,7 +474,7 @@ cdef class Events:
                                            conversion=1.e-3,
                                            N_threads=N_threads)
         else:
-            raise ValueError(f'The number of threads {N_threads} is not valid')
+            raise ValueError(f'The number of threads ({N_threads}) is not valid')
 
         if cache is not None:
 

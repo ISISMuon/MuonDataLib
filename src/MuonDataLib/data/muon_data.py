@@ -210,7 +210,7 @@ class MuonEventData(MuonData):
         if the cache is occupied.
         If just the resolution has changed it will
         not alter the filtered values.
-        :param N_threads: the number of threads to run on
+        :param N_threads: the amount of parallelisation
         :return: the histograms and bins
         """
         is_cache_empty = self._cache.empty()
@@ -238,7 +238,7 @@ class MuonEventData(MuonData):
         Method for saving the object to a muon
         nexus v2 histogram file
         :param file_name: the name of the file to save to
-        :param N_threads: the number of threads to run on
+        :param N_threads: the amount of parallelisation
         """
         hist, _ = self.histogram(N_threads)
         super().save_histograms(file_name)

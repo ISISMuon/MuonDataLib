@@ -14,18 +14,18 @@ def get_max_threads():
 
 @numba.jit(float64[:](float64, float64, float64),
            nopython=True, fastmath=True, parallel=True)
-def get_bin_edges(a_min, a_max, delta):
+def get_bin_edges(a_min, a_max, width):
     """
-    A method to reproduce the result of np.arange, but in parallel.
-    I have tested this and it seems to be faster.
+    A method to caclculate histogram bin edges,
+    given the range and bin width.
     :param a_min: the first bin edge
     :param a_max: the last bin edge
-    :param delte: the bin width
+    :param width: the bin width
     :return: the bin edges
     """
     bin_edges = np.zeros(int((a_max-a_min)/delta) + 1, dtype=np.float64)
     for i in numba.prange(bin_edges.shape[0]):
-        bin_edges[i] = a_min + i * delta
+        bin_edges[i] = a_min + i * width
 
     bin_edges[-1] = a_max  # Avoid roundoff error on last point
     return bin_edges
@@ -48,14 +48,6 @@ def para_histogram(times,
     This method creates histograms from a list of data in parallel.
     It produces a matrix of histograms for multiple periods
     and spectra.
-    Strictly speaking these are not histograms as they
-    are not normalised to bin width.
-    This is the language used by the users and the
-    analysis code applys the normalisation.
-
-    To avoid a race condition we need to use a
-    unique matrix on each thread, then sum them afterwards.
-
     :param times: the times for the data
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
@@ -70,6 +62,15 @@ def para_histogram(times,
     number of events in the histogram
     """
     numba.set_num_threads(N_threads)
+    """
+    Strictly speaking these are not histograms as they
+    the y unit is counts and not density.
+    This is the language used by the users (muon group at ISIS) and the
+    analysis code (Wimda/Mantid) applys the normalisation.
+
+    To avoid a race condition we need to use a
+    unique matrix on each thread, then sum them afterwards.
+    """
     bins = get_bin_edges(min_time, max_time, width)
 
     N = np.zeros(N_threads)
