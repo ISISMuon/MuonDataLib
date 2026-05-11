@@ -98,8 +98,8 @@ def remove_filters(data):
     data._clear()
     filters = data.report_filters().time_filters.remove_filters.copy()
     if len(filters) > 0:
-        for name in filters:
-            data.delete_remove_data_time_between(name)
+        for f in filters:
+            data.delete_remove_data_time_between(f.name)
     return data
 
 
