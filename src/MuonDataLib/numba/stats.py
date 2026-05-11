@@ -74,7 +74,7 @@ def para_histogram(times,
     """
     bins = get_bin_edges(min_time, max_time, width)
 
-    N = np.zeros(N_threads)
+    N = 0
     result = np.zeros((N_threads,
                        np.max(periods)+1,
                        N_spec,
@@ -96,6 +96,6 @@ def para_histogram(times,
                 det = spec[k]
                 w = weight[k]
                 result[thread, p, det, j_bin] += w
-                N[thread] += w
+                N += w
 
-    return np.sum(result, axis=0, dtype=np.int32), bins, np.sum(N)
+    return np.sum(result, axis=0, dtype=np.int32), bins, N
