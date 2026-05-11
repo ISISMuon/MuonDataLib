@@ -6,7 +6,7 @@ from numba import int32, float64, int64
 
 def get_max_threads():
     """
-    Gets the max number of threads that 
+    Gets the max number of threads that
     numba will use
     :return: the number of threads to be used
     """
