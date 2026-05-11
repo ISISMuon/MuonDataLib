@@ -6,8 +6,9 @@ from numba import int32, float64, int64
 
 def get_max_threads():
     """
-    Gets the max number of threads
-    :return: the max number of threads
+    Gets the max number of threads that 
+    numba will use
+    :return: the number of threads to be used
     """
     return numba.get_num_threads()
 
@@ -23,7 +24,7 @@ def get_bin_edges(a_min, a_max, width):
     :param width: the bin width
     :return: the bin edges
     """
-    bin_edges = np.zeros(int((a_max-a_min)/delta) + 1, dtype=np.float64)
+    bin_edges = np.zeros(int((a_max-a_min)/width) + 1, dtype=np.float64)
     for i in numba.prange(bin_edges.shape[0]):
         bin_edges[i] = a_min + i * width
 
