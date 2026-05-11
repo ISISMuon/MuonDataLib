@@ -8,7 +8,7 @@ def get_data():
     :return: the path, list of file names and number of detectors
     """
     path = ''
-    name = [f'SIM0000000{k}' for k in range(1, 7)]
+    name = [f'SIM0000000{k}' for k in range(1, 4)]
     # number of detectors
     N = 960
     return path, name, N
@@ -96,7 +96,7 @@ def remove_filters(data):
     """
     # this clears the cache for no filters
     data._clear()
-    filters = data.report_filters()['time_filters']['remove_filters'].copy()
+    filters = data.report_filters().time_filters.remove_filters.copy()
     if len(filters) > 0:
         for name in filters:
             data.delete_remove_data_time_between(name)
