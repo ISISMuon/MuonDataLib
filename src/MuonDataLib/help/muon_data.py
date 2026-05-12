@@ -39,6 +39,8 @@ def get_muon_data_docs():
                 "not alter the filtered values.",
                 {'file_name': "The name of the file to save the "
                               "NeXus v2 histogram file to."},
+                optional_param={'N_threads': ['The amount of parallelisation',
+                                              1]},
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
@@ -57,6 +59,8 @@ def get_muon_data_docs():
                 "not alter the filtered values.",
                 returns="A matrix of histograms (period, "
                         "spectrum number, bin) and bin edges.",
+                optional_param={'N_threads': ['The amount of parallelisation',
+                                              1]},
                 example=['from MuonDataLib.data.loader.load_events '
                          'import load_events',
                          'data = load_events("HIFI00001.nxs", 64)',
@@ -67,9 +71,12 @@ def get_muon_data_docs():
                 [MUONDATA, HIST, FILTER],
                 "Change the histogram bounds and bin width.",
                 optional_param = {
-                    'min_time': 'The lower time bound for the histogram.',
-                    'max_time': 'The upper time bound for the histogram.',
-                    'num_bins': 'The number of bins to use in the histogram.'
+                    'min_time': ['The lower time bound for the histogram.',
+                                 0.0],
+                    'max_time': ['The upper time bound for the histogram.',
+                                 32.768],
+                    'num_bins': ['The number of bins to use in the histogram.',
+                                 2048]
                     }
                 ),
 

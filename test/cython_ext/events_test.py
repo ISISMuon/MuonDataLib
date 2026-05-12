@@ -8,6 +8,9 @@ from MuonDataLib.cython_ext.event_data import Events
 from MuonDataLib.cython_ext.events_cache import EventsCache
 
 
+THREADS = [1, 2]
+
+
 class EventsTest(TestHelper):
 
     def setUp(self):
@@ -54,45 +57,57 @@ class EventsTest(TestHelper):
             self.assertEqual(self._events.get_threshold(key), 0.0)
 
     def test_histogram(self):
-        mat, bins = self._events.histogram()
-        self.assertArrays(bins, np.arange(0, 32.784, 0.016))
-        self.assertEqual(len(mat), 1)
-        self.assertEqual(len(mat[0]), 2)
+        for N in THREADS:
+            with self.subTest(N=N):
+                mat, bins = self._events.histogram(N_threads=N)
+                self.assertArrays(bins, np.arange(0, 32.784, 0.016))
+                self.assertEqual(len(mat), 1)
+                self.assertEqual(len(mat[0]), 2)
 
     def test_custom_histogram(self):
-        mat, bins = self._events.histogram(0., 7., 7)
-        self.assertArrays(bins, np.arange(0., 8., 1.))
-        self.assertEqual(len(mat), 1)
-        self.assertEqual(len(mat[0]), 2)
-        self.assertArrays(mat[0][0], [0, 1, 0, 1, 0, 1, 0])
-        self.assertArrays(mat[0][1], [0, 0, 1, 0, 1, 0, 1])
+        for N in THREADS:
+            with self.subTest(N=N):
+                mat, bins = self._events.histogram(0., 7., 7)
+                self.assertArrays(bins, np.arange(0., 8., 1.))
+                self.assertEqual(len(mat), 1)
+                self.assertEqual(len(mat[0]), 2)
+                self.assertArrays(mat[0][0], [0, 1, 0, 1, 0, 1, 0])
+                self.assertArrays(mat[0][1], [0, 0, 1, 0, 1, 0, 1])
 
     def test_cache_histogram(self):
-        date = datetime.datetime(2024, 12, 21, 7, 59, 0)
-        cache = EventsCache(date, np.asarray([100], dtype=np.int32))
-        self.assertTrue(cache.empty())
-        mat, bins = self._events.histogram(1.2, 4.2, 15, cache)
+        for N in THREADS:
+            with self.subTest(N=N):
+                date = datetime.datetime(2024, 12, 21, 7, 59, 0)
+                cache = EventsCache(date, np.asarray([100],
+                                                     dtype=np.int32))
+                self.assertTrue(cache.empty())
+                mat, bins = self._events.histogram(1.2, 4.2, 15,
+                                                   cache)
 
-        self.assertFalse(cache.empty())
-        c_mat, c_bins = cache.get_histograms()
-        self.assertArrays(bins, c_bins)
-        # cache adds a list for periods, need to remove it
-        self.assertEqual(len(mat), len(c_mat))
-        self.assertEqual(len(mat[0]), len(c_mat[0]))
-        self.assertEqual(cache.get_good_frames[0], 100)
-        self.assertEqual(cache.min_time, 1.2)
-        self.assertEqual(cache.max_time, 4.2)
-        self.assertEqual(cache.num_bins, 15)
-        self.assertEqual(cache.get_N_events, 3)
+                self.assertFalse(cache.empty())
+                c_mat, c_bins = cache.get_histograms()
+                self.assertArrays(bins, c_bins)
+                # cache adds a list for periods, need to remove it
+                self.assertEqual(len(mat), len(c_mat))
+                self.assertEqual(len(mat[0]), len(c_mat[0]))
+                self.assertEqual(cache.get_good_frames[0], 100)
+                self.assertEqual(cache.min_time, 1.2)
+                self.assertEqual(cache.max_time, 4.2)
+                self.assertEqual(cache.num_bins, 15)
+                self.assertEqual(cache.get_N_events, 3)
 
     def test_amplitude_filter_on_histogram(self):
-        self._events.set_threshold('Amplitudes', 1.1)
-        mat, bins = self._events.histogram(0., 7., 7)
-        self.assertArrays(bins, np.arange(0., 8., 1.))
-        self.assertEqual(len(mat), 1)
-        self.assertEqual(len(mat[0]), 2)
-        self.assertArrays(mat[0][0], [0, 0, 0, 1, 0, 1, 0])
-        self.assertArrays(mat[0][1], [0, 0, 0, 0, 1, 0, 1])
+        for N in THREADS:
+            with self.subTest(N=N):
+                self._events.set_threshold('Amplitudes', 1.1)
+                mat, bins = self._events.histogram(0., 7., 7)
+                self.assertArrays(bins, np.arange(0., 8., 1.))
+                self.assertEqual(len(mat), 1)
+                self.assertEqual(len(mat[0]), 2)
+                self.assertArrays(mat[0][0],
+                                  [0, 0, 0, 1, 0, 1, 0])
+                self.assertArrays(mat[0][1],
+                                  [0, 0, 0, 0, 1, 0, 1])
 
     def test_get_start_times(self):
         self.assertArrays(self._events.get_start_times(),
