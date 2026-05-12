@@ -11,6 +11,7 @@ cpdef make_histogram(
         cnp.int32_t[:] spec,
         int N_spec,
         int[:] periods,
+        int N_periods,
         int[:] weight,
         double min_time=0,
         double max_time=30.,
@@ -28,6 +29,7 @@ cpdef make_histogram(
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
     :param periods: a list of the periods each event belongs to
+    :param N_periods: the number of periods
     :param weight: the weight to give each event in the histogram ( 0 or 1)
     :param min_time: the first bin edge
     :param max_time: the last bin edge
@@ -44,7 +46,7 @@ cpdef make_histogram(
 
     cdef cnp.ndarray[double, ndim=1] bins = np.arange(min_time, max_time + width, width, dtype=np.double)
 
-    cdef cnp.ndarray[int, ndim=3] result = np.zeros((np.max(periods)+1, N_spec, len(bins)-1), dtype=np.int32)
+    cdef cnp.ndarray[int, ndim=3] result = np.zeros((N_periods, N_spec, len(bins)-1), dtype=np.int32)
     cdef int[:, :, :] mat = result
     for k in range(len(times)):
         det = spec[k]

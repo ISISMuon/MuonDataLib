@@ -137,6 +137,7 @@ cdef class Events:
     cdef public int [:] periods
     cdef public double[:] times
     cdef readonly int N_spec
+    cdef readonly int N_periods
     cdef public int[:] start_index_list
     cdef public int[:] end_index_list
     cdef readonly dict[str, double] filter_start
@@ -175,6 +176,7 @@ cdef class Events:
         self.filter_start = {}
         self.filter_end = {}
         self.periods = periods
+        self.N_periods = np.max(self.periods) + 1 
         self.peak_prop = {'Amplitudes': amps}
         self.clear_thresholds()
 
@@ -458,6 +460,7 @@ cdef class Events:
                                            spec=IDs,
                                            N_spec=self.N_spec,
                                            periods=periods,
+                                           N_periods=self.N_periods,
                                            min_time=min_time,
                                            max_time=max_time,
                                            width=width,
@@ -467,6 +470,7 @@ cdef class Events:
                                            spec=IDs,
                                            N_spec=self.N_spec,
                                            periods=periods,
+                                           N_periods=self.N_periods,
                                            min_time=min_time,
                                            max_time=max_time,
                                            width=width,
