@@ -95,14 +95,14 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
     cdef cnp.ndarray[int, ndim=1] _final_end = np.zeros(N, dtype=np.int32)
     cdef int[:] final_start = _final_start
     cdef int[:] final_end = _final_end
-    cdef int one = 1
     cdef int start = j_start[0]
     cdef int end = j_end[0]
     cdef int k, next_start, next_end, j
+    cdef int N_filters = len(j_start)  # to make the actual code pure C
 
     # due to overlaps the number of filters might be smaller
     N = 0
-    for k in range(1, len(j_start)):
+    for k in prange(1, N_filters, nogil=True):
         next_start = j_start[k]
         next_end = j_end[k]
 
@@ -110,7 +110,7 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
         if end < next_start:
             final_start[N] = start
             final_end[N] = end
-            N += 1
+            N = N + 1
             start = next_start
             end = next_end
 
@@ -125,9 +125,9 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
 
     # get removed frames
     cdef int[:] rm_frames = np.zeros(np.max(periods) + 1, dtype=np.int32)
-    for k in range(N):
-        start = _final_start[k]
-        for j in range(_final_end[k] - start + 1):
+    for k in prange(N, nogil=True):
+        start = final_start[k]
+        for j in range(final_end[k] - start + 1):
             rm_frames[periods[start + j]] += 1
 
     return _final_start[:N], _final_end[:N], rm_frames
