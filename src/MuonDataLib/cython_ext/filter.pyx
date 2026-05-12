@@ -3,6 +3,7 @@ from MuonDataLib.cython_ext.utils import binary_search
 import numpy as np
 cimport numpy as cnp
 import cython
+from cython.parallel import prange
 cnp.import_array()
 
 
@@ -164,7 +165,8 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
         if k < filter_start:
             end = start_index[k+1]
             dm = end - start
-            good_periods[M:M+dm] = periods[k]
+            for dm_i in range(dm):
+                good_periods[M + dm_i] = periods[k]
             M += dm
             start = end
         elif k == f_end[j]:
@@ -176,7 +178,8 @@ cpdef good_periods(int[:] f_start, int[:] f_end, int[:] start_index, int[:] peri
                 filter_start = f_start[j]
 
     dm = N_events - start_index[N_frames-1]
-    good_periods[M:M + dm] = periods[len(periods)-1]
+    for dm_i in range(dm):
+        good_periods[M + dm_i] = periods[len(periods)-1]
     M += dm
     return _good_periods[:M]
 
@@ -259,25 +262,35 @@ cpdef apply_filter(x, y, times):
     :param times: a list of the [start, end] times
     within which the data will be removed
     """
-    fx = np.zeros(len(x))
-    fy = np.zeros(len(y))
+    cdef cnp.ndarray[double] _fx = np.zeros(len(x), dtype=np.double)
+    cdef cnp.ndarray[double] _fy = np.zeros(len(y), dtype=np.double)
+    cdef double[:] fx = _fx
+    cdef double[:] fy = _fy
+    # these are defined to make the loop not require the GIL so it is parallelisable
+    cdef double current_x
+    cdef double current_y
+    cdef int num_x = len(x)
     # need to make sure the times are in the correct order
     cdef double[:] start_times= np.sort(np.asarray([ times[k][0] for k in range(len(times))], dtype=np.double), kind='quicksort')
     cdef double[:] end_times= np.sort(np.asarray([ times[k][1] for k in range(len(times))], dtype=np.double), kind='quicksort')
+    cdef Py_ssize_t N, k, j
 
     N = 0
     k = 0
-    for j in range(len(x)):
-        if k == len(start_times) or x[j] < start_times[k]:
-            fx[N] = x[j]
-            fy[N] = y[j]
-            N += 1
+    for j in prange(num_x, nogil=True):
+        with cython.gil:
+            current_x = x[j]
+            current_y = y[j]
+        if k == len(start_times) or current_x < start_times[k]:
+            fx[N] = current_x
+            fy[N] = current_y
+            N = N + 1
 
-        elif x[j] >= end_times[k]:
-            k += 1
-            if k < len(start_times) and x[j] < start_times[k]:
-                fx[N] = x[j]
-                fy[N] = y[j]
-                N += 1
+        elif current_x >= end_times[k]:
+            k = k + 1
+            if k < len(start_times) and current_x < start_times[k]:
+                fx[N] = current_x
+                fy[N] = current_y
+                N = N + 1
 
-    return fx[:N], fy[:N]
+    return _fx[:N], _fy[:N]
