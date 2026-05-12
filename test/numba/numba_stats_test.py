@@ -50,7 +50,7 @@ class NumbaStatsTest(unittest.TestCase):
         10.0 -> ignore (>3)
         """
         result, bins, N = para_histogram(
-            times, spec, 1, periods, weight,
+            times, spec, 1, periods, 1, weight,
             min_time=0.0, max_time=3.0, width=1.0,
             conversion=1.0, N_threads=2
         )
@@ -68,7 +68,7 @@ class NumbaStatsTest(unittest.TestCase):
         weight = np.array([1, 0, 1], dtype=np.int32)
 
         result, bins, N = para_histogram(
-            times, spec, 1, periods, weight,
+            times, spec, 1, periods, 1, weight,
             min_time=0.0, max_time=2.0, width=1.0,
             conversion=1.0, N_threads=2
         )
@@ -84,7 +84,7 @@ class NumbaStatsTest(unittest.TestCase):
         weight = np.array([1, 1], dtype=np.int32)
 
         result, bins, N = para_histogram(
-            times, spec, 1, periods, weight,
+            times, spec, 1, periods, 1, weight,
             min_time=0.0, max_time=2.0, width=1.0,
             conversion=1e-3, N_threads=2
         )
@@ -109,7 +109,7 @@ class NumbaStatsTest(unittest.TestCase):
         weight = np.array([1, 1, 1, 1, 1, 1], dtype=np.int32)
 
         result, bins, N = para_histogram(
-            times, spec, 3, periods, weight,
+            times, spec, 3, periods, 2, weight,
             min_time=0.0, max_time=2.0, width=1.0,
             conversion=1.0, N_threads=2
         )

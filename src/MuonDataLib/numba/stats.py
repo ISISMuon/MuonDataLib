@@ -33,12 +33,13 @@ def get_bin_edges(a_min, a_max, width):
 
 
 @numba.jit((float64[:], int32[:], int64, int32[:],
-            int32[:], float64, float64, float64,
+            int32, int32[:], float64, float64, float64,
             float64, int64), fastmath=True, parallel=True)
 def para_histogram(times,
                    spec,
                    N_spec,
                    periods,
+                   N_periods,
                    weight,
                    min_time=0,
                    max_time=30.,
@@ -53,6 +54,7 @@ def para_histogram(times,
     :param spec: the spectra for the corresponding time
     :param N_spec: the number of spectra
     :param periods: a list of the periods each event belongs to
+    :param N_periods: the number of periods
     :param weight: the weight to give each event in the histogram ( 0 or 1)
     :param min_time: the first bin edge
     :param max_time: the last bin edge
@@ -76,7 +78,7 @@ def para_histogram(times,
 
     N = 0
     result = np.zeros((N_threads,
-                       np.max(periods)+1,
+                       N_periods,
                        N_spec,
                        len(bins)-1), dtype=np.int32)
 
