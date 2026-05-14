@@ -224,35 +224,22 @@ class EventsTest(TestHelper):
         self._events.add_filter('test', 1.2, 1.7)
 
         results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times, periods, amps = results
+        f_start, f_end, rm, mask = results
         self.assertArrays(np.asarray(f_start), [0])
         self.assertArrays(np.asarray(f_end), [0])
 
         self.assertArrays(rm, [1])
-        self.assertArrays(np.asarray(amps), [1.2, 1.3, 1.4, 1.5])
-        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1])
-        self.assertArrays(np.asarray(times), [3000., 4000.,
-                                              5000., 6000.])
+        self.assertArrays(np.asarray(mask), np.array([0, 0, 1, 1, 1, 1]))
 
     def test_get_filtered_data_no_filter(self):
 
         results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times, periods, amps = results
+        f_start, f_end, rm, mask = results
         self.assertArrays(np.asarray(f_start), [])
         self.assertArrays(np.asarray(f_end), [])
 
         self.assertArrays(rm, [0])
-        self.assertArrays(np.asarray(amps), [1, 1.1, 1.2, 1.3, 1.4, 1.5])
-        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1])
-        self.assertArrays(np.asarray(times), [1000., 2000.,
-                                              3000., 4000.,
-                                              5000., 6000.])
-
-    def test_get_filtered_data_no_data(self):
-        self._events.add_filter('test', 0, 1e9)
-
-        with self.assertRaises(ValueError):
-            _ = self._events._get_filtered_data(1.e-9*self._frame_time)
+        self.assertArrays(np.asarray(mask), np.ones(6))
 
     def test_start_and_end_times_filter_in_middle(self):
         frame_times = np.arange(1, 20, dtype=np.double)

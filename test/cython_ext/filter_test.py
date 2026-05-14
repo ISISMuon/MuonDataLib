@@ -3,10 +3,9 @@ import numpy as np
 
 from MuonDataLib.test_helpers.unit_test import TestHelper
 from MuonDataLib.cython_ext.filter import (rm_overlaps,
-                                           good_periods,
+                                           get_event_periods,
                                            get_indices,
-                                           good_values_ints,
-                                           good_values_double,
+                                           get_good_values,
                                            apply_filter)
 
 
@@ -77,30 +76,28 @@ class FilterTest(TestHelper):
         self.assertArrays(j_start, [1, 5])
         self.assertArrays(j_end, [2, 5])
 
-    def test_good_values_ints(self):
+    def test_get_good_values(self):
         f_start = np.asarray([0, 4], dtype=np.int32)
         f_end = np.asarray([1, 4], dtype=np.int32)
         start_index = np.asarray([0, 10, 20, 30, 40], dtype=np.int32)
-        int_array = np.arange(0, 45, dtype=np.int32)
 
-        result = good_values_ints(f_start,
-                                  f_end,
-                                  start_index,
-                                  int_array)
-        self.assertEqual(len(result), 20)
-        self.assertArrays(result, np.arange(20, 40))
-
-    def test_good_values_double(self):
-        f_start = np.asarray([0, 4], dtype=np.int32)
-        f_end = np.asarray([1, 4], dtype=np.int32)
-        start_index = np.asarray([0, 10, 20, 30, 40], dtype=np.int32)
-        double_array = np.arange(0, 0.45, step=0.01, dtype=np.double)
-        result = good_values_double(f_start,
-                                    f_end,
-                                    start_index,
-                                    double_array)
-        self.assertEqual(len(result), 20)
-        self.assertArrays(result, np.arange(0.2, 0.4, step=0.01))
+        result = get_good_values(f_start,
+                                 f_end,
+                                 start_index,
+                                 45)
+        # the expected result corresponds to:
+        # array = np.arange(0, 45, dtype=np.int32)
+        # (array >= 20) & (array < 40)
+        self.assertArrays(result, np.array([False, False, False, False, False,
+                                            False, False, False, False, False,
+                                            False, False, False, False, False,
+                                            False, False, False, False, False,
+                                            True, True, True, True, True,
+                                            True, True, True, True, True,
+                                            True, True, True, True, True,
+                                            True, True, True, True, True,
+                                            False, False, False, False, False])
+                          )
 
     def test_apply_filter_unordered(self):
         x = np.arange(0, 10, dtype=np.double)
@@ -128,54 +125,13 @@ class FilterTest(TestHelper):
         self.assertArrays(fx, np.asarray([0, 4, 5, 9], dtype=np.double))
         self.assertArrays(fy, np.asarray([1, 9, 11, 19], dtype=np.double))
 
-    def test_good_periods(self):
-        f_start = np.asarray([0, 4], dtype=np.int32)
-        f_end = np.asarray([1, 4], dtype=np.int32)
-        start_index = np.asarray([0, 10, 20, 30, 40], dtype=np.int32)
-        double_array = np.arange(0, 0.45, step=0.01, dtype=np.double)
-        periods = np.asarray([0, 1, 1, 0, 1], dtype=np.int32)
-        result = good_periods(f_start,
-                              f_end,
-                              start_index,
-                              periods,
-                              len(double_array))
-        self.assertEqual(len(result), 25)
-        self.assertArrays(result, np.asarray([1, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              1, 0, 0,
-                                              0, 0, 0,
-                                              0, 0, 0,
-                                              0, 0, 1,
-                                              1, 1, 1, 1]))
+    def test_get_event_periods(self):
+        frame_periods = np.array([1, 2, 1], dtype=np.int32)
+        start_index = np.array([1, 4, 6], dtype=np.int32)
+        N_events = 8
 
-    def test_good_periods_middle(self):
-        f_start = np.asarray([4, 7], dtype=np.int32)
-        f_end = np.asarray([5, 7], dtype=np.int32)
-        start_index = np.asarray([0, 10, 20, 30, 40], dtype=np.int32)
-        double_array = np.arange(0, 0.45, step=0.01, dtype=np.double)
-        periods = np.asarray([0, 1, 1, 0, 1], dtype=np.int32)
-        result = good_periods(f_start,
-                              f_end,
-                              start_index,
-                              periods,
-                              len(double_array))
-        self.assertEqual(len(result), 45)
-        self.assertArrays(result, np.asarray([0, 0, 0,
-                                              0, 0, 0,
-                                              0, 0, 0,
-                                              0, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              1, 1, 1,
-                                              0, 0, 0,
-                                              0, 0, 0,
-                                              0, 0, 0,
-                                              0, 1, 1,
-                                              1, 1, 1]))
+        event_periods = get_event_periods(start_index, frame_periods, N_events)
+        self.assertArrays(event_periods, np.array([1, 1, 1, 1, 2, 2, 1, 1]))
 
 
 if __name__ == '__main__':
