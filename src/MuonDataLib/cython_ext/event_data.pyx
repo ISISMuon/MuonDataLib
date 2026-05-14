@@ -4,8 +4,7 @@ from MuonDataLib.cython_ext.filter import (
                                            get_indices,
                                            rm_overlaps,
                                            good_periods,
-                                           good_values_ints,
-                                           good_values_double)
+                                           get_good_values)
 from MuonDataLib.numba.stats import para_histogram
 import numpy as np
 cimport numpy as cnp
@@ -400,28 +399,19 @@ cdef class Events:
         cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames = np.zeros(np.max(self.periods) + 1, dtype=np.int32)
         cdef cnp.ndarray[double, ndim=1] times, amps
+        cdef int mask_size = len(self.peak_prop['Amplitudes'])
+        cdef cnp.ndarray[int] mask = np.empty(mask_size, dtype=np.int32)
 
         if len(self.filter_start.keys())>0:
             f_i_start, f_i_end, rm_frames = self._get_exclude_windows()
-
-            IDs = good_values_ints(f_i_start, f_i_end, self.start_index_list, self.IDs)
-            times = good_values_double(f_i_start, f_i_end, self.start_index_list, self.times)
-            amps = good_values_double(f_i_start, f_i_end, self.start_index_list,
-                                      self.peak_prop['Amplitudes'])
-
-            if len(times) == 0:
-                raise ValueError("The current filter selection results in zero data "
-                                 "for the histograms. Aborting histogram generation.")
+            mask = get_good_values(f_i_start, f_i_end, self.start_index_list, mask_size)
         else:
             # no filters
-            IDs = np.asarray(self.IDs)
-            times = np.asarray(self.times)
-            amps = np.asarray(self.peak_prop['Amplitudes'])
             f_i_start = np.asarray([], dtype=np.int32)
             f_i_end = np.asarray([], dtype=np.int32)
         # get the periods for each event
         periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
-        return f_i_start, f_i_end, rm_frames, IDs, times, periods, amps
+        return f_i_start, f_i_end, rm_frames, mask 
 
     def histogram(self,
                   double min_time=0.,
@@ -441,17 +431,23 @@ cdef class Events:
         :param N_threads: the number of threads to run on
         :returns: a matrix of histograms, bin edges
         """
-        cdef cnp.ndarray[int, ndim=1] IDs, periods
+        cdef cnp.ndarray[int, ndim=1] periods
+        cdef int[:] IDs
+        cdef double[:] times, amps
         cdef int[:] f_i_start, f_i_end
         cdef int[:] rm_frames
-        cdef cnp.ndarray[double, ndim=1] times
 
         cdef double[:] frame_times = ns_to_s*np.asarray(self.get_start_times())
 
-        f_i_start, f_i_end, rm_frames, IDs, times, periods, amps = self._get_filtered_data(frame_times)
+        f_i_start, f_i_end, rm_frames, mask = self._get_filtered_data(frame_times)
+        IDs = self.IDs
+        times = self.times
+        amps = self.peak_prop['Amplitudes']
+        periods = good_periods(f_i_start, f_i_end, self.start_index_list, self.periods, len(self.times))
 
         cdef cnp.ndarray[int, ndim=1] weight = np.array(np.where(amps > np.double(self.threshold['Amplitudes']),
                                                                  1., 0.), dtype=np.int32)
+        weight = weight * mask
 
         cdef double width = (max_time - min_time) / num_bins
 
@@ -466,15 +462,15 @@ cdef class Events:
                                            width=width,
                                            weight=weight)
         elif N_threads > 1:
-            hist, bins, N = para_histogram(times=times,
-                                           spec=IDs,
+            hist, bins, N = para_histogram(times=np.asarray(times, dtype=double),
+                                           spec=np.asarray(IDs, dtype=np.int32),
                                            N_spec=self.N_spec,
                                            periods=periods,
                                            N_periods=self.N_periods,
                                            min_time=min_time,
                                            max_time=max_time,
                                            width=width,
-                                           weight=weight,
+                                           weight=np.asarray(weight, dtype=np.int32),
                                            conversion=1.e-3,
                                            N_threads=N_threads)
         else:
