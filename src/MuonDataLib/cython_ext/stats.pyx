@@ -52,7 +52,7 @@ cpdef make_histogram(
         det = spec[k]
         time = times[k] * conversion
         w_k = 1*weight[k]
-        if time <= max_time and time >= min_time and w_k != 0:
+        if w_k != 0 and time <= max_time and time >= min_time:
             p = periods[k]
             j_bin = int((time - min_time) // width)
             mat[p, det, j_bin] += w_k

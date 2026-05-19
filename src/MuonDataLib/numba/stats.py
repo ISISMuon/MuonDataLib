@@ -93,7 +93,7 @@ def para_histogram(times,
         for k in range(start, stop):
             time = times[k]*conversion
             w = weight[k]
-            if time <= max_time and time >= min_time and w != 0:
+            if w != 0 and time <= max_time and time >= min_time:
                 j_bin = int((time - min_time) // width)
                 p = periods[k]
                 det = spec[k]
