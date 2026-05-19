@@ -7,6 +7,7 @@ from MuonDataLib.cython_ext.filter import (
                                            good_values_ints,
                                            good_values_double)
 from MuonDataLib.numba.stats import para_histogram
+from MuonDataLib.numba.GPU import GPU_histogram
 import numpy as np
 cimport numpy as cnp
 import cython
@@ -465,6 +466,18 @@ cdef class Events:
                                            max_time=max_time,
                                            width=width,
                                            weight=weight)
+        elif N_threads == 0:
+            hist, bins, N = GPU_histogram(times=times,
+                                           spec=IDs,
+                                           N_spec=self.N_spec,
+                                           periods=periods,
+                                           N_periods=self.N_periods,
+                                           min_time=min_time,
+                                           max_time=max_time,
+                                           width=width,
+                                           weight=weight,
+                                           conversion=1.e-3)
+ 
         elif N_threads > 1:
             hist, bins, N = para_histogram(times=times,
                                            spec=IDs,

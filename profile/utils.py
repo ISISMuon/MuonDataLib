@@ -7,7 +7,7 @@ def get_data():
     Method to get the data for profiling.
     :return: the path, list of file names and number of detectors
     """
-    path = ''
+    path = '/tmp'
     name = [f'SIM0000000{k}' for k in range(1, 7)]
     # number of detectors
     N = 960
