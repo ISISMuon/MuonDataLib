@@ -3,7 +3,6 @@ from MuonDataLib.cython_ext.utils import binary_search
 import numpy as np
 cimport numpy as cnp
 import cython
-from cython.parallel import prange
 cnp.import_array()
 
 
@@ -102,7 +101,7 @@ cpdef rm_overlaps(int[:] j_start, int[:] j_end, int[:] periods):
 
     # due to overlaps the number of filters might be smaller
     N = 0
-    for k in prange(1, N_filters, nogil=True):
+    for k in range(1, N_filters):
         next_start = j_start[k]
         next_end = j_end[k]
 
@@ -185,7 +184,7 @@ cpdef get_good_values(int[:] f_start, int[:] f_end, int[:] start_index, int arra
     cdef int M = len(f_start)
     cdef int len_start_index = len(start_index)  # cache length
 
-    for k in prange(M, nogil=True):
+    for k in range(M):
         last = start_index[f_start[k]]
         mask[start:last] = 1
 
@@ -225,10 +224,9 @@ cpdef apply_filter(x, y, times):
 
     N = 0
     k = 0
-    for j in prange(num_x, nogil=True):
-        with cython.gil:
-            current_x = x[j]
-            current_y = y[j]
+    for j in range(num_x):
+        current_x = x[j]
+        current_y = y[j]
         if k == len(start_times) or current_x < start_times[k]:
             fx[N] = current_x
             fy[N] = current_y
