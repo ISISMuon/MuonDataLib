@@ -33,9 +33,9 @@ class HistSettingsPresenter(PresenterTemplate):
         if err_msg is not None:
             return f"Resolution: N/A ({err_msg})"
 
-        width = (max_time - min_time) / num_bins
+        width = ((max_time - min_time) * 1e3) / num_bins
 
-        return f"Resolution: {width:.5f} μs"
+        return f"Resolution: {width:.2f} ns"
 
     def check_num_bins_invalid(self, num_bins: int) -> bool:
         """
