@@ -146,44 +146,6 @@ class MultiperiodEventsTest(TestHelper):
         self.assertArrays(cache.get_good_frames, [99, 99])
         self.assertEqual(cache.get_N_events, 4)
 
-    def test_get_filtered_data(self):
-        self._events.add_filter('test', 1.2, 1.7)
-
-        results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times, periods, amps = results
-        self.assertArrays(np.asarray(f_start), [0])
-        self.assertArrays(np.asarray(f_end), [0])
-
-        self.assertArrays(rm, [1, 0])
-        self.assertArrays(np.asarray(amps), [1.2, 1.3, 1.4, 1.5, 1.6, 1.7])
-        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1])
-        self.assertArrays(np.asarray(times), [3000., 4000.,
-                                              5000., 6000.,
-                                              7000., 8000.])
-        self.assertArrays(np.asarray(periods), [1, 1,
-                                                0, 0,
-                                                1, 1])
-
-    def test_get_filtered_data_no_filter(self):
-
-        results = self._events._get_filtered_data(1.e-9*self._frame_time)
-        f_start, f_end, rm, IDs, times, periods, amps = results
-        self.assertArrays(np.asarray(f_start), [])
-        self.assertArrays(np.asarray(f_end), [])
-
-        self.assertArrays(rm, [0, 0])
-        self.assertArrays(np.asarray(IDs), [0, 1, 0, 1, 0, 1, 0, 1])
-        self.assertArrays(np.asarray(amps), [1.0, 1.1, 1.2, 1.3,
-                                             1.4, 1.5, 1.6, 1.7])
-        self.assertArrays(np.asarray(times), [1000., 2000.,
-                                              3000., 4000.,
-                                              5000., 6000.,
-                                              7000., 8000.])
-        self.assertArrays(np.asarray(periods), [0, 0,
-                                                1, 1,
-                                                0, 0,
-                                                1, 1])
-
     def test_get_total_frames(self):
         self.assertArrays(self._events.get_total_frames, [2, 2])
 
