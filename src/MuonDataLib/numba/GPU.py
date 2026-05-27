@@ -64,9 +64,9 @@ def calc_hist(times,
 
     for k in range(start, times.size, stride):
         time = times[k]*info[3]
-        if time >= info[0] and time <= info[1]:
+        w = weight[k]
+        if w != 0 and time >= info[0] and time <= info[1]:
             j_bin = int((time - info[0])/ info[2])
-            w = weight[k]
         else:
             j_bin = 0
             w = 0
