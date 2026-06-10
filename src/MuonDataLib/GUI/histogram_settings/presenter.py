@@ -33,6 +33,7 @@ class HistSettingsPresenter(PresenterTemplate):
         if err_msg is not None:
             return f"Resolution: N/A ({err_msg})"
 
+         # 1e3 is the conversion from micro to nano seconds
         width = ((max_time - min_time) * 1e3) / num_bins
 
         return f"Resolution: {width:.2f} ns"
