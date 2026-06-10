@@ -13,10 +13,10 @@ class HistogramSettingsPresenterTest(TestHelper):
         for valid settings.
         """
         output = self.presenter.display_width(0, 10, 2)
-        self.assertEqual(output, "Resolution: 5.00000 μs")
+        self.assertEqual(output, "Resolution: 5000.00 ns")
 
         output = self.presenter.display_width(0, 1, 3)
-        self.assertEqual(output, "Resolution: 0.33333 μs")
+        self.assertEqual(output, "Resolution: 333.33 ns")
 
     def test_display_width_invalid(self):
         """
